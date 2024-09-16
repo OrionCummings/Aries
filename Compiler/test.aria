@@ -1,0 +1,5 @@
+# This is a test program written in Aries Assembly Language
+
+test_label:
+    ldi 4 A
+    ret

@@ -1,0 +1,44 @@
+{
+  "name": "ari",
+  "displayName": "Aries",
+  "description": "Aries Programming Language",
+  "author": "Orion Cummings",
+  "publisher": "Orion Cummings",
+  "icon": "res/Aries Language File Icon.png",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.93.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "ari",
+        "aliases": ["Aries", "ari"],
+        "extensions": [".ari"],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "res/aries-file-icon.png",
+          "dark": "res/aries-file-icon.png"
+        }
+      },
+      {
+        "id": "ari-asm",
+        "aliases": ["Aries Assembly", "aria"],
+        "extensions": [".aria"],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "res/aries-asm-file-icon.png",
+          "dark": "res/aries-asm-file-icon.png"
+        }
+      }
+    ],
+    "grammars": [{
+      "language": "ari",
+      "scopeName": "source.ari",
+      "path": "./syntaxes/ari.tmLanguage.json"
+    }]
+  }
+}

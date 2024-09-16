@@ -1,0 +1,55 @@
+std all;
+
+// Test Comment
+
+/* Test Comment */
+
+/**/
+
+/*
+ * Test
+ *
+ * Comment
+*/
+
+# Test Comment
+
+def main(NONE) -> int {
+
+    int test_int = 16;
+    int test1 = 16 + 374;
+    int test2 = 16 - 374;
+    int test3 = (28 * 4) % 127 / (6 ^ 2);
+    int test_bin = 0b10100101;
+    int test_hex = 0x17F8ACED;
+    int test_oct = 0o15715672;
+    string test_string = "some string";
+    char test_char = 'c';
+    int test_size = sizeof test1;
+    char i = !0;
+    i--;
+    i++
+    i += 17;
+
+    for (int i = 0; i < 1278 && 32; i += 0x278) {
+        switch (i) {
+            case 1: {
+                function_call(17);
+                break;
+            }
+            default: {
+                return;
+            }
+        }
+    }
+
+    if (test_int > 10) {
+        return 18;
+    }
+
+    while (true) {
+        break;
+    }
+
+    return 0;
+}

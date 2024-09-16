@@ -1,0 +1,113 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Aries",
+	"patterns": [
+		{
+			"include": "#comments"
+		},
+		{
+			"include": "#operators"
+		},
+		{
+			"include": "#strings"
+		},
+		{
+			"include": "#numbers"
+		},
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#control"
+		}
+	],
+	"repository": {
+		"comments": {
+			"patterns": [
+				{
+					"begin": "#",
+					"beginCaptures": {
+						"0": {
+							"name": "punctuation.definition.comment.ari"
+						}
+					},
+					"end": "\\n",
+					"name": "comment.line.number-sign"
+				},
+				{
+					"captures" : {
+						"0": {
+							"name": "punctuation.definition.comment.ari"
+						}
+					},
+					"match": "/\\*\\*/",
+					"name": "comment.block.empty.ari"
+				}
+			]
+		},
+		"operators": {
+			"patterns": [
+				{
+					"name": "keyword.operator.ari",
+					"match": "+|-|*|/|%|<<|>>|<<<|>>>|!|&&|(||)|&|(|)|^"
+				},
+				{
+					"name": "keyword.operator.sizeof.ari",
+					"match": "(?<![\\w$])(sizeof)(?![\\w$])"
+				},
+				{
+					"name": "keyword.operator.decrement.ari",
+					"match": "--"
+				},
+				{
+					"name": "keyword.operator.increment.ari",
+					"match": "++"
+				},
+				{
+					"name": "keyword.operator.assignment.compound.ari",
+					"match": "%=|\\+=|-=|\\*=|(?<!\\()/=)"
+				},
+				{
+					"name": "keyword.operator.assignment.compound.bitwise.ari",
+					"match": "&=|\\^=|<<=|>>=|\\|="
+				}
+			]
+		},
+		"keywords": {
+			"patterns": [
+				{
+					"name": "keyword.control.ari",
+					"match": "\\b(overload|const|static|enum|def|struct|sizeof|std|cast|asm)\\b"
+				}
+			]
+		},
+		"strings": {
+			"name": "string.quoted.double.ari",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.ari",
+					"match": "\\\\."
+				}
+			]
+		},
+		"numbers": {
+			"patterns": [
+				{
+					"name": "keyword.other.unit.suffix.integer.ari",
+					"match": "(^-?[0-9][0-9\\.]+$"
+				}
+			]
+		},
+		"control": {
+			"patterns": [
+				{
+					"name": "keyword.control.ari",
+					"match": "\\b(if|while|for|switch|case|default|continue|match|return)\\b"
+				}
+			]
+		}
+	},
+	"scopeName": "source.ari"
+}
