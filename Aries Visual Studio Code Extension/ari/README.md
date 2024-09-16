@@ -1,6 +1,6 @@
 # Aries
 
-Aries is a statically-typed imperative programming language inspired by C and Rust.
+This extension provides syntax highlighting for the Aries programming language. Aries is a statically-typed imperative programming language inspired by C and Rust.
 
 ## Features
 
