@@ -1,6 +1,6 @@
-# ari README
+# Aries
 
-This is the README for your extension "ari". After writing up a brief description, we recommend including the following sections.
+Aries is a statically-typed imperative programming language inspired by C and Rust.
 
 ## Features
 
