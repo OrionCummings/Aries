@@ -49,4 +49,5 @@ The Aries Project encompasses four components: the Aries Programming Language, t
     - HF: HPC
 * 4-bit memory alignment
 * 16-bit floating point number support
-![The memory layout of the Aries CPU](https://github.com/OrionCummings/Aries/blob/main/Resources/GitHub/memory-map.png?raw=true)
+
+![The memory layout of the Aries CPU](https://github.com/OrionCummings/Aries/blob/main/Resources/GitHub/memory-map.PNG?raw=true)
