@@ -1,123 +1,132 @@
 {
 	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
 	"name": "Aries",
+	"scopeName": "source.ari",
 	"patterns": [
 		{
-			"include": "#comments"
+			"include": "#comment"
 		},
 		{
-			"include": "#operators"
+			"include": "#keyword"
+		},
+		{
+			"include": "#variable"
 		},
 		{
 			"include": "#strings"
 		},
 		{
-			"include": "#numbers"
+			"include": "#literals"
 		},
 		{
-			"include": "#keywords"
-		},
-		{
-			"include": "#control"
+			"include": "#operators"
 		}
 	],
 	"repository": {
-		"comments": {
+		"comment": {
 			"patterns": [
 				{
-					"begin": "/\\*\\*(?!/)",
-					"captures": {
-						"0": {
-							"name": "punctuation.definition.comment.ari"
-						}
-					},
-					"end": "\\*/",
-					"name": "comment.block.documentation.ari"
+					"name": "comment.line.ari",
+					"match": "//.*$"
 				},
 				{
+					"name": "comment.block.ari",
 					"begin": "/\\*",
-					"captures": {
-						"0": {
-							"name": "punctuation.definition.comment.ari"
-						}
-					},
-					"end": "\\*/",
-					"name": "comment.block.ari"
+					"end": "\\*/"
+				}
+			]
+		},
+		"keyword": {
+			"patterns": [
+				{
+					"name": "keyword.control.ari",
+					"match": "\\b(if|else|for|while|struct|switch|case|break|default|match|return|sizeof)\\b"
 				},
 				{
-					"captures": {
-						"1": {
-							"name": "punctuation.definition.comment.ari"
-						}
-					},
-					"match": "(//).*$\\n?",
-					"name": "comment.line.double-slash.ari"
+					"name": "storage.type.definition.ari",
+					"match": "\\b(overload|struct|def)\\b"
+				},
+				{
+					"name": "storage.type.primitive.ari",
+					"match": "\\b(void|int|uint|char|bool|float)\\b"
 				}
+			]
+		},
+		"variable": {
+			"patterns": [
+				{
+					"name": "variable.name.ari",
+					"match": "[a-zA-Z_][a-zA-Z_0-9]*"
+				},
+				{
+					"name": "entity.name.function.ari",
+					"match": "^def [a-zA-Z_][a-zA-Z_0-9]*\\("
+				}
+			]
+		},
+		"strings": {
+			"patterns": [
+				
+			]
+		},
+		"literals": {
+			"patterns": [
+				{
+					"name": "string.quoted.double.ari",
+					"begin": "\"",
+					"end": "\""
+				},
+				{
+					"name": "string.quoted.single.ari",
+					"begin": "'",
+					"end": "'"
+				},
+				{
+					"name": "constant.numeric.float.ari",
+					"match": "\\b([+-]?\\d+(?:(\\.)\\d+(?:e[+-]?\\d+)?|(?:e[+-]?\\d+)))\\b"
+				},
+				{
+					"name": "constant.numeric.integer.ari",
+					"match": "\\b((\\+|\\-)[\\d]+)\\b"
+				},
+				{
+					"name": "constant.numeric.natural.ari",
+					"match": "(\\b[\\d]+)\\b"
+				},
+				{
+					"name": "constant.numeric.binary.ari",
+					"match": "(\\b0b[0-1]+)\\b"
+				},
+				{
+					"name": "constant.numeric.octal.ari",
+					"match": "(\\b0o[0-7]+)\\b"
+				},
+				{
+					"name": "constant.numeric.hex.ari",
+					"match": "(\\b0x[0-9A-Fa-f]+)\\b"
+				}
+				
 			]
 		},
 		"operators": {
 			"patterns": [
 				{
-					"name": "keyword.operator.ari",
-					"match": "+|-|*|/|%|<<|>>|<<<|>>>|!|&&|(||)|&|(|)|^"
+					"name": "keyword.operator.assignment.ari",
+					"match": "(=|\\+=|-=|\\*=|\/=|%=|&=|\\|=|\\^=|!=)"
 				},
 				{
-					"name": "keyword.operator.sizeof.ari",
-					"match": "(?<![\\w$])(sizeof)(?![\\w$])"
+					"name": "keyword.operator.increment.ari",
+					"match": "\\+\\+"
 				},
 				{
 					"name": "keyword.operator.decrement.ari",
 					"match": "--"
 				},
 				{
-					"name": "keyword.operator.increment.ari",
-					"match": "++"
-				},
-				{
-					"name": "keyword.operator.assignment.compound.ari",
-					"match": "%=|\\+=|-=|\\*=|(?<!\\()/=)"
-				},
-				{
-					"name": "keyword.operator.assignment.compound.bitwise.ari",
-					"match": "&=|\\^=|<<=|>>=|\\|="
-				}
-			]
-		},
-		"keywords": {
-			"patterns": [
-				{
-					"name": "keyword.control.ari",
-					"match": "\\b(overload|const|static|enum|def|struct|sizeof|std|cast|asm)\\b"
-				}
-			]
-		},
-		"strings": {
-			"name": "string.quoted.double.ari",
-			"begin": "\"",
-			"end": "\"",
-			"patterns": [
-				{
-					"name": "constant.character.escape.ari",
-					"match": "\\\\."
-				}
-			]
-		},
-		"numbers": {
-			"patterns": [
-				{
-					"name": "constant.numeric.ari",
-					"match": "(^-?[0-9][0-9\\.]+$"
-				}
-			]
-		},
-		"control": {
-			"patterns": [
-				{
-					"name": "keyword.control.ari",
-					"match": "\\b(if|while|for|switch|case|default|continue|match|return)\\b"
+					"name": "keyword.operator.ari",
+					"match": "(\\+|-|\\*|\/|%|<|>|<<|>>|<<<|>>>|!|&&|\\|\\||&|\\||\\^)"
 				}
 			]
 		}
-	},
-	"scopeName": "source.ari"
+	}
 }

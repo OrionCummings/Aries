@@ -1,28 +1,24 @@
 std all;
 
-// Test Comment
-
-/* Test Comment */
-
-/**/
-
-/*
- * Test
- *
- * Comment
-*/
-
-# Test Comment
-
+// A point structure
 struct point {
     float x,
     float y
 };
 
+// A function declaration
+def overload test() -> return_type;
+
+// A function definition
 def overload test() -> return_type {
-    
+
 }
 
+/*
+
+This is the main function!
+
+*/
 def main(NONE) -> int {
 
     int test_int = 16;
@@ -34,11 +30,16 @@ def main(NONE) -> int {
     int test_oct = 0o15715672;
     string test_string = "some string";
     char test_char = 'c';
+    byte test_byte = 0xF5;
     uint test_size = sizeof test1;
     char i = !0;
     i--;
     i++
     i += 17;
+
+    float f = 3482.198;
+
+    char list = ['x', 'y', 'z'];
 
     for (int i = 0; i < 1278 && 32; i += 0x278) {
         switch (i) {
