@@ -1,30 +1,32 @@
-# ♈ Aries
+# ♈ The Aries Project
 
-The Aries Project encompasses four components: the Aries Programming Language, the Aries Assembly Language, the Aries Hardware Emulator, and the Aries Computer.
+The Aries Project encompasses four components: the Aries Programming Language, the Aries Assembly Language, the Aries Hardware Emulator, and the Aries Computer. All four components aim to be non-trivial explorations into the domains of programming language development and theory, electrical and computer engineering, and embedded software development and testing.
 
 ## Active Development
-- Aries Programming Language
+- :fire: Aries Programming Language
+    - Aries Visual Studio Code Extension
+        - Syntax highlighting
 
 ## Planned Development
-- Aries Assembly Language
-- Aries Hardware Emulator
-- Aries Hardware Design Package
+- :ice_cube: Aries Assembly Language
+- :ice_cube: Aries Hardware Emulator
+- :ice_cube: Aries Hardware Design Package
 
 ---
 
-## The Aries Programming Language
+## The Aries Programming Language (APL)
 
 
 ---
-## The Aries Assembly Language
+## The Aries Assembly Language (AAL)
 
 
 ---
-## The Aries Hardware Emulator
+## The Aries Hardware Emulator (AHE)
 
 
 ---
-## The Aries Computer
+## The Aries Computer (AC)
 * 16-bit architecture
 * Little endian
 * Variable clock speed [1 - 10k Hz]
@@ -50,4 +52,6 @@ The Aries Project encompasses four components: the Aries Programming Language, t
 * 4-bit memory alignment
 * 16-bit floating point number support
 
-![The memory layout of the Aries CPU](https://github.com/OrionCummings/Aries/blob/main/Resources/GitHub/memory-map.PNG?raw=true)
+The 
+
+<img src="https://github.com/OrionCummings/Aries/blob/main/Resources/GitHub/memory-map.PNG?raw=true" alt="The memory layout of the Aries CPU" width="300"/>
