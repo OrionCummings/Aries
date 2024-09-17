@@ -4,7 +4,7 @@
   "description": "Aries Programming Language",
   "author": "Orion Cummings",
   "publisher": "Orion Cummings",
-  "icon": "res/Aries Language File Icon.png",
+  "icon": "res/aries-file-icon.png",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.93.0"
@@ -20,8 +20,8 @@
         "extensions": [".ari"],
         "configuration": "./language-configuration.json",
         "icon": {
-          "light": "res/aries-file-icon.png",
-          "dark": "res/aries-file-icon.png"
+          "light": "res/aries-file-icon.svg",
+          "dark": "res/aries-file-icon.svg"
         }
       },
       {
@@ -30,8 +30,8 @@
         "extensions": [".aria"],
         "configuration": "./language-configuration.json",
         "icon": {
-          "light": "res/aries-asm-file-icon.png",
-          "dark": "res/aries-asm-file-icon.png"
+          "light": "res/aries-asm-file-icon.svg",
+          "dark": "res/aries-asm-file-icon.svg"
         }
       }
     ],

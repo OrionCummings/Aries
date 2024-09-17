@@ -14,6 +14,15 @@ std all;
 
 # Test Comment
 
+struct point {
+    float x,
+    float y
+};
+
+def overload test() -> return_type {
+    
+}
+
 def main(NONE) -> int {
 
     int test_int = 16;
@@ -25,7 +34,7 @@ def main(NONE) -> int {
     int test_oct = 0o15715672;
     string test_string = "some string";
     char test_char = 'c';
-    int test_size = sizeof test1;
+    uint test_size = sizeof test1;
     char i = !0;
     i--;
     i++
