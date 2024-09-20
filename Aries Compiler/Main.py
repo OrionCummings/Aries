@@ -7,9 +7,10 @@ class ProgramErrorCode(Enum):
     ExitFailure = -1,
     ExitSuccess = 0,
     ExitFailureCLI = 1,
-    ExitFailureTokenizer = 2,
-    ExitFailureParser = 3,
-    ExitFailureGenerator = 4
+    ExitFailureFile = 2,
+    ExitFailureTokenizer = 3,
+    ExitFailureParser = 4,
+    ExitFailureGenerator = 5
 
 def Main():
     
@@ -29,6 +30,9 @@ def Main():
     T: Tokenizer = Tokenizer(Arguments.Source)
     TResult: Result[int, str] = T.Tokenize()
     
+    # DEBUG
+    print(T)
+    
     match TResult:
         
         case Success(_):
@@ -46,4 +50,6 @@ def Main():
     
 
 if __name__ == "__main__":
+    print()
     Main()
+    print()
