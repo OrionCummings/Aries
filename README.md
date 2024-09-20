@@ -5,11 +5,27 @@ The Aries Project encompasses four components: the Aries Programming Language, t
 ## Active Development
 - :fire: Aries Programming Language
     - Aries Visual Studio Code Extension
-        - Syntax highlighting
+        - :white_check_mark: Syntax highlighting
+        - Improved user interface
+            - :ice_cube: Run button
+            - :ice_cube: Examples
+    - Aries Compiler
+        - :white_check_mark: Tokenization/Lexer
+        - :fire: Parser
+        - :ice_cube: Generator
+            - :ice_cube: AAL support
+            - :ice_cube: x86-64 support
+            - :ice_cube: :ice_cube: :ice_cube: RISC V support
+
+- :fire: Aries Assembly Language
+    - :fire: Defining the Aires Instruction Set Architecture
+
+- :fire: Aries Hardware Emulator
+    - :fire: Implemented AISA instructions in Python test environment
+    - :ice_cube: Connect Aries Compiler output to AHE input
 
 ## Planned Development
-- :ice_cube: Aries Assembly Language
-- :ice_cube: Aries Hardware Emulator
+
 - :ice_cube: Aries Hardware Design Package
 
 ---
