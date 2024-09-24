@@ -76,6 +76,5 @@ The Aries Project encompasses four components: the Aries Programming Language, t
 * 4-bit memory alignment
 * 16-bit floating point number support
 
-The 
-
+Here is the first draft of the real memory map:
 <img src="https://github.com/OrionCummings/Aries/blob/main/Resources/GitHub/memory-map.PNG?raw=true" alt="The memory layout of the Aries CPU" width="300"/>
