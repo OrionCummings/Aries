@@ -19,9 +19,17 @@ The Aries Project encompasses four components: the Aries Programming Language, t
 
 - :fire: Aries Assembly Language
     - :fire: Defining the Aires Instruction Set Architecture
+        - :fire: Simple Aries Instruction Set Architecture
+            - :fire: Parser
+            - :fire: Assembler
+        - :ice_cube: Basic Aries Instruction Set Architecture
+        - :ice_cube: Full Aries Instruction Set Architecture
 
 - :fire: Aries Hardware Emulator
-    - :fire: Implemented AISA instructions in Python test environment
+    - :fire: Implements AISA instructions in Python test environment
+        - :fire: Implements Simple AISA instructions in Python test environment
+        - :ice_cube: Implements Basic AISA instructions in Python test environment
+        - :ice_cube: Implements Full AISA instructions in Python test environment
     - :ice_cube: Connect Aries Compiler output to AHE input
 
 ## Planned Development
