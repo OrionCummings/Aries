@@ -1,0 +1,4 @@
+EXIT 1
+LOAD 16, 0
+LOAD 0, 1
+BNE 0, 1, 10
