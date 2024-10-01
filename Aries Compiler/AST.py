@@ -5,18 +5,18 @@ class AST():
     def __init__(self) -> None:
         pass
 
-class ASTNode(AST):
+class ASTNode():
     """An AST node. A base class for expression and statement nodes."""
 
     def __init__(self) -> None:
         pass
 
-class ASTExpressionNode(AST):
+class ASTExpressionNode(ASTNode):
 
     def __init__(self) -> None:
         pass
 
-class ASTStatementNode(AST):
+class ASTStatementNode(ASTNode):
 
     def __init__(self) -> None:
         pass
