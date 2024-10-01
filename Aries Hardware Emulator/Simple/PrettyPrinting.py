@@ -16,9 +16,21 @@ class PP():
     
     def RedBold(s: str) -> str:
         return PP.Red(PP.Bold(s))
+
+    def GreenBold(s: str) -> str:
+        return PP.Green(PP.Bold(s))
+    
+    def BlueBold(s: str) -> str:
+        return PP.Blue(PP.Bold(s))
     
     def Bold(s: str) -> str:
         return str(PP.BOLD) + str(s) + str(PP.END)
 
     def Red(s: str) -> str:
         return str(PP.RED) + str(s) + str(PP.END)
+    
+    def Green(s: str) -> str:
+        return str(PP.GREEN) + str(s) + str(PP.END)
+    
+    def Blue(s: str) -> str:
+        return str(PP.BLUE) + str(s) + str(PP.END)
