@@ -4,21 +4,13 @@ from enum import Enum
 import returns
 from returns.result import Result, Success, Failure
 
-class SAISAInstructionType(Enum):
-    ADD = 0x00,
-    SUB = 0x01,
-    MOVE = 0x02,
-    LOAD = 0x03,
-    BNE = 0x04,
-    EXIT = 0x05,
-
 class Instruction():
     
     def __init__(Self) -> None:
-        Self.InstructionType: SAISAInstructionType = None
-        Self.Arg1: str = None
-        Self.Arg2: str = None
-        Self.Arg3: str = None
+        Self.InstructionStr: str    = None
+        Self.Arg1: str              = None
+        Self.Arg2: str              = None
+        Self.Arg3: str              = None
         
     def __str__(Self) -> str:
         Builder: str = "0x"
@@ -45,13 +37,27 @@ class Instruction():
         return Builder
     
     def AsBytes(Self) -> List[int]:
-        Bytes: List[int] = []
 
-        # ...
+        # Get the string version of the instruction
+        S: str = str(Self)
+        
+        # Remove the hex prefix
+        S = S[2:]
+        
+        # Split every two characters
+        # TODO: Always allocate 8 spaces! Instructions are fixed-width
+        BytesAsStrings: List[str] = []
+        while S:
+            BytesAsStrings.append(S[:2])
+            S = S[2:]
+            
+        # Convert each stringified byte into an actual byte
+        Bytes: List[int] = []
+        [Bytes.append(int(B, 16)) for B in BytesAsStrings]
 
         return Bytes
     
-    def SetType(Self, IType: SAISAInstructionType):
+    def SetType(Self, IType: int):
         Self.InstructionType = IType
 
 class SAISA():
@@ -66,6 +72,12 @@ class SAISA():
             "BNE":  (0x04, 3),
             "EXIT": (0x05, 1)
         }
+    
+    def IsValidOpcode(Self, Opcode: int) -> bool:
+        
+        
+        
+        pass
     
     def ParseInstruction(Self, Line: str) -> Result[Instruction, str]:
         I: Instruction = Instruction()
@@ -94,7 +106,7 @@ class SAISA():
                 
             A1 = Line[FirstSpaceIndex:NewLineIndex].strip()
             try:
-                I.Arg1 = "{:04X}".format(int(A1))
+                I.Arg1 = "{:04X}".format(int(A1, 16))
             except ValueError:
                 print("Invalid first argument '" + Line + "'!")
                 exit(1)
@@ -156,4 +168,5 @@ class SAISA():
                 exit(1)
         
         return Success(I)
-    
+
+        

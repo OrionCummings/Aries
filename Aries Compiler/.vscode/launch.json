@@ -11,7 +11,8 @@
             "program": "D:\\PersonalProjects\\Aries\\Aries Compiler\\Main.py",
             "console": "integratedTerminal",
             "args": [
-                "_basic.ari"
+                "_basic.ari",
+                "x86"
             ]
         },
         {
@@ -21,7 +22,8 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": [
-                "_basic.ari"
+                "_basic.ari",
+                "x86"
             ]
         }
     ]

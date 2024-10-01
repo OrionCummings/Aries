@@ -17,6 +17,7 @@ def Main():
     # Verify command line arguments
     ArgumentParser = argparse.ArgumentParser()
     ArgumentParser.add_argument('Source', type=str)
+    ArgumentParser.add_argument('Target', type=str)
     try:
         Arguments = ArgumentParser.parse_args()
     except SystemExit:
@@ -34,10 +35,8 @@ def Main():
     print(T)
     
     match TResult:
-        
         case Success(_):
             print("Tokenization success!")
-            
         case Failure(X):
             print("Tokenization failure!")
             print(str(X))
