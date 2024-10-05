@@ -117,7 +117,7 @@ KeywordMap: Dict[str, TokenType] = {
     "struct": TokenType.KEYWORD_STRUCT,
     "sizeof": TokenType.KEYWORD_SIZEOF,
     "std": TokenType.KEYWORD_STD,
-    "cast": TokenType.KEYWORD_CAST,
+    "as": TokenType.KEYWORD_CAST,
     "asm": TokenType.KEYWORD_ASM
 }
 
