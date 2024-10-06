@@ -4,7 +4,7 @@ The Aries Programming Language (APL) is a statically-typed procedural language d
 APL currently uses the following EBNF grammar:
 
 ```
-// Note: Tokens are capitalized
+// Note: Tokens are capitalized or symbolic
 
 <Aries Program> ::= <Declaration>*
 
@@ -13,7 +13,10 @@ APL currently uses the following EBNF grammar:
     <FunctionDeclaration>
 
 <VariableDeclaration> ::=
-    <Type> <VariableDeclarationList> ;
+    <Type> <Identifier> = VALUE ; |
+    <Type> <Identifier> [ ] = VALUE ; |
+    <Type> <Identifier> [ <DecimalConstant> ] = { <ConstantList> } ; |
+
 
 <VariableDeclarationList> ::= 
     <VariableDeclarationList> , <VariableDeclarationIdentifier> |
@@ -40,7 +43,7 @@ APL currently uses the following EBNF grammar:
 
 <Statement> ::=
 
-<Type> ::= int | float | bool | char | void
+<Type> ::= int | uint | float | bool | char | void
 
 <Digit> ::= [0-9]
 <NonDigit> ::= [A-Za-z_]*
@@ -74,6 +77,8 @@ APL currently uses the following EBNF grammar:
     SIZEOF ( <Type> )
 
 // Constants
+
+<ConstantList> ::= <Constant> (, <Constant>)*
 
 <Constant> ::=
     <IntegerConstant> |

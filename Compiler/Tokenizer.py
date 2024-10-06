@@ -1,14 +1,12 @@
 from enum import Enum
 from dataclasses import dataclass
-import json
 from typing import Dict, List, Optional, Self
-from unicodedata import numeric
 import returns
 from returns.result import Result, Success, Failure
 import unittest
 import pprint
 
-from Helpers import Debug, GetCurrentFunction
+from Helpers import Debug
 
 class TokenType(Enum):
     NONE                = 0x00,
@@ -32,12 +30,6 @@ class TokenType(Enum):
     KEYWORD_CONTINUE    = 0x75, # continue
     KEYWORD_OVERLOAD    = 0x76, # overload
     KEYWORD_RETURN      = 0x77, # return
-    KEYWORD_VOID        = 0x78, # void
-    KEYWORD_INT         = 0x79, # int
-    KEYWORD_UINT        = 0x80, # uint
-    KEYWORD_CHAR        = 0x81, # char
-    KEYWORD_BOOL        = 0x82, # bool
-    KEYWORD_FLOAT       = 0x83, # float
     KEYWORD_CONST       = 0x84, # const
     KEYWORD_STATIC      = 0x85, # static
     KEYWORD_MATCH       = 0x86, # match
@@ -148,7 +140,6 @@ class Tokenizer():
     def __str__(Self) -> str:
         return pprint.pformat(Self.__dict__)
     
-    # Read some number of characters out of the source file
     def Peek(Self, NumCharacters: int = 1) -> Optional[str]:
         
         # If we are trying to read too many characters, return None
