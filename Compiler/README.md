@@ -116,3 +116,27 @@ APL currently uses the following EBNF grammar:
 
 <StringConstant> ::= " <Character>* "
 ```
+
+## Unit Test Order of Execution
+
+#### Tokenizer Unit Tests
+
+1. `test_Peek()` and `test_Pop()`
+2. `test_Minimal()` and `test_Return()`
+3. `test_Operators()`
+4. `test_Literals()`
+5. `test_Expressions()`
+6. `test_Logic()`
+7. `test_Arithmetic()`
+8. `test_Variables()`
+9. `test_Functions()`
+10. `test_Structs()` and `test_CustomTypes()`
+
+#### Parser Unit Tests
+
+1. `test_Minimal()` and `test_Return()`
+
+#### Generator Unit Tests
+
+1. `test_Minimal()` and `test_Return()`
+

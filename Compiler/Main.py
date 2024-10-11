@@ -1,5 +1,6 @@
 import argparse
 from enum import Enum
+import unittest
 from returns.result import Result, Success, Failure
 from AST import AST
 from Generator import Generator
@@ -19,14 +20,14 @@ def Main():
     
     RSetup = Setup()
     if RSetup.value_or(None) is None:
+        print(RSetup.failure())
+        exit(CompilerErrorCode.ExitFailureTokenizer)
         
+    Arguments = RSetup.unwrap()
     
     # Tokenize the source file
-    T: Tokenizer = Tokenizer(RSetup.unwrap().Source)
+    T: Tokenizer = Tokenizer(Arguments.Source)
     TResult: Result[int, str] = T.Tokenize()
-    
-    # DEBUG
-    # print(T)
     
     match TResult:
         case Success(_):
@@ -35,13 +36,13 @@ def Main():
         case Failure(X):
             print(PP.RedBold("Tokenization failure!"))
             print(str(X))
-            return CompilerErrorCode.ExitFailureTokenizer
+            exit(CompilerErrorCode.ExitFailureTokenizer)
     
     # Parse the tokens
-    A: AST = AST(T)
+    #A: AST = AST(T)
     
     # Generate the assembly instructions
-    G: Generator = Generator(A, "x86")
+    #G: Generator = Generator(A, "x86")
 
 def Setup() -> Result[str, int]:
     
@@ -52,13 +53,11 @@ def Setup() -> Result[str, int]:
     try:
         Arguments = ArgumentParser.parse_args()
     except SystemExit:
-        print("Incorrect usage!")
-        return CompilerErrorCode.ExitFailureCLI
+        return Failure("Incorrect usage!")
     except:
-        print("Unknown CLI error!")
-        return CompilerErrorCode.ExitFailureCLI
+        return Failure("Unknown CLI error!")
     
-    return Arguments
+    return Success(Arguments)
 
 if __name__ == "__main__":
     print()

@@ -4,6 +4,44 @@ from typing import List, Optional
 from PrettyPrinting import PP
 from  Tokenizer import Tokenizer, Token
 
+@dataclass
+class VariableDeclaration():
+    """ 
+    A variable declaration. Examples:
+    int x = 4;
+    float y[6];
+    char z[] = { 't', 'e', 's', 't', '\n' };
+    char s[] = z;
+    uint a, b, c = 2;
+    float a, b, c;
+    """
+    Type: Token                 = None
+    Identifiers: List[Token]    = None
+    Length: int                 = 0
+    Expression: Optional[List[str]]  = None
+
+@dataclass
+class FunctionDeclaration():
+    """
+    A function definition. Examples:
+    def f() {
+        // ...
+    }
+    def overload g(int x) -> bool {
+        // ...
+    }
+    """
+    Identifier: Token               = None
+    ReturnType: Token               = None
+    Parameters: Optional[List[str]] = None
+    Body: Optional[str]             = None
+
+@dataclass
+class Declaration():
+    VarDecl:  VariableDeclaration = None
+    FuncDecl: FunctionDeclaration = None
+
+
 class ASTNode():
     """An AST node. A base class for expression and statement nodes."""
 
@@ -31,43 +69,6 @@ class AST():
     #     Builder += str(Self.Root)
     #     [Builder.append(N) for N in Self.Root.Body]
     #     return Builder
-    
-    @dataclass
-    class VariableDeclaration():
-        """ 
-        A variable declaration. Examples:
-        int x = 4;
-        float y[6];
-        char z[] = { 't', 'e', 's', 't', '\n' };
-        char s[] = z;
-        uint a, b, c = 2;
-        float a, b, c;
-        """
-        Type: Token                 = None
-        Identifiers: List[Token]    = None
-        Length: int                 = 0
-        Expression: Optional[List[str]]  = None
-    
-    @dataclass
-    class FunctionDeclaration():
-        """
-        A function definition. Examples:
-        def f() {
-            // ...
-        }
-        def overload g(int x) -> bool {
-            // ...
-        }
-        """
-        Identifier: Token               = None
-        ReturnType: Token               = None
-        Parameters: Optional[List[str]] = None
-        Body: Optional[str]             = None
-    
-    @dataclass
-    class Declaration():
-        VarDecl:  VariableDeclaration = None
-        FuncDecl: FunctionDeclaration = None
     
     def ParseVariableDeclaration(Self) -> Result[VariableDeclaration, str]:
         VarDecl: VariableDeclaration = None
@@ -113,3 +114,5 @@ class AST():
         
         # Return the root program node
         return Root
+
+
