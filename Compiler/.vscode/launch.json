@@ -8,12 +8,9 @@
             "name": "Run Main",
             "type": "python",
             "request": "launch",
-            "program": "D:\\PersonalProjects\\Aries\\Aries Compiler\\Main.py",
+            "program": "D:\\PersonalProjects\\Aries\\Compiler\\Main.py",
             "console": "integratedTerminal",
-            "args": [
-                "_basic.ari",
-                "x86"
-            ]
+            "args": ["Source Files\\minimal.ari"]
         },
         {
             "name": "Python Debugger: Current File with Arguments",
@@ -21,10 +18,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": [
-                "_basic.ari",
-                "x86"
-            ]
+            "args": ["Source Files\\minimal.ari"]
         }
     ]
 }

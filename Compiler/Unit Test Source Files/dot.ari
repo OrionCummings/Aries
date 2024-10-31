@@ -1,0 +1,6 @@
+def main() -> int {
+    float a = 12.65;
+    float b = .124;
+    float c = 1023.0;
+    return 0;
+}
