@@ -1,50 +1,29 @@
 from enum import Enum
-from ISA import SAISA, Instruction
-from Program import Program
+from Assembler import Assembler
+from ProgramCounter import ProgramCounter
+from RegisterFile import RegisterFile
+from DataMemory import DataMemory
+from InstructionMemory import InstructionMemory
+from Flags import Flags
 from typing import List
 from PrettyPrinting import PP
+from CallStack import CallStack
 
 class CPU():
     """A CPU implementing the Simple Aries Instruction Set Architecture."""
     
-    class ExitCode(Enum):
-        EMU_OK              = 0x00,
-        EMU_ERROR           = 0x01,
-        EMU_PC_OVERRUN      = 0x02,
-        EMU_INVALID_OPCODE  = 0x03,
-        PROG_OK             = 0xA0, # This is strange
-        PROG_ERROR          = 0xA1  # This is strange
-    
-    def __init__(Self, MemorySize: int = 4096) -> None:
+    def __init__(Self, InstructionMemorySize: int = 4096, DataMemorySize: int = 4096) -> None:
         """Initializes a CPU instance with a given memory size in bytes."""
         
-        # The ISA in use
-        Self.ISA = SAISA()
-        
-        # The program counter
-        Self.PC: int = 0
-        
-        # The CPU memory. Memory isn't actually in the CPU, but this currently simplifies
-        # the project, so I don't care
-        Self.Memory: bytearray = bytearray(MemorySize)
-        
-        # The number of bytes in memory
-        Self.MemorySize = MemorySize
-        
-        # An internal register that contains the opcode of the current instruction
-        Self.OpcodeRegister: int = 0
-        
-        # An internal register that contains the data of the current instruction
-        Self.DataRegister: int = 0
-        
-        # The memory occupied by the (first?) program loaded
-        Self.ProgramMemory: List[int] = []
-        
-        # A list of memory addresses/bytes that have changed between clock cycles
-        Self.Delta: List[int] = []
+        Self.ProgramCounter         = ProgramCounter()
+        Self.RegisterFile           = RegisterFile()
+        Self.InstructionMemory      = InstructionMemory(InstructionMemorySize)
+        Self.DataMemory             = DataMemory(DataMemorySize)
+        Self.CallStack              = CallStack()
+        Self.Flags                  = Flags()
     
     def __str__(Self) -> str:
-        Builder: str = "[SAISA CPU] PC: " + str(Self.PC)
+        Builder: str = "PC: " + str(Self.PC)
         for ByteIndex in range(0, len(Self.Memory)):
             if ByteIndex == 0 or ByteIndex % 16 == 0:
                 Builder += "\n"
@@ -136,29 +115,3 @@ class CPU():
             Self.Exit(Self.ExitCode.PC_OVERRUN)
         Self.PC += 1
     
-    def Add(Self, A: int, B: int, C: int):
-        """Memory[A] + Memory[B] = Memory[C]"""
-        Self.Memory[C] = Self.Memory[A] + Self.Memory[B]
-    
-    def Sub(Self, A: int, B: int, C: int):
-        """Memory[A] - Memory[B] = Memory[C]"""
-        Self.Memory[C] = Self.Memory[A] - Self.Memory[B]
-    
-    def Move(Self, A: int, B: int):
-        """Memory[B] = Memory[A]"""
-        Self.Memory[B] = Self.Memory[A]
-        Self.Memory[B] = 0
-    
-    def Load(Self, A: int, B: int):
-        """Memory[B] = A"""
-        Self.Memory[B] = A
-    
-    def Bne(Self, A: int, B: int, L: int):
-        """If Memory[A] != Memory[B], then PC = L"""
-        if not Self.Memory[A] == Self.Memory[B]:
-            Self.PC = L
-    
-    def Exit(Self, ExitCode: ExitCode):
-        """Exits the program with the given exit code."""
-        print("Exiting program with code {} ({}).".format(ExitCode.name, ExitCode.value))
-        exit(ExitCode)

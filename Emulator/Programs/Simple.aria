@@ -1,0 +1,9 @@
+; These are some comments
+; to test how well the error
+; messages respond to non-code
+; lines!
+
+LDI 1 A         ; Load 1 into A
+LDI 4 B         ; Load 4 into B
+ADD A B C       ; A + B = C
+HLT             ; Halt the program
