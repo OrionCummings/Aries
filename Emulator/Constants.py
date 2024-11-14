@@ -1,8 +1,16 @@
 
+from enum import Enum
+
+from option import Err, Ok, Result
+
+
 def PExit(S: str, E: int = 0):
     """A function to print an error message and exit the assembler."""
     print(S)
     exit(E)
+
+def IsValidOpcode(Opcode: str) -> bool:
+    return Opcode in OPCODES
 
 def BitMask(Index: int) -> int:
     """Returns a 1-bit mask at the specified `Index`."""
@@ -20,40 +28,94 @@ def ToggleBit(Number: int, Index: int) -> int:
     """Toggles bit `Index` in number `Number`."""
     return (Number ^ (1 << (Index)))
 
-################################################################################################################
+def OpcodeToInt(Opcode: str) -> Result[int, str]:
+    """Converts the given opcode (as a string) to an integer."""
+    try:
+        OpcodeInt: int = int(Opcode)
+    except (TypeError, ValueError):
+        return Err("Failed to convert '{}' to a number".format(Opcode))
+    return Ok(OpcodeInt)
+
+def IsRegister(Reg: str) -> bool:
+    return Reg in REGISTERS
+
+########################################################################
 
 # This is the character which should be interpreted as a comment in assembly
 ASM_COMMENT_CHARACTER = ';'
 
-# All valid opcodes
+# The length of full instructions in bits
+INS_LENGTH = 32
+
+# The length of opcode fields in bits
+OP_LENGTH = 6
+
+# The length of register fields in bits
+REG_LENGTH = 4
+
+# The length of immediate fields in bits
+IMM_LENGTH = 16
+
+# The length of address fields in bits
+ADDR_LENGTH = 26
+
+# Instruction modes determine the bit layout of the instruction
+# 
+# Register                        [UNUSED] [UNUSED]
+# OPCODE    REGA    REGB    REGC    SHAMT   FUNC
+# XXXXXX    XXXX    XXXX    XXXX    XXXXX   XXXXXXXXX
+# 6         4       4       4       5       9
+# 0-6       7-10    11-14   15-18   19-23   24-32
+# 
+# Immediate              [UNUSED]
+# OPCODE    REGA    REGB    ??    VALUE
+# XXXXXX    XXXX    XXXX    XX    XXXXXXXXXXXXXXXX
+# 6         4       4       2     16
+# 0-6       7-10    11-14   15-17 18-32
+# 
+# Jump
+# OPCODE    ADDRESS
+# XXXXXX    XXXXXXXXXXXXXXXXXXXXXXXXXX
+# 6         26
+# 0-6       7-32
+# 
+class InstructionMode(Enum):
+    Register = 0
+    Immediate = 1
+    Jump = 2
+    
+# All valid opcodes and their information tuple (ID, ARGC, MODE)
 OPCODES = {
-    "nop":       0,
-    "hlt":       1,
-    "add":       2,
-    "addi":      3,
-    "subi":      4,
-    "sub":       5,
-    "not":       6,
-    "and":       7,
-    "nand":      8,
-    "or":        9,
-    "nor":      10,
-    "xor":      11,
-    "xnor":     12,
-    "shl":      13,
-    "shr":      14,
-    "ldi":      15,
-    "sti":      16,
-    "ldr":      17,
-    "str":      18,
-    "jmp":      19,
-    "ret":      20,
-    "hpe":      21,
-    "hpd":      22,
-    "syscall":  23,
+    "nop":      (0, 0, InstructionMode.Register),
+    "hlt":      (1, 0, InstructionMode.Register),
+    "add":      (2, 3, InstructionMode.Register),
+    "addi":     (3, 2, InstructionMode.Immediate),
+    # "sub":      (5, 3, InstructionMode.Register),
+    # "subi":     (4, 2, InstructionMode.Immediate),
+    # "not":      (6, 2, InstructionMode.Register),
+    # "and":      (7, 3, InstructionMode.Register),
+    # "nand":     (8, 3, InstructionMode.Register),
+    # "or":       (9, 3, InstructionMode.Register),
+    # "nor":     (10, 3, InstructionMode.Register),
+    # "xor":     (11, 3, InstructionMode.Register),
+    # "xnor":    (12, 3, InstructionMode.Register),
+    # "shl":     (13, 2, InstructionMode.Register),
+    # "shr":     (14, 2, InstructionMode.Register),
+    "ldi":     (15, 2, InstructionMode.Immediate),
+    # "lui":     (16, 2, InstructionMode.Immediate),
+    # "lli":     (17, 2, InstructionMode.Immediate),
+    # "ld":      (18, 2, InstructionMode.Register),
+    # "sti":     (19, 2, InstructionMode.Immediate),
+    # "str":     (20, 2, InstructionMode.Register),
+    # "bne":     (21, 1, InstructionMode.Jump),
+    # "jmp":     (22, 1, InstructionMode.Jump),
+    # "jr":      (23, 1, InstructionMode.Jump),
+    # "ret":     (24, 0, InstructionMode.Register),
+    # "hpc":     (25, 1, InstructionMode.Register),
+    # "syscall": (26, 1, InstructionMode.Register), # Bold move
 }
 
-# This is a dictionary containing all 16 16-bit registers.
+# This is a dictionary containing all 16 registers.
 REGISTERS = {
     "A":    0,
     "B":    1,
@@ -99,3 +161,12 @@ FL_HPC_MASK               = BitMask(FL_HPC)
 IP_INC = 1
 BP_INC = 1
 SP_INC = 1
+
+# The program counter increment value
+PC_INC = 1
+
+# Error codes
+PC_OVERRUN = 0x30
+
+
+

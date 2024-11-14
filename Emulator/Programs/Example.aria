@@ -1,0 +1,15 @@
+; These are some comments
+; to test how well the error
+; messages respond to non-code
+; lines!
+
+ldi 1 A         ; Load 1 into register A
+ldi 4 B         ; Load 4 into register B
+add A B C       ; A + B = C
+hlt             ; Halt the program
+
+; Expected machine code output
+; 00001111 00000001 00000000 00000000
+; 00001111 00000100 00000001 00000000
+; 00000010 00000000 00000001 00000010
+; 00000001 00000000 00000000 00000000

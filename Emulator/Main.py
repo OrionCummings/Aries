@@ -1,10 +1,10 @@
 from CPU import CPU
 from pynput.keyboard import Key, Listener
-from Simple import Assembler
+from Assembler import Assembler
 
-P: Assembler = Assembler("Simple.aria")
-C: CPU = CPU(128)
-C.LoadProgram(P)
+A: Assembler = Assembler("Example.aria")
+C: CPU = CPU(128, 128)
+C.LoadProgram(A)
 
 def Press(key) -> bool:
     """Runs one clock cycle if the space bar is pressed.
