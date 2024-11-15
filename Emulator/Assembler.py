@@ -63,14 +63,32 @@ def ParseArgument(Arg: str, Type: ParseMode = ParseMode.Register) -> Result[int,
     
     return Ok(Ret)
 
-def Encode(OpcodeStr: str, Arg1Str: str = '0', Arg2Str: str = '0', Arg3Str: str = '0') -> Result[int, str]:
+def Encode(Line: str) -> Result[int, str]:
     
-    if OpcodeStr not in OPCODES:
-        return Err("Invalid opcode '{}'!".format(OpcodeStr))
+    # Create the line vector
+    LineVector = Line.split(' ')
+    if len(LineVector) < 1: return Err("Malformed instruction '{}'".format(Line))
     
-    OpcodeInformation = OPCODES[OpcodeStr]
-    Opcode = OpcodeInformation[0]
-    Mode = OpcodeInformation[2]
+    # Get the potential opcode
+    PotentialOpcode = LineVector[0]
+    
+    # Check that it's a valid opcode
+    if not IsValidOpcode(PotentialOpcode):
+        return Err("Unknown opcode '{}'".format(PotentialOpcode))
+    
+    
+    
+    OpcodeTuple = OPCODES[PotentialOpcode]
+    Opcode = OpcodeTuple[0]
+    NumArgs = OpcodeTuple[1]
+    Mode = OpcodeTuple[2]
+    
+    # Check that the number of expected arguments matches
+    # the number of actual arguments.
+    if len(LineVector) == NumArgs:
+        return Err("Expected number of arguments ({}) does not match the actual number of arguments ({})!".format(NumArgs, len(LineVector) - 1))
+
+    # below this is wrong
     
     Instruction: int = 0
     Instruction |= Opcode << (INS_LENGTH - OP_LENGTH)
@@ -78,32 +96,40 @@ def Encode(OpcodeStr: str, Arg1Str: str = '0', Arg2Str: str = '0', Arg3Str: str 
     match Mode:
         case InstructionMode.Register:
             
-            RRegA = ParseArgument(Arg1Str, ParseMode.Register)
-            if RRegA.is_err: return RRegA.Err()
-            else: RegA = RRegA.unwrap()
+            RegA, RegB, RegC = (0, 0, 0)
             
-            RRegB = ParseArgument(Arg2Str, ParseMode.Register)
-            if RRegB.is_err: return RRegB.Err()
-            else: RegB = RRegB.unwrap()
+            if NumArgs > 0:
+                RRegA = ParseArgument(LineVector[1], ParseMode.Register)
+                if RRegA.is_err: return RRegA.Err()
+                else: RegA = RRegA.unwrap()
             
-            RRegC = ParseArgument(Arg3Str, ParseMode.Register)
-            if RRegC.is_err: return RRegC.Err()
-            else: RegC = RRegC.unwrap()
+            if NumArgs > 1:
+                RRegB = ParseArgument(LineVector[2], ParseMode.Register)
+                if RRegB.is_err: return RRegB.Err()
+                else: RegB = RRegB.unwrap()
+            
+            if NumArgs > 2:
+                RRegC = ParseArgument(LineVector[3], ParseMode.Register)
+                if RRegC.is_err: return RRegC.Err()
+                else: RegC = RRegC.unwrap()
             
             Instruction |= RegA << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 1))
             Instruction |= RegB << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 2))
             Instruction |= RegC << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 3))
+            
             # TODO: SHAMT and FUNC are not implemented yet
             
         case InstructionMode.Immediate:
             
-            RRegA = ParseArgument(Arg1Str, ParseMode.Register)
-            if RRegA.is_err: return RRegA.Err()
-            else: RegA = RRegA.unwrap()
+            if NumArgs > 0:
+                RRegA = ParseArgument(LineVector[1], ParseMode.Register)
+                if RRegA.is_err: return RRegA.Err()
+                else: RegA = RRegA.unwrap()
             
-            RValue = ParseArgument(Arg2Str, ParseMode.ImmediateValue)
-            if RValue.is_err: return RValue.Err()
-            else: Value = RValue.unwrap()
+            if NumArgs > 1:
+                RValue = ParseArgument(LineVector[2], ParseMode.ImmediateValue)
+                if RValue.is_err: return RValue.Err()
+                else: Value = RValue.unwrap()
             
             Instruction |= RegA << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 1))
             Instruction |= Value
@@ -112,9 +138,10 @@ def Encode(OpcodeStr: str, Arg1Str: str = '0', Arg2Str: str = '0', Arg3Str: str 
             
             Address = 0
             
-            RAddress = ParseArgument(Arg3Str, ParseMode.Address)
-            if RAddress.is_err: return RAddress.Err()
-            else: Address = RAddress.unwrap()
+            if NumArgs > 0:
+                RAddress = ParseArgument(LineVector[1], ParseMode.Address)
+                if RAddress.is_err: return RAddress.Err()
+                else: Address = RAddress.unwrap()
             
             Instruction |= Address
     

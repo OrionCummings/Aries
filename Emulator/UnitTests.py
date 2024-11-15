@@ -272,40 +272,36 @@ class AssemblerUnitTests(unittest.TestCase):
 
     def test_Encode_LDI_Hex(Self):
         Line = 'ldi A 0xFFFF'
-        Vec = Line.split(' ')
                    # XXXXXX_XXXX_XXXXXX_XXXXXXXXXXXXXXXX
         Expected = 0b001111_0000_000000_1111111111111111
-        RActual: Result = Encode(*Vec)
+        RActual: Result = Encode(Line)
         if RActual.is_err:
             Self.fail("Failed to encode: {}".format(RActual.unwrap_err()))
         Self.assertEqual(Expected, RActual.unwrap())
 
     def test_Encode_LDI_Octal(Self):
         Line = 'ldi B 0o1720'
-        Vec = Line.split(' ')
                    # XXXXXX_XXXX_XXXXXX_XXXXXXXXXXXXXXXX
         Expected = 0b001111_0001_000000_0000001111010000
-        RActual: Result = Encode(*Vec)
+        RActual: Result = Encode(Line)
         if RActual.is_err:
             Self.fail("Failed to encode: {}".format(RActual.unwrap_err()))
         Self.assertEqual(Expected, RActual.unwrap())
         
     def test_Encode_LDI_Binary(Self):
         Line = 'ldi C 0b1101010111010010'
-        Vec = Line.split(' ')
                    # XXXXXX_XXXX_XXXXXX_XXXXXXXXXXXXXXXX
         Expected = 0b001111_0010_000000_1101010111010010
-        RActual: Result = Encode(*Vec)
+        RActual: Result = Encode(Line)
         if RActual.is_err:
             Self.fail("Failed to encode: {}".format(RActual.unwrap_err()))
         Self.assertEqual(Expected, RActual.unwrap())
         
     def test_Encode_LDI_Decimal(Self):
         Line = 'ldi G 16726'
-        Vec = Line.split(' ')
                    # XXXXXX_XXXX_XXXXXX_XXXXXXXXXXXXXXXX
         Expected = 0b001111_0110_000000_0100000101010110
-        RActual: Result = Encode(*Vec)
+        RActual: Result = Encode(Line)
         if RActual.is_err:
             Self.fail("Failed to encode: {}".format(RActual.unwrap_err()))
         
