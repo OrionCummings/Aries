@@ -22,6 +22,7 @@ def ParseArgument(Arg: str, Type: ParseMode = ParseMode.Register) -> Result[int,
     
     match Type:
         case ParseMode.Register:
+            
             if Arg.isdigit():
                 Ret = int(Arg)
                 if Ret < 0:
@@ -76,8 +77,6 @@ def Encode(Line: str) -> Result[int, str]:
     if not IsValidOpcode(PotentialOpcode):
         return Err("Unknown opcode '{}'".format(PotentialOpcode))
     
-    
-    
     OpcodeTuple = OPCODES[PotentialOpcode]
     Opcode = OpcodeTuple[0]
     NumArgs = OpcodeTuple[1]
@@ -88,12 +87,11 @@ def Encode(Line: str) -> Result[int, str]:
     if len(LineVector) == NumArgs:
         return Err("Expected number of arguments ({}) does not match the actual number of arguments ({})!".format(NumArgs, len(LineVector) - 1))
 
-    # below this is wrong
-    
     Instruction: int = 0
     Instruction |= Opcode << (INS_LENGTH - OP_LENGTH)
     
     match Mode:
+        
         case InstructionMode.Register:
             
             RegA, RegB, RegC = (0, 0, 0)
@@ -144,6 +142,9 @@ def Encode(Line: str) -> Result[int, str]:
                 else: Address = RAddress.unwrap()
             
             Instruction |= Address
+            
+        case InstructionMode.Mono:
+            pass # Do nothing; opcode already captured
     
     return Ok(Instruction)
 

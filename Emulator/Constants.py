@@ -83,11 +83,12 @@ class InstructionMode(Enum):
     Register = 0
     Immediate = 1
     Jump = 2
+    Simple = 3
     
 # All valid opcodes and their information tuple (ID, ARGC, MODE)
 OPCODES = {
-    "nop":      (0, 0, InstructionMode.Register),
-    "hlt":      (1, 0, InstructionMode.Register),
+    "nop":      (0, 0, InstructionMode.Simple),
+    "hlt":      (1, 0, InstructionMode.Simple),
     "add":      (2, 3, InstructionMode.Register),
     "addi":     (3, 2, InstructionMode.Immediate),
     # "sub":      (5, 3, InstructionMode.Register),
@@ -110,8 +111,8 @@ OPCODES = {
     # "bne":     (21, 1, InstructionMode.Jump),
     # "jmp":     (22, 1, InstructionMode.Jump),
     # "jr":      (23, 1, InstructionMode.Jump),
-    # "ret":     (24, 0, InstructionMode.Register),
-    # "hpc":     (25, 1, InstructionMode.Register),
+    # "ret":     (24, 0, InstructionMode.Simple),
+    # "hpc":     (25, 1, InstructionMode.Simple),
     # "syscall": (26, 1, InstructionMode.Register), # Bold move
 }
 
