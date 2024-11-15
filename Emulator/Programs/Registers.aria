@@ -1,0 +1,64 @@
+; This test file is designed to use all 
+; registers at least once. The program
+; will fill all register with values
+; corresponding to their register enum 
+; value. The program will then sum all 
+; registers together to get an expected
+; result
+
+            ; Load the values into the general purpose registers
+ldi 0 A     ; Load 0 into register A
+ldi 1 B     ; Load 1 into register B
+ldi 2 C     ; Load 2 into register C
+ldi 3 D     ; Load 3 into register D
+ldi 4 E     ; Load 4 into register E
+ldi 5 F     ; Load 5 into register F
+ldi 6 G     ; Load 6 into register G
+ldi 7 H     ; Load 7 into register H
+ldi 8 I     ; Load 8 into register I
+ldi 9 J     ; Load 9 into register J
+ldi 10 K    ; Load 10 into register K
+ldi 11 L    ; Load 11 into register L
+
+            ; Accumulate in register A
+add A B A   ; A + B -> A
+add A C A   ; A + C -> A
+add A D A   ; A + D -> A
+add A E A   ; A + E -> A
+add A F A   ; A + F -> A
+add A G A   ; A + G -> A
+add A H A   ; A + H -> A
+add A I A   ; A + I -> A
+add A J A   ; A + J -> A
+add A K A   ; A + K -> A
+add A L A   ; A + L -> A
+
+hlt         ; Halt the program
+
+; Expected output
+: 00001111 00000001 00000000 00000000   ; Load 0 into register A
+: 00001111 00000010 00000000 00000001   ; Load 1 into register B
+: 00001111 00000011 00000000 00000010   ; Load 2 into register C
+: 00001111 00000100 00000000 00000011   ; Load 3 into register D
+: 00001111 00000101 00000000 00000100   ; Load 4 into register E
+: 00001111 00000110 00000000 00000101   ; Load 5 into register F
+: 00001111 00000111 00000000 00000110   ; Load 6 into register G
+: 00001111 00001000 00000000 00000111   ; Load 7 into register H
+: 00001111 00001001 00000000 00001000   ; Load 8 into register I
+: 00001111 00001010 00000000 00001001   ; Load 9 into register J
+: 00001111 00001011 00000000 00001010   ; Load 10 into register K
+: 00001111 00001100 00000000 00001011   ; Load 11 into register L
+
+: 00000010 00000000 00000001 00000000   ; A + B -> A
+: 00000010 00000000 00000010 00000000   ; A + C -> A
+: 00000010 00000000 00000011 00000000   ; A + D -> A
+: 00000010 00000000 00000100 00000000   ; A + E -> A
+: 00000010 00000000 00000101 00000000   ; A + F -> A
+: 00000010 00000000 00000110 00000000   ; A + G -> A
+: 00000010 00000000 00000111 00000000   ; A + H -> A
+: 00000010 00000000 00001000 00000000   ; A + I -> A
+: 00000010 00000000 00001001 00000000   ; A + J -> A
+: 00000010 00000000 00001010 00000000   ; A + K -> A
+: 00000010 00000000 00001011 00000000   ; A + L -> A
+
+: 00000001 00000000 00000000 00000000   ; Halt the program

@@ -117,6 +117,7 @@ OPCODES = {
 }
 
 # This is a dictionary containing all 16 registers.
+# TODO: Could add indication of GPRs and SPRs
 REGISTERS = {
     "A":    0,
     "B":    1,

@@ -7,8 +7,8 @@ from Constants import *
 
 def PrintExpectedAndActualBinary(Expected: int, Actual: int):
     print()
-    print("Expected: " + format(Expected, "#016b"))
-    print("Actual:   " + format(Actual, "#016b"))
+    print("Expected: " + format(Expected, "032b"))
+    print("Actual:   " + format(Actual, "032b"))
     print()
 
 class RegisterFileUnitTests(unittest.TestCase):
@@ -237,18 +237,6 @@ class AssemblerFunctionUnitTests(unittest.TestCase):
         Line = 'addi A B 28921'
         Expected = OPCODES['addi']
         Self.OpcodeComparison(Expected, Line)
-
-    @unittest.skip("Unimplemented")
-    def test_GetArg1(Self):
-        pass
-    
-    @unittest.skip("Unimplemented")
-    def test_GetArg2(Self):
-        pass
-    
-    @unittest.skip("Unimplemented")
-    def test_GetArg3(Self):
-        pass
 
 class AssemblerUnitTests(unittest.TestCase):
     

@@ -8,7 +8,7 @@ ldi 4 B         ; Load 4 into register B
 add A B C       ; A + B = C
 hlt             ; Halt the program
 
-; Expected machine code output
+; Expected output
 ; 00001111 00000001 00000000 00000000
 ; 00001111 00000100 00000001 00000000
 ; 00000010 00000000 00000001 00000010
