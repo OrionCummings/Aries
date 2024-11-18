@@ -1,20 +1,113 @@
+from dataclasses import dataclass
 from re import search
 from enum import Enum
 from typing import List
 from option import Err, Ok, Result
-from Constants import ADDR_LENGTH, ASM_COMMENT_CHARACTER, IMM_LENGTH, INS_LENGTH, OP_LENGTH, OPCODES, REG_LENGTH, REGISTERS, InstructionMode, IsValidOpcode, PExit
-
-def GetOpcode(Line: str) -> Result[int, str]:
-    if Line is not None:
-        Opcode = Line.split(' ')[0]
-        if Opcode in OPCODES:
-            return Ok(OPCODES[Opcode])
-    return Err("Line '{}' does not contain a valid opcode!")
+from Constants import ADDR_LENGTH, ASM_COMMENT_CHARACTER, ASM_TEST_PREFIX_CHARACTER, FF_LENGTH, FUNC_LENGTH, IMM_LENGTH, INS_LENGTH, OP_LENGTH, OPCODES, REG_LENGTH, REGISTERS, SHAMT_LENGTH, InstructionMode, IsValidOpcode, PExit
 
 class ParseMode(Enum):
     Register = 0,
     ImmediateValue = 1,
     Address = 2,
+
+class PrintMode(Enum):
+    NoOutput        = 0,
+    Bytes           = 1,
+    Binary          = 2,
+    Hex             = 3,
+    Instructions    = 4,
+
+@dataclass
+class AssemblerSettings:
+    Test: bool          = False
+    PrintMode           = PrintMode.NoOutput
+
+def GetOpcode(Line: str | int) -> Result[int, str]:
+    
+    # If it's a string, the this call is likely parsing
+    # an input file (i.e. Encode()).
+    if isinstance(Line, str):
+        if Line is not None:
+            OpcodeStr = Line.split(' ')[0]
+            if OpcodeStr in OPCODES:
+                return Ok(OPCODES[OpcodeStr])
+            
+    # If it's an int, then this call is likely decoding
+    # a previously parsed instruction (i.e. Decode())
+    elif isinstance(Line, int):
+        if Line is not None:
+            OpcodeInt = (Line & 0xFC000000) >> (INS_LENGTH - OP_LENGTH) # TODO: Magic number!
+            
+            for OpcodeTuple in OPCODES.values():# TODO: This is pretty stinky
+                if OpcodeInt == OpcodeTuple[0]:
+                    return Ok(OpcodeTuple)
+    else:
+        return Err("Invalid type passed to GetOpcode(Line: str | int)!")
+    
+    return Err("Line '{}' does not contain a valid opcode!")
+
+def InstructionString(Instruction: int, PMode: PrintMode) -> Result[str, str]:
+    Builder: str = ""
+    
+    ROpcode = GetOpcode(Instruction)
+    if ROpcode.is_err: return Err(ROpcode.Err())
+    Opcode = ROpcode.unwrap()
+    IMode: InstructionMode = Opcode[2]
+    
+    # Convert the intruction to a binary string
+    InstructionStr: str = format(Instruction, "032b")
+    
+    match PMode:
+        
+        case PrintMode.NoOutput:
+            pass
+        
+        case PrintMode.Binary:
+            Builder += InstructionStr
+        
+        case PrintMode.Bytes: # TODO: Magic numbers (but I think they are justified here)!
+            Byte0 = InstructionStr[0:8]
+            Byte1 = InstructionStr[8:16]
+            Byte2 = InstructionStr[16:24]
+            Byte3 = InstructionStr[24:32]
+            Builder += " ".join([Byte0, Byte1, Byte2, Byte3])
+            
+        case PrintMode.Hex:
+            Byte0 = "{:X}".format(int(InstructionStr[0 : 4], 2))
+            Byte1 = "{:X}".format(int(InstructionStr[4 : 8], 2))
+            Byte2 = "{:X}".format(int(InstructionStr[8 :12], 2))
+            Byte3 = "{:X}".format(int(InstructionStr[12:16], 2))
+            Byte4 = "{:X}".format(int(InstructionStr[16:20], 2))
+            Byte5 = "{:X}".format(int(InstructionStr[20:24], 2))
+            Byte6 = "{:X}".format(int(InstructionStr[24:28], 2))
+            Byte7 = "{:X}".format(int(InstructionStr[28:32], 2))
+            Builder += "".join([Byte0, Byte1, Byte2, Byte3, Byte4, Byte5, Byte6, Byte7])
+        
+        case PrintMode.Instructions:
+            match IMode:
+                case InstructionMode.Register:
+                    Opcode  = InstructionStr[:OP_LENGTH]
+                    RegA    = InstructionStr[OP_LENGTH : OP_LENGTH + (1 * REG_LENGTH)]
+                    RegB    = InstructionStr[OP_LENGTH + (1 * REG_LENGTH) : OP_LENGTH + (2 * REG_LENGTH)]
+                    RegC    = InstructionStr[OP_LENGTH + (2 * REG_LENGTH) : OP_LENGTH + (3 * REG_LENGTH)]
+                    Shamt   = InstructionStr[OP_LENGTH + (3 * REG_LENGTH) : OP_LENGTH + (3 * REG_LENGTH) + SHAMT_LENGTH]
+                    Func    = InstructionStr[-FUNC_LENGTH:]
+                    Builder += " ".join([Opcode, RegA, RegB, RegC, Shamt, Func])
+                    
+                case InstructionMode.Immediate:
+                    Opcode  = InstructionStr[:OP_LENGTH]
+                    RegA    = InstructionStr[OP_LENGTH : OP_LENGTH + REG_LENGTH]
+                    RegB    = InstructionStr[OP_LENGTH + (1 * REG_LENGTH) : OP_LENGTH + (2 * REG_LENGTH)]
+                    Unk     = InstructionStr[OP_LENGTH + (2 * REG_LENGTH) : OP_LENGTH + (2 * REG_LENGTH) + FF_LENGTH]
+                    Value   = InstructionStr[-IMM_LENGTH:]
+                    Builder += " ".join([Opcode, RegA, RegB, Unk, Value])
+                    
+                case InstructionMode.Jump:
+                    Opcode  = InstructionStr[:OP_LENGTH]
+                    Address = InstructionStr[OP_LENGTH:]
+                    Builder += " ".join([Opcode, Address])
+    
+    return Ok(Builder)
 
 def ParseArgument(Arg: str, Type: ParseMode) -> Result[int, str]:
     """Parses a given argument as either a register value, immediate value, or an address."""
@@ -161,8 +254,11 @@ def Decode(Instruction: int) -> Result[(str, str, str, str, int), str]:
 
 class Assembler():
     
-    def __init__(Self, FileName: str, TestFile: bool = True) -> None:
-        """Assembles an Aires program from an Aries assembly (.aria) file ."""
+    def __init__(Self, FileName: str, Settings: AssemblerSettings) -> None:
+        """Assembles an Aires program from an Aries assembly (.aria) file."""
+        
+        # Assembler settings
+        Self.Settings: AssemblerSettings = Settings
         
         # Directory containing all test programs
         Self.ProgramDirectory = "Programs"
@@ -180,48 +276,60 @@ class Assembler():
         Self.CurrentLine: int = 0
         
         # Read the file into FileContents
-        Self.Read().unwrap_or_else(lambda E: PExit(E))
+        print("Reading file '{}' into assembler buffer.".format(FileName))
+        RReal: Result[bool, str] = Self.Read(Settings)
+        if RReal.is_err:
+            PExit(RReal.Err(), -4)
+        print("Read file '{}' into assembler buffer.".format(FileName))
         
-        print()
-        print("Read file '{}' into assembler buffer".format(FileName))
-        
+        if Settings.Test: print("Assembling file '{}' with self tests enabled.".format(FileName))
+        else:        print("Assembling file '{}' with self tests enabled.".format(FileName))
+            
         # Assemble the file
-        RInstructions = Self.Assemble(TestFile)
+        RInstructions = Self.Assemble(Settings)
         if RInstructions.is_err:
-            print()
-            if TestFile: print("Failed to assemble file '{}' as a test file!".format(FileName))
+            if Settings.Test: print("Failed to assemble file '{}' as a test file!".format(FileName))
             else:        print("Failed to assemble file '{}'!".format(FileName))
-            print()
             print(RInstructions.Err)
         
         Self.Instructions = RInstructions.unwrap()
             
-        print()
-        print("Assembled file '{}'".format(FileName))
-        print()
+        if Settings.Test: print("Assembled file '{}' with self tests enabled.".format(FileName))
+        else:        print("Assembled file '{}'.".format(FileName))
         
         # Update metadata post assembly
         Self.UpdateMetadata()
         
+        print()
         print(Self)
         
     def __str__(Self) -> str:
+        
+        if Self.Settings.PrintMode == PrintMode.NoOutput:
+            return ""
+        
         Builder: str = ""
-        Builder += "\n[" + Self.FileName + " - " + str(Self.Size) + " Bytes]\n"
+        Builder += "[" + Self.FileName + " - " + str(Self.Size) + " Bytes]\n"
+        
         if len(Self.Instructions) < 1:
-            Builder = "No File Contents"
-        else:
-            Index = 0
-            for Instruction in Self.Instructions:
-                
-                if Index != 0 and Index % 1 == 0:
-                    Builder += "\n"
-                
-                InstructionBinary: str = format(Instruction, "032b")
-                Builder += " ".join([InstructionBinary[i:i+8] for i in range(0, len(InstructionBinary), 8)])
-                Builder += " "
-                
-                Index += 1
+            Builder += "No File Contents"
+            return Builder
+        
+        Index = 0
+        for Instruction in Self.Instructions:
+            
+            if Index != 0 and Index % 1 == 0:
+                Builder += "\n"
+
+            RInstruction: Result[str, str] = InstructionString(Instruction, Self.Settings.PrintMode)
+            if RInstruction.is_err:
+                Builder += "Failed to convert instruction '{}': {}".format(format(Instruction, "032b"), RInstruction.unwrap_err())
+                return Builder
+            
+            Builder += RInstruction.unwrap()
+            
+            Index += 1
+            
         return Builder
     
     def UpdateMetadata(Self):
@@ -234,13 +342,13 @@ class Assembler():
         # Other metadata
         # ...
     
-    def Assemble(Self, TestFile: bool = False) -> Result[List[int], str]:
+    def Assemble(Self, Settings: AssemblerSettings) -> Result[List[int], str]:
         """Assembles the santized file into Aries machine code. Accepts a 
         boolean value to determine if the given file should be interpreted
         as a test file. Test files contain additional information such as
-        manually compiled machine code prefixed by ':' that will be tested
-        against the actual resulting machine code. An error will be thrown
-        if these two do not match.
+        manually compiled machine code prefixed by ASM_TEST_PREFIX_CHARACTER
+        that will be tested against the actual resulting machine code. An 
+        error will be thrown if these two do not match.
         """
         
         if len(Self.FileContents) == 0:
@@ -264,10 +372,10 @@ class Assembler():
             # Check if the first non-whitespace character is a colon; if so,
             # this is a test file!
             # TODO: Could use decode here to add an additional check
-            elif Line.strip()[0] == ':':
+            elif Line.strip()[0] == ASM_TEST_PREFIX_CHARACTER:
                 
                 InstructionStr = "".join(Line.split())
-                InstructionStr = InstructionStr.replace(":", "")
+                InstructionStr = InstructionStr.replace(ASM_TEST_PREFIX_CHARACTER, "")
 
                 Instruction: int = int(InstructionStr, 2)
 
@@ -278,7 +386,7 @@ class Assembler():
         
         # If this is a test file, then compare the assembled
         # instructions and the test instructions
-        if TestFile:
+        if Settings.Test:
             if len(TestInstructions) != len(Instructions):
                 return Err("Test instructions and assembled instructions differ in size ({} != {})".format(len(TestInstructions), len(Instructions)))
         
@@ -288,7 +396,7 @@ class Assembler():
         
         return Ok(Instructions)
     
-    def Read(Self, TestFile: bool = False) -> Result[bool, str]:
+    def Read(Self, Settings: AssemblerSettings) -> Result[bool, str]:
         """Reads the file into an internal buffer."""
         
         FullFileName = Self.ProgramDirectory + "/" + Self.FileName
@@ -309,11 +417,13 @@ class Assembler():
                         Self.FileContents.append(Content)
         except FileNotFoundError:
             return Err("File '" + FullFileName + "' not found! Unable to parse program.")
-        #except: 
-        #    return Err("Unknown exception! Unable to parse program.")
         return Ok(True)
 
 if __name__ == "__main__":
     
-    A: Assembler = Assembler("Registers.aria", False)
+    Settings = AssemblerSettings()
+    Settings.PrintMode = PrintMode.Instructions
+    Settings.Test = True
+    
+    A: Assembler = Assembler("Example.aria", Settings=Settings)
     print()

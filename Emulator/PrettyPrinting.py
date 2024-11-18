@@ -1,4 +1,9 @@
 
+from option import Err, Ok, Result
+from Assembler import GetOpcode
+from Constants import InstructionMode
+
+
 class PP():
     PURPLE = '\033[95m'
     CYAN = '\033[96m'
@@ -34,3 +39,4 @@ class PP():
     
     def Blue(s: str) -> str:
         return str(PP.BLUE) + str(s) + str(PP.END)
+    
