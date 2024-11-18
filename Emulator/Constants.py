@@ -20,9 +20,9 @@ def SetBit(Number: int, Index: int) -> int:
     """Sets bit `Index` in number `Number`."""
     return Number | BitMask(Index)
 
-def GetBit(Number: int, Index: int) -> bool:
+def GetBit(Number: int, Index: int) -> int:
     """Gets bit `Index` in number `Number`."""
-    return not not (Number & BitMask(Index))
+    return (Number & BitMask(Index))
 
 def ToggleBit(Number: int, Index: int) -> int:
     """Toggles bit `Index` in number `Number`."""
