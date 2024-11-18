@@ -28,6 +28,7 @@ class CPU():
     
         # Auxilary metadata
         Self.LastUpdatedAddress: int = 0
+        Self.HPCBus: int             = 0
     
     def __str__(Self) -> str:
         

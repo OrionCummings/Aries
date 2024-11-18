@@ -102,35 +102,36 @@ class InstructionMode(Enum):
     Immediate = 1
     Jump = 2
     
-# All valid opcodes and their information tuple (ID, ARGC, MODE)
+# All valid opcodes and their information tuple (ID, ARGC, MODE, ALU?)
 OPCODES = {
-    "nop":      (0, 0, InstructionMode.Jump),
-    "hlt":      (1, 0, InstructionMode.Jump),
-    "add":      (2, 3, InstructionMode.Register),
-    "addi":     (3, 2, InstructionMode.Immediate),
-    # "sub":      (5, 3, InstructionMode.Register),
-    # "subi":     (4, 2, InstructionMode.Immediate),
-    # "not":      (6, 2, InstructionMode.Register),
-    # "and":      (7, 3, InstructionMode.Register),
-    # "nand":     (8, 3, InstructionMode.Register),
-    # "or":       (9, 3, InstructionMode.Register),
-    # "nor":     (10, 3, InstructionMode.Register),
-    # "xor":     (11, 3, InstructionMode.Register),
-    # "xnor":    (12, 3, InstructionMode.Register),
-    # "shl":     (13, 2, InstructionMode.Register),
-    # "shr":     (14, 2, InstructionMode.Register),
-    "ldi":     (15, 2, InstructionMode.Immediate),
-    # "lui":     (16, 2, InstructionMode.Immediate),
-    # "lli":     (17, 2, InstructionMode.Immediate),
-    # "ld":      (18, 2, InstructionMode.Register),
-    # "sti":     (19, 2, InstructionMode.Immediate),
-    # "str":     (20, 2, InstructionMode.Register),
-    # "bne":     (21, 1, InstructionMode.Jump),
-    # "jmp":     (22, 1, InstructionMode.Jump),
-    # "jr":      (23, 1, InstructionMode.Jump),
-    # "ret":     (24, 0, InstructionMode.Jump),
-    # "hpc":     (25, 1, InstructionMode.Jump),
-    # "syscall": (26, 1, InstructionMode.Register), # Bold move
+    "nop":      (0, 0, InstructionMode.Jump, False),
+    "hlt":      (1, 0, InstructionMode.Jump, False),
+    "add":      (2, 3, InstructionMode.Register, True),
+    "addi":     (3, 2, InstructionMode.Immediate, True),
+    # "sub":      (5, 3, InstructionMode.Register, True),
+    # "subi":     (4, 2, InstructionMode.Immediate, True),
+    # "not":      (6, 2, InstructionMode.Register, True),
+    # "and":      (7, 3, InstructionMode.Register, True),
+    # "nand":     (8, 3, InstructionMode.Register, True),
+    # "or":       (9, 3, InstructionMode.Register, True),
+    # "nor":     (10, 3, InstructionMode.Register, True),
+    # "xor":     (11, 3, InstructionMode.Register, True),
+    # "xnor":    (12, 3, InstructionMode.Register, True),
+    # "shl":     (13, 2, InstructionMode.Register, True),
+    # "shr":     (14, 2, InstructionMode.Register, True),
+    "ldi":     (15, 2, InstructionMode.Immediate, True),    # TODO: May not use ALU
+    # "lui":     (16, 2, InstructionMode.Immediate, True),  # TODO: May not use ALU
+    # "lli":     (17, 2, InstructionMode.Immediate, True),  # TODO: May not use ALU
+    # "ld":      (18, 2, InstructionMode.Register, True),   # TODO: May not use ALU
+    # "sti":     (19, 2, InstructionMode.Immediate, False),
+    # "str":     (20, 2, InstructionMode.Register, False),
+    # "bne":     (21, 1, InstructionMode.Jump, False),
+    # "jmp":     (22, 1, InstructionMode.Jump, False),
+    # "jr":      (23, 1, InstructionMode.Jump, False),
+    # "ret":     (24, 0, InstructionMode.Jump, False),
+    # "hpc":     (25, 1, InstructionMode.Jump, False),
+    # "syscall": (26, 1, InstructionMode.Register, False
+    # ), # Bold move
 }
 
 # This is a dictionary containing all 16 registers.
