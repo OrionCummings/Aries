@@ -1,8 +1,12 @@
 from CPU import CPU
 from pynput.keyboard import Key, Listener
-from Assembler import Assembler
+from Assembler import Assembler, AssemblerSettings, PrintMode
 
-A: Assembler = Assembler("Example.aria")
+Settings = AssemblerSettings()
+Settings.PrintMode = PrintMode.Bytes
+Settings.Test = True
+
+A: Assembler = Assembler("Example.aria", Settings)
 C: CPU = CPU(128, 128)
 C.LoadProgram(A)
 

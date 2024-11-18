@@ -18,14 +18,14 @@ class CPU():
     def __init__(Self, InstructionMemorySize: int = 4096, DataMemorySize: int = 4096) -> None:
         """Initializes a CPU instance with a given memory size in bytes."""
         
-        # The essential parts of the CPU
+        # The essential parts a Harvard CPU
         Self.ProgramCounter          = ProgramCounter()
         Self.RegisterFile            = RegisterFile()
         Self.InstructionMemory       = InstructionMemory(InstructionMemorySize)
         Self.DataMemory              = DataMemory(DataMemorySize)
         Self.CallStack               = CallStack()
         Self.Flags                   = Flags()
-    
+
         # Auxilary metadata
         Self.LastUpdatedAddress: int = 0
         Self.HPCBus: int             = 0
@@ -75,7 +75,7 @@ class CPU():
         print("Loaded '{}' starting at address {} ({:0X})".format(Assembler.FileName, BaseAddress, BaseAddress))
         return Ok(True)
     
-    def ExecuteCurrentInstruction(Self) -> int:
+    def Tick(Self) -> int:
         """Executes the current instruction and returns the address that was changed."""
         pass
     
