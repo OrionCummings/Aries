@@ -14,6 +14,10 @@ class Flags():
         Builder += str(Self.Flag)
         return Builder
     
+    # TODO: Probably want to do something else!!!!
+    def Tick(Self) -> None:
+        Self.PreviousFlag = Self.Flag
+    
     def GetFlag(Self, FlagIndex: int) -> int:
         return GetBit(Self.Flag, FlagIndex)
     
