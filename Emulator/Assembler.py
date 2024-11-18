@@ -323,7 +323,7 @@ class Assembler():
 
             RInstruction: Result[str, str] = InstructionString(Instruction, Self.Settings.PrintMode)
             if RInstruction.is_err:
-                Builder += "Failed to convert instruction '{}': {}".format(format(Instruction, "032b"), RInstruction.unwrap_err())
+                Builder += "Failed to convert instruction '{}': {}".format(format(Instruction, "032b"), RInstruction.unwrap_err()) # TODO: Inconsistent use of 'format()'
                 return Builder
             
             Builder += RInstruction.unwrap()
@@ -422,7 +422,7 @@ class Assembler():
 if __name__ == "__main__":
     
     Settings = AssemblerSettings()
-    Settings.PrintMode = PrintMode.Instructions
+    Settings.PrintMode = PrintMode.Bytes
     Settings.Test = True
     
     A: Assembler = Assembler("Example.aria", Settings=Settings)
