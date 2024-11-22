@@ -2,13 +2,11 @@ from enum import Enum
 
 from option import Err, Ok, Result
 from Assembler import Assembler
-from Constants import PC_OVERRUN
+from Constants import PC_OVERRUN, PExit
 from ProgramCounter import ProgramCounter
 from RegisterFile import RegisterFile
-from DataMemory import DataMemory
-from InstructionMemory import InstructionMemory
+from Memory import Memory
 from Flags import Flags
-from typing import List
 from PrettyPrinting import PP
 from CallStack import CallStack
 
@@ -21,41 +19,53 @@ class CPU():
         # The essential parts a Harvard CPU
         Self.ProgramCounter          = ProgramCounter()
         Self.RegisterFile            = RegisterFile()
-        Self.InstructionMemory       = InstructionMemory(InstructionMemorySize)
-        Self.DataMemory              = DataMemory(DataMemorySize)
+        Self.InstructionMemory       = Memory(InstructionMemorySize)
+        Self.DataMemory              = Memory(DataMemorySize)
         Self.CallStack               = CallStack()
         Self.Flags                   = Flags()
 
         # Auxilary metadata
-        Self.LastUpdatedAddress: int = 0
+        Self.LastUpdatedAddress: int = None
         Self.HPCBus: int             = 0
-    
+
     def __str__(Self) -> str:
         
         # Begin the string builder by including the program counter
         Builder: str = "PC: " + str(Self.ProgramCounter)
         
-        # For every byte in instruction memory
-        for ByteAddress in range(len(Self.InstructionMemory)):
+        # TODO: Add some kind of 'CPU settings' similar to the assembler settings
+        # to control things like the output format of this function.
+        for Index in range(Self.InstructionMemory.Capacity):
             
-            # Get the hex literal of the instruction
-            Hex = PP.HexLiteral(Self.InstructionMemory[ByteAddress])
-            
-            # If it's a 32 bit boundary, print some formatting
-            if ByteAddress == 0 or ByteAddress % 32 == 0:
+            # If it's a 8 byte boundary, print some formatting
+            if Index == 0 or Index % 8 == 0:
                 Builder += "\n"
-                Builder += str(ByteAddress)
+                Builder += str(Index)
                 Builder += ":\t"
             
-            if ByteAddress == Self.ProgramCounter: # Highlight the current instruction in bold red
-                Builder += PP.RedBold(Hex)
-            elif ByteAddress == Self.LastUpdatedAddress: # Highlight the last recently updated address in bold green
-                Builder += PP.GreenBold(Hex)
-            else: # Otherwise, just add the instruction data to the builder
-                Builder += Hex
+            # # Insert a space between each byte
+            # Builder += " "
             
-            # Insert a space between each byte
-            Builder += " "
+            # Get the full hex literal of the instruction
+            Instruction = Self.InstructionMemory[Index]
+            Hex = format(Instruction, "08X")
+            HexList = [Hex[0:2], Hex[2:4], Hex[4:6], Hex[6:8]]
+            
+            x=1 # DEBUG LINE
+            
+            for Hex in HexList:
+                
+                # Insert a space between each byte
+                Builder += " "
+                
+                if Index == Self.ProgramCounter: # Highlight the current instruction in bold red
+                    Builder += PP.RedBold(Hex)
+                elif Index == Self.LastUpdatedAddress: # Highlight the last recently updated address in bold green
+                    Builder += PP.GreenBold(Hex)
+                else: # Otherwise, just add the instruction data to the builder
+                    Builder += Hex
+            
+
             
         return Builder
     
@@ -65,12 +75,13 @@ class CPU():
     def LoadProgram(Self, Assembler: Assembler, BaseAddress: int = 0) -> Result[bool, str]:
         """Loads a program into memory at the given address."""
         
-        if BaseAddress >= len(Self.InstructionMemory):
-            return Err("Base address '{}' exceeds the instruction memory address space of {}!".format(BaseAddress, Self.InstructionMemory.Size))
+        if BaseAddress >= Self.InstructionMemory.Capacity:
+            print("Base address '{}' exceeds the instruction memory address space of {}!".format(BaseAddress, Self.InstructionMemory.Size))
+            exit(2)
+            #return Err("Base address '{}' exceeds the instruction memory address space of {}!".format(BaseAddress, Self.InstructionMemory.Size))
         
-        for Byte in Assembler.Bytes:
-            Self.InstructionMemory[BaseAddress] = Byte
-            BaseAddress += 1
+        RUpdate = Self.InstructionMemory.UpdateChunk(Assembler.Instructions, BaseAddress)
+        if RUpdate.is_err: return Err(RUpdate.unwrap_err())
         
         print("Loaded '{}' starting at address {} ({:0X})".format(Assembler.FileName, BaseAddress, BaseAddress))
         return Ok(True)
@@ -83,9 +94,13 @@ class CPU():
         """Perform one clock cycle."""
 
         # Execute the instruction
-        Self.ExecuteCurrentInstruction()
+        Self.Tick()
         
+        # TODO: This only triggers when we go out of bounds (which is good!), but
+        # it is possible to interact with uninitialized memory (index > size).
+        # It may be a good idea to raise a warning of some kind, but there is no
+        # such mechanism at the moment. 
         # Increment the program counter
-        if Self.ProgramCounter >= len(Self.InstructionMemory) - 1:
-            exit(PC_OVERRUN)
+        if Self.ProgramCounter.Value >= Self.InstructionMemory.Capacity - 1: PExit("Program counter overrun!", PC_OVERRUN)
+            
         Self.ProgramCounter.Increment()

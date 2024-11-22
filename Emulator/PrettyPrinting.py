@@ -17,7 +17,7 @@ class PP():
     END = '\033[0m'
     
     def HexLiteral(s: str) -> str:
-        return "{:02X}".format(s)
+        return "{:X}".format(s)
     
     def RedBold(s: str) -> str:
         return PP.Red(PP.Bold(s))

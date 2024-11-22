@@ -3,23 +3,23 @@ from pynput.keyboard import Key, Listener
 from Assembler import Assembler, AssemblerSettings, PrintMode
 
 Settings = AssemblerSettings()
-Settings.PrintMode = PrintMode.Bytes
-Settings.Test = True
+Settings.PrintMode = PrintMode.Hex
+Settings.SelfTest = True
 
 A: Assembler = Assembler("Example.aria", Settings)
-C: CPU = CPU(128, 128)
+C: CPU = CPU(InstructionMemorySize=16, DataMemorySize=64)
 C.LoadProgram(A)
 
 def Press(key) -> bool:
     """Runs one clock cycle if the space bar is pressed.
-    Runs many clock cycles if the space bar is held."""
+    Runs many clock cycles if the space bar is held.""" 
 
     if key == Key.space:
         C.Clock()
         C.Print()
         return True #?
     else:
-        return False
+        return False 
 
 def Main():
     

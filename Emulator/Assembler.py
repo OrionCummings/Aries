@@ -19,7 +19,7 @@ class PrintMode(Enum):
 
 @dataclass
 class AssemblerSettings:
-    Test: bool          = False
+    SelfTest: bool          = False
     PrintMode           = PrintMode.NoOutput
 
 def GetOpcode(Line: str | int) -> Result[int, str]:
@@ -282,26 +282,27 @@ class Assembler():
             PExit(RReal.Err(), -4)
         print("Read file '{}' into assembler buffer.".format(FileName))
         
-        if Settings.Test: print("Assembling file '{}' with self tests enabled.".format(FileName))
+        if Settings.SelfTest: print("Assembling file '{}' with self tests enabled.".format(FileName))
         else:        print("Assembling file '{}' with self tests enabled.".format(FileName))
             
         # Assemble the file
         RInstructions = Self.Assemble(Settings)
         if RInstructions.is_err:
-            if Settings.Test: print("Failed to assemble file '{}' as a test file!".format(FileName))
+            if Settings.SelfTest: print("Failed to assemble file '{}' as a test file!".format(FileName))
             else:        print("Failed to assemble file '{}'!".format(FileName))
             print(RInstructions.Err)
         
         Self.Instructions = RInstructions.unwrap()
             
-        if Settings.Test: print("Assembled file '{}' with self tests enabled.".format(FileName))
+        if Settings.SelfTest: print("Assembled file '{}' with self tests enabled.".format(FileName))
         else:        print("Assembled file '{}'.".format(FileName))
         
         # Update metadata post assembly
         Self.UpdateMetadata()
         
-        print()
-        print(Self)
+        if Settings.PrintMode != PrintMode.NoOutput:
+            print()
+            print(Self)
         
     def __str__(Self) -> str:
         
@@ -386,7 +387,7 @@ class Assembler():
         
         # If this is a test file, then compare the assembled
         # instructions and the test instructions
-        if Settings.Test:
+        if Settings.SelfTest:
             if len(TestInstructions) != len(Instructions):
                 return Err("Test instructions and assembled instructions differ in size ({} != {})".format(len(TestInstructions), len(Instructions)))
         
@@ -423,7 +424,6 @@ if __name__ == "__main__":
     
     Settings = AssemblerSettings()
     Settings.PrintMode = PrintMode.Bytes
-    Settings.Test = True
+    Settings.SelfTest = True
     
     A: Assembler = Assembler("Example.aria", Settings=Settings)
-    print()
