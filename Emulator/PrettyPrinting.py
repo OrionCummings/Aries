@@ -1,8 +1,4 @@
-
-from option import Err, Ok, Result
-from Assembler import GetOpcode
-from Constants import InstructionMode
-
+from enum import Enum
 
 class PP():
     PURPLE = '\033[95m'
@@ -39,4 +35,15 @@ class PP():
     
     def Blue(s: str) -> str:
         return str(PP.BLUE) + str(s) + str(PP.END)
-    
+
+class ParseMode(Enum):
+    Register = 0,
+    ImmediateValue = 1,
+    Address = 2,
+
+class PrintMode(Enum):
+    NoOutput        = 0,
+    Bytes           = 1,
+    Binary          = 2,
+    Hex             = 3,
+    Instructions    = 4,

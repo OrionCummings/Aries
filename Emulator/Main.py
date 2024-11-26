@@ -8,16 +8,16 @@ Settings.SelfTest = True
 
 A: Assembler = Assembler("Example.aria", Settings)
 C: CPU = CPU(InstructionMemorySize=16, DataMemorySize=64)
-C.LoadProgram(A)
+C.LoadProgram(A.Instructions, A.FileName, 0)
 
 def Press(key) -> bool:
     """Runs one clock cycle if the space bar is pressed.
     Runs many clock cycles if the space bar is held.""" 
 
     if key == Key.space:
-        C.Clock()
+        Clock = C.Clock()
         C.Print()
-        return True #?
+        return Clock #?
     else:
         return False 
 

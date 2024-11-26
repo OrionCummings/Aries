@@ -1,16 +1,10 @@
-
 from enum import Enum
-
 from option import Err, Ok, Result
-
 
 def PExit(S: str, E: int = 0):
     """A function to print an error message and exit the assembler."""
     print(S)
     exit(E)
-
-def IsValidOpcode(Opcode: str) -> bool:
-    return Opcode in OPCODES
 
 def BitMask(Index: int) -> int:
     """Returns a 1-bit mask at the specified `Index`."""
@@ -27,14 +21,6 @@ def GetBit(Number: int, Index: int) -> int:
 def ToggleBit(Number: int, Index: int) -> int:
     """Toggles bit `Index` in number `Number`."""
     return (Number ^ (1 << (Index)))
-
-def OpcodeToInt(Opcode: str) -> Result[int, str]:
-    """Converts the given opcode (as a string) to an integer."""
-    try:
-        OpcodeInt: int = int(Opcode)
-    except (TypeError, ValueError):
-        return Err("Failed to convert '{}' to a number".format(Opcode))
-    return Ok(OpcodeInt)
 
 def IsRegister(Reg: str) -> bool:
     return Reg in REGISTERS
