@@ -34,7 +34,7 @@ class CPU():
         data_memory_equal         = self.data_memory == other.data_memory
         call_stack               = self.call_stack == other.call_stack
         
-        halt_equal               = self.halt == other.halt
+        halt_equal               = self.halted == other.halted
         last_updated_address_equal = self.last_updated_address == other.last_updated_address
         hpc_bus_equal             = self.hpc_bus == other.hpc_bus
         
@@ -114,10 +114,10 @@ class CPU():
         opcode_tuple = r_opcode.unwrap()
         
         opcode_id = opcode_tuple[0]
-        opcode_function = INSTRUCTIONS[OpcodeID]
-        #self = opcode_function(self, current_instruction)
+        opcode_function = INSTRUCTIONS[opcode_id]
+        self = opcode_function(self, current_instruction)
         
-        print("Executed '{}'".format())
+        print("Executed 'N/A'".format())
         
         # TODO: Fix this (optional) feature!
         return address

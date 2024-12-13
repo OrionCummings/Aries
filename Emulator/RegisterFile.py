@@ -1,7 +1,11 @@
 from __future__ import annotations
 from option import Err, Ok, Result
 
-from Constants import register_map, BP_INC, PC_INC, SP_INC, set_bit, get_bit, toggle_bit
+from BitManipulation import get_bit, set_bit, toggle_bit
+from Constants import register_map, BP_INC, PC_INC, SP_INC
+
+def is_register(reg: str) -> bool:
+    return reg in register_map
 
 class RegisterFile():
     
