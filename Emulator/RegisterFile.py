@@ -1,56 +1,85 @@
-from Constants import *
+from __future__ import annotations
+from option import Err, Ok, Result
+
+from Constants import register_map, BP_INC, PC_INC, SP_INC, set_bit, get_bit, toggle_bit
 
 class RegisterFile():
     
-    def __init__(Self):
+    def __init__(self):
         """Creates an empty RegisterFile."""
         
-        Self.Registers = {}
-        for R in REGISTERS.keys():
-            Self.Registers[R] = 0
+        self.registers = {}
+        for r in register_map.keys():
+            self.registers[r] = 0
     
-    def __str__(Self) -> str:
+    def __eq__(self, other: RegisterFile):
+        
+        if not isinstance(other, RegisterFile):
+            return NotImplemented
+        
+        for s, o in zip(self.registers.items(), other.registers.items()):
+            if s != o: return False
+            
+        return True
+        
+    def __str__(self) -> str:
         """Returns a string representation of a RegisterFile."""
-        Builder = ""
-        for R in Self.Registers.items():
-            Builder += ("{:2} = {:016b}".format(R[0], R[1]))
-            Builder += "\n"
-        Builder += "            HTDIOSPCZ"
-        return Builder
+
+        builder = ""
+        for r in self.registers.items():
+            builder += ("{:2} = {:032b}".format(r[0], r[1]))
+            builder += "\n"
+        builder += "                             HTIOSPCZ"
+
+        return builder
     
-    def SetReg(Self, Reg: str, Value: int) -> None:
-        if Reg in Self.Registers:
-            Self.Registers[Reg] = Value
+    def set_reg(self, reg: str, value: int) -> None:
+        if reg in self.registers:
+            self.registers[reg] = value & 0xFFFFFFFF
     
-    def GetReg(Self, Reg: str) -> int:
-        if Reg in Self.Registers:
-            return Self.Registers[Reg]
-        return None
+    def get_reg(self, reg: str) -> Result[int, str]:
+        if reg in self.registers:
+            return Ok(self.registers[reg])
+        return Err("No register with key '{}'!".format(reg))
     
-    def IncrementInstructionPointer(Self) -> None:
-        Self.Registers['IP'] += IP_INC
+    def get_pc(self) -> int:
+        return self.registers["PC"]
     
-    def IncrementBasePointer(Self) -> None:
-        Self.Registers['BP'] += BP_INC
+    def increment_program_counter(self) -> None:
+        self.registers['PC'] += PC_INC
     
-    def IncrementStackPointer(Self) -> None:
-        Self.Registers['SP'] += SP_INC
+    def increment_base_pointer(self) -> None:
+        self.registers['BP'] += BP_INC
     
-    def ClearFlags(Self) -> None:
-        Self.Registers['FL'] = 0
+    def increment_stack_pointer(self) -> None:
+        self.registers['SP'] += SP_INC
     
-    def SetFlag(Self, Flag: int) -> None:
-        Self.Registers['FL'] = SetBit(Self.Registers['FL'], Flag)
+    def clear_flags(self) -> None:
+        self.registers['FL'] = 0
     
-    def GetFlag(Self, Flag: int) -> bool:
-        return GetBit(Self.Registers['FL'], Flag)
+    def set_flag(self, flag: int) -> None:
+        self.registers['FL'] = set_bit(self.registers['FL'], flag)
     
-    def ToggleFlag(Self, Flag: int) -> None:
-        Self.Registers['FL'] = ToggleBit(Self.Registers['FL'], Flag)
+    def get_flag(self, flag: int) -> bool:
+        return get_bit(self.registers['FL'], flag)
+    
+    def toggle_flag(self, flag: int) -> None:
+        self.registers['FL'] = toggle_bit(self.registers['FL'], flag)
     
 if __name__ == "__main__":
     
-    RF = RegisterFile()
-    print(RF)
+    rf = RegisterFile()
+    print(rf)
     print()
-
+    
+    rf.set_reg("B", 255)
+    rf.set_reg("G", 16000)
+    rf.set_reg("H", 2367471)
+    print(rf)
+    
+    print(rf.get_reg("A").unwrap())
+    print(rf.get_reg("B").unwrap())
+    print(rf.get_reg("G").unwrap())
+    print(rf.get_reg("H").unwrap())
+    
+    

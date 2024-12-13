@@ -1,3 +1,4 @@
+from __future__ import annotations
 
 class ALU():
     
@@ -5,4 +6,7 @@ class ALU():
         pass
     
     def __str__(self):
+        pass
+
+    def __eq__(self, other: ALU):
         pass

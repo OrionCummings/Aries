@@ -2,107 +2,107 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import List
 from option import Err, Ok, Result
-from CPU import Encode, InstructionString
+from Instructions import Encode, InstructionString
 from Constants import ASM_COMMENT_CHARACTER, ASM_TEST_PREFIX_CHARACTER, PExit
 from PrettyPrinting import PrintMode
 
 @dataclass
 class AssemblerSettings:
-    SelfTest: bool = False
-    PrintMode      = PrintMode.NoOutput
+    self_test: bool = False
+    print_mode      = PrintMode.no_output
 
 class Assembler():
     
-    def __init__(Self, FileName: str, Settings: AssemblerSettings) -> None:
+    def __init__(self, file_name: str, settings: AssemblerSettings) -> None:
         """Assembles an Aires program from an Aries assembly (.aria) file."""
         
         # Assembler settings
-        Self.Settings: AssemblerSettings = Settings
+        self.settings: AssemblerSettings = settings
         
         # Directory containing all test programs
-        Self.ProgramDirectory = "Programs"
+        self.program_directory = "Programs"
         
         # The name of the Aires assembly file (.aria) 
-        Self.FileName: str = FileName
+        self.file_name: str = file_name
         
         # The raw .aria file contents
-        Self.FileContents: List[str] = []
+        self.file_contents: List[str] = []
         
         # The contents of the file as a list of integers
-        Self.Instructions: List[int] = []
+        self.instructions: List[int] = []
         
         # The current line in the .aria file
-        Self.CurrentLine: int = 0
+        self.current_line: int = 0
         
         # Read the file into FileContents
-        print("Reading file '{}' into assembler buffer.".format(FileName))
-        RReal: Result[bool, str] = Self.Read(Settings)
-        if RReal.is_err:
-            PExit(RReal.Err(), -4)
-        print("Read file '{}' into assembler buffer.".format(FileName))
+        print("Reading file '{}' into assembler buffer.".format(file_name))
+        r_real: result[bool, str] = self.read(settings)
+        if r_real.is_err:
+            p_exit(r_real.Err(), -4)
+        print("Read file '{}' into assembler buffer.".format(file_name))
         
-        if Settings.SelfTest: print("Assembling file '{}' with self tests enabled.".format(FileName))
-        else:        print("Assembling file '{}' with self tests enabled.".format(FileName))
+        if settings.selfTest: print("Assembling file '{}' with self tests enabled.".format(file_name))
+        else:        print("Assembling file '{}' with self tests enabled.".format(file_name))
             
         # Assemble the file
-        RInstructions = Self.Assemble(Settings)
-        if RInstructions.is_err:
-            if Settings.SelfTest: print("Failed to assemble file '{}' as a test file!".format(FileName))
-            else:        print("Failed to assemble file '{}'!".format(FileName))
-            print(RInstructions.Err)
+        r_instructions = self.assemble(settings)
+        if r_instructions.is_err:
+            if Settings.self_test: print("Failed to assemble file '{}' as a test file!".format(file_name))
+            else:        print("Failed to assemble file '{}'!".format(file_name))
+            print(r_instructions.Err)
         
-        Self.Instructions = RInstructions.unwrap()
+        self.instructions = r_instructions.unwrap()
             
-        if Settings.SelfTest: print("Assembled file '{}' with self tests enabled.".format(FileName))
-        else:        print("Assembled file '{}'.".format(FileName))
+        if settings.self_test: print("Assembled file '{}' with self tests enabled.".format(file_name))
+        else:        print("Assembled file '{}'.".format(file_name))
         
         # Update metadata post assembly
-        Self.UpdateMetadata()
+        self.update_metadata()
         
-        if Settings.PrintMode != PrintMode.NoOutput:
+        if settings.print_mode != PrintMode.no_output:
             print()
-            print(Self)
+            print(self)
         
-    def __str__(Self) -> str:
+    def __str__(self) -> str:
         
-        if Self.Settings.PrintMode == PrintMode.NoOutput:
+        if self.settings.print_mode == PrintMode.NoOutput:
             return ""
         
-        Builder: str = ""
-        Builder += "[" + Self.FileName + " - " + str(Self.Size) + " Bytes]\n"
+        builder: str = ""
+        builder += "[" + self.file_name + " - " + str(self.size) + " Bytes]\n"
         
-        if len(Self.Instructions) < 1:
-            Builder += "No File Contents"
-            return Builder
+        if len(self.instructions) < 1:
+            builder += "No File Contents"
+            return builder
         
-        Index = 0
-        for Instruction in Self.Instructions:
+        index = 0
+        for instruction in self.instructions:
             
-            if Index != 0 and Index % 1 == 0:
-                Builder += "\n"
+            if index != 0 and index % 1 == 0:
+                builder += "\n"
 
-            RInstruction: Result[str, str] = InstructionString(Instruction, Self.Settings.PrintMode)
-            if RInstruction.is_err:
-                Builder += "Failed to convert instruction '{}': {}".format(format(Instruction, "032b"), RInstruction.unwrap_err()) # TODO: Inconsistent use of 'format()'
-                return Builder
+            r_instruction: Result[str, str] = instruction_string(instruction, self.settings.print_mode)
+            if r_instruction.is_err:
+                builder += "Failed to convert instruction '{}': {}".format(format(instruction, "032b"), r_instruction.unwrap_err()) # TODO: Inconsistent use of 'format()'
+                return builder
             
-            Builder += RInstruction.unwrap()
+            builder += r_instruction.unwrap()
             
-            Index += 1
+            index += 1
             
-        return Builder
+        return builder
     
-    def UpdateMetadata(Self):
+    def update_metadata(self):
         """Updates assembler metadata after a successful assembly."""
         
         # BUG: Magic number!
         # Program size in bytes
-        Self.Size = len(Self.Instructions * 4)
+        self.size = len(self.instructions * 4)
         
         # Other metadata
         # ...
     
-    def Assemble(Self, Settings: AssemblerSettings) -> Result[List[int], str]:
+    def assemble(self, settings: AssemblerSettings) -> Result[List[int], str]:
         """Assembles the santized file into Aries machine code. Accepts a 
         boolean value to determine if the given file should be interpreted
         as a test file. Test files contain additional information such as
@@ -111,59 +111,59 @@ class Assembler():
         error will be thrown if these two do not match.
         """
         
-        if len(Self.FileContents) == 0:
+        if len(self.file_contents) == 0:
             return Ok(True)
         
-        Instructions: List[int] = []
-        TestInstructions: List[int] = []
+        instructions: List[int] = []
+        test_instructions: List[int] = []
         
         # For every line of assembly code
-        for Line in Self.FileContents:
+        for line in self.file_contents:
             
             # Parse the instruction
-            if RInstruction := Encode(Line):
+            if r_instruction := encode(line):
                 
                 # If parsing fails, propagate the error
-                if RInstruction.is_err: return Err(RInstruction.Err)
+                if r_instruction.is_err: return Err(r_instruction.Err)
                 
                 # Append the machine code instruction to the program
-                Instructions.append(RInstruction.unwrap())
+                instructions.append(r_instruction.unwrap())
             
             # Check if the first non-whitespace character is a colon; if so,
             # this is a test file!
             # TODO: Could use decode here to add an additional check
-            elif Line.strip()[0] == ASM_TEST_PREFIX_CHARACTER:
+            elif line.strip()[0] == ASM_TEST_PREFIX_CHARACTER:
                 
-                InstructionStr = "".join(Line.split())
-                InstructionStr = InstructionStr.replace(ASM_TEST_PREFIX_CHARACTER, "")
+                instruction_str = "".join(line.split())
+                instruction_str = instruction_str.replace(ASM_TEST_PREFIX_CHARACTER, "")
 
-                Instruction: int = int(InstructionStr, 2)
+                instruction: int = int(instruction_str, 2)
 
-                TestInstructions.append(Instruction)
+                test_instructions.append(instruction)
             
             else:
-                PExit("Invalid instruction '{}'".format(Line))
+                p_exit("Invalid instruction '{}'".format(line))
         
         # If this is a test file, then compare the assembled
         # instructions and the test instructions
-        if Settings.SelfTest:
-            if len(TestInstructions) != len(Instructions):
-                return Err("Test instructions and assembled instructions differ in size ({} != {})".format(len(TestInstructions), len(Instructions)))
+        if settings.self_test:
+            if len(test_instructions) != len(instructions):
+                return Err("Test instructions and assembled instructions differ in size ({} != {})".format(len(test_instructions), len(instructions)))
         
-            for Index in range(0, len(TestInstructions)):
-                if TestInstructions[Index] != Instructions[Index]:
-                    return Err("Test instructions and assembled instructions differ at index {} ({} != {})".format(Index, format(TestInstructions[Index], "032b"), format(Instructions[Index], "032b")))
+            for index in range(0, len(test_instructions)):
+                if test_instructions[index] != instructions[index]:
+                    return Err("Test instructions and assembled instructions differ at index {} ({} != {})".format(index, format(test_instructions[index], "032b"), format(Instructions[Index], "032b")))
         
         return Ok(Instructions)
     
-    def Read(Self, Settings: AssemblerSettings) -> Result[bool, str]:
+    def read(self, settings: AssemblerSettings) -> Result[bool, str]:
         """Reads the file into an internal buffer."""
         
-        FullFileName = Self.ProgramDirectory + "/" + Self.FileName
+        full_file_name = self.program_directory + "/" + self.file_name
         
         try:
-            with open(FullFileName, "r") as File:
-                while Line := File.readline():
+            with open(full_file_name, "r") as file:
+                while line := file.readline():
                     
                     # BUG: Stripping out comments is good! But we lose
                     # line number information using this method!!!!!
@@ -172,18 +172,19 @@ class Assembler():
                     # if a comment character is found! Then, the index
                     # into the FileContents list will map to the line
                     # number of the source file!!!!!!!!!!!
-                    Content = Line.partition(ASM_COMMENT_CHARACTER)[0].strip()
-                    if Content != "":
-                        Self.FileContents.append(Content)
+                    content = line.partition(ASM_COMMENT_CHARACTER)[0].strip()
+                    if content != "":
+                        self.file_contents.append(content)
                         
         except FileNotFoundError:
-            return Err("File '" + FullFileName + "' not found! Unable to parse program.")
+            return Err("File '" + full_file_name + "' not found! Unable to parse program.")
+        
         return Ok(True)
 
 if __name__ == "__main__":
     
-    Settings = AssemblerSettings()
-    Settings.PrintMode = PrintMode.Bytes
-    Settings.SelfTest = True
+    settings = AssemblerSettings()
+    settings.print_mode = PrintMode.Bytes
+    settings.self_test = True
     
-    A: Assembler = Assembler("Example.aria", Settings=Settings)
+    a: Assembler = Assembler("Example.aria", settings=settings)

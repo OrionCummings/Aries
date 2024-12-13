@@ -1,29 +1,28 @@
 from enum import Enum
-from option import Err, Ok, Result
 
-def PExit(S: str, E: int = 0):
+def p_exit(s: str, e: int = 0):
     """A function to print an error message and exit the assembler."""
-    print(S)
-    exit(E)
+    print(s)
+    exit(e)
 
-def BitMask(Index: int) -> int:
-    """Returns a 1-bit mask at the specified `Index`."""
-    return (1 << Index)
+def bit_mask(index: int) -> int:
+    """Returns a 1-bit mask at the specified `index`."""
+    return (1 << index)
 
-def SetBit(Number: int, Index: int) -> int:
-    """Sets bit `Index` in number `Number`."""
-    return Number | BitMask(Index)
+def set_bit(number: int, index: int) -> int:
+    """Sets bit `index` in number `Number`."""
+    return number | bit_mask(index)
 
-def GetBit(Number: int, Index: int) -> int:
-    """Gets bit `Index` in number `Number`."""
-    return (Number & BitMask(Index))
+def get_bit(number: int, index: int) -> int:
+    """Gets bit `index` in number `number`."""
+    return (number & bit_mask(index)) >> index
 
-def ToggleBit(Number: int, Index: int) -> int:
-    """Toggles bit `Index` in number `Number`."""
-    return (Number ^ (1 << (Index)))
+def toggle_bit(number: int, index: int) -> int:
+    """Toggles bit `index` in number `number`."""
+    return (number ^ (1 << (index)))
 
-def IsRegister(Reg: str) -> bool:
-    return Reg in REGISTERS
+def is_register(reg: str) -> bool:
+    return reg in register_map
 
 ########################################################################
 
@@ -105,10 +104,10 @@ OPCODES = {
     # "xnor":    (12, 3, InstructionMode.Register, True),
     # "shl":     (13, 2, InstructionMode.Register, True),
     # "shr":     (14, 2, InstructionMode.Register, True),
-    "ldi":     (15, 2, InstructionMode.Immediate, True),    # TODO: May not use ALU
-    # "lui":     (16, 2, InstructionMode.Immediate, True),  # TODO: May not use ALU
-    # "lli":     (17, 2, InstructionMode.Immediate, True),  # TODO: May not use ALU
-    # "ld":      (18, 2, InstructionMode.Register, True),   # TODO: May not use ALU
+    "ldi":     (15, 2, InstructionMode.Immediate, True),
+    # "lui":     (16, 2, InstructionMode.Immediate, True),
+    # "lli":     (17, 2, InstructionMode.Immediate, True),
+    # "ld":      (18, 2, InstructionMode.Register, True),
     # "sti":     (19, 2, InstructionMode.Immediate, False),
     # "str":     (20, 2, InstructionMode.Register, False),
     # "bne":     (21, 1, InstructionMode.Jump, False),
@@ -121,8 +120,7 @@ OPCODES = {
 }
 
 # This is a dictionary containing all 16 registers.
-# TODO: Could add indication of GPRs and SPRs
-REGISTERS = {
+register_map = {
     "A":    0,
     "B":    1,
     "C":    2,
@@ -137,7 +135,7 @@ REGISTERS = {
     "L":    11,
     "SP":   12, # Stack pointer
     "BP":   13, # Base pointer
-    "IP":   14, # Instruction pointer
+    "PC":   14, # Program counter
     "FL":   15  # Flags register
 }
 
@@ -148,28 +146,23 @@ FL_PARITY            = 2 # P
 FL_SIGN              = 3 # S
 FL_OVERFLOW          = 4 # O
 FL_INTERRUPT         = 5 # I
-FL_INTERRUPT_DISABLE = 6 # D
-FL_TRAP              = 7 # T
-FL_HPC               = 8 # H
+FL_TRAP              = 6 # T
+FL_HPC               = 7 # H
 
 # Flag bit masks
-FL_ZERO_MASK              = BitMask(FL_ZERO)
-FL_CARRY_MASK             = BitMask(FL_CARRY)
-FL_PARITY_MASK            = BitMask(FL_PARITY)
-FL_SIGN_MASK              = BitMask(FL_SIGN)
-FL_OVERFLOW_MASK          = BitMask(FL_OVERFLOW)
-FL_INTERRUPT_MASK         = BitMask(FL_INTERRUPT)
-FL_INTERRUPT_DISABLE_MASK = BitMask(FL_INTERRUPT_DISABLE)
-FL_TRAP_MASK              = BitMask(FL_TRAP)
-FL_HPC_MASK               = BitMask(FL_HPC)
+FL_ZERO_MASK              = bit_mask(FL_ZERO)
+FL_CARRY_MASK             = bit_mask(FL_CARRY)
+FL_PARITY_MASK            = bit_mask(FL_PARITY)
+FL_SIGN_MASK              = bit_mask(FL_SIGN)
+FL_OVERFLOW_MASK          = bit_mask(FL_OVERFLOW)
+FL_INTERRUPT_MASK         = bit_mask(FL_INTERRUPT)
+FL_TRAP_MASK              = bit_mask(FL_TRAP)
+FL_HPC_MASK               = bit_mask(FL_HPC)
 
 # The values to increment pointer registers
-IP_INC = 1
+PC_INC = 1
 BP_INC = 1
 SP_INC = 1
-
-# The program counter increment value
-PC_INC = 1
 
 # Error codes
 PC_OVERRUN = 0x30

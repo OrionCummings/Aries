@@ -1,6 +1,6 @@
 from enum import Enum
 
-class PP():
+class TextFormatting():
     PURPLE = '\033[95m'
     CYAN = '\033[96m'
     DARKCYAN = '\033[36m'
@@ -12,29 +12,29 @@ class PP():
     UNDERLINE = '\033[4m'
     END = '\033[0m'
     
-    def HexLiteral(s: str) -> str:
-        return "{:X}".format(s)
-    
-    def RedBold(s: str) -> str:
-        return PP.Red(PP.Bold(s))
+def hex_literal(s: str) -> str:
+    return "{:X}".format(s)
 
-    def GreenBold(s: str) -> str:
-        return PP.Green(PP.Bold(s))
-    
-    def BlueBold(s: str) -> str:
-        return PP.Blue(PP.Bold(s))
-    
-    def Bold(s: str) -> str:
-        return str(PP.BOLD) + str(s) + str(PP.END)
+def red_bold(s: str) -> str:
+    return red(bold(s))
 
-    def Red(s: str) -> str:
-        return str(PP.RED) + str(s) + str(PP.END)
-    
-    def Green(s: str) -> str:
-        return str(PP.GREEN) + str(s) + str(PP.END)
-    
-    def Blue(s: str) -> str:
-        return str(PP.BLUE) + str(s) + str(PP.END)
+def green_bold(s: str) -> str:
+    return green(bold(s))
+
+def blue_bold(s: str) -> str:
+    return blue(bold(s))
+
+def bold(s: str) -> str:
+    return str(TextFormatting.BOLD) + str(s) + str(TextFormatting.END)
+
+def red(s: str) -> str:
+    return str(TextFormatting.RED) + str(s) + str(TextFormatting.END)
+
+def green(s: str) -> str:
+    return str(TextFormatting.GREEN) + str(s) + str(TextFormatting.END)
+
+def blue(s: str) -> str:
+    return str(TextFormatting.BLUE) + str(s) + str(TextFormatting.END)
 
 class ParseMode(Enum):
     Register = 0,

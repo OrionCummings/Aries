@@ -4,7 +4,6 @@ import unittest
 
 from Tokenizer import Token, TokenType, Tokenizer
 
-
 class TokenizerUnitTests(unittest.TestCase):
 
     UnitTestResultDirectory = "Unit Test Results/"
