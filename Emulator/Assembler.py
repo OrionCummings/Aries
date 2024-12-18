@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import List
 from option import Err, Ok, Result
-from CPU import Encode, InstructionString
+from Instructions import Encode, InstructionString
 from Constants import ASM_COMMENT_CHARACTER, ASM_TEST_PREFIX_CHARACTER, PExit
 from PrettyPrinting import PrintMode
 

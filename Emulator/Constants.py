@@ -1,5 +1,5 @@
 from enum import Enum
-from option import Err, Ok, Result
+from bidict import bidict
 
 def PExit(S: str, E: int = 0):
     """A function to print an error message and exit the assembler."""
@@ -16,7 +16,7 @@ def SetBit(Number: int, Index: int) -> int:
 
 def GetBit(Number: int, Index: int) -> int:
     """Gets bit `Index` in number `Number`."""
-    return (Number & BitMask(Index))
+    return (Number & BitMask(Index)) >> Index
 
 def ToggleBit(Number: int, Index: int) -> int:
     """Toggles bit `Index` in number `Number`."""
@@ -137,8 +137,27 @@ REGISTERS = {
     "L":    11,
     "SP":   12, # Stack pointer
     "BP":   13, # Base pointer
-    "IP":   14, # Instruction pointer
+    "PC":   14, # Program counter
     "FL":   15  # Flags register
+}
+
+REGISTERIDS = {
+    0:  "A",
+    1:  "B",
+    2:  "C",
+    3:  "D",
+    4:  "E",
+    5:  "F",
+    6:  "G",
+    7:  "H",
+    8:  "I",
+    9:  "J",
+    10: "K",
+    11: "L",
+    12: "SP",
+    13: "BP",
+    14: "PC",
+    15: "FL",
 }
 
 # Flag register bit positions
@@ -148,9 +167,8 @@ FL_PARITY            = 2 # P
 FL_SIGN              = 3 # S
 FL_OVERFLOW          = 4 # O
 FL_INTERRUPT         = 5 # I
-FL_INTERRUPT_DISABLE = 6 # D
-FL_TRAP              = 7 # T
-FL_HPC               = 8 # H
+FL_TRAP              = 6 # T
+FL_HPC               = 7 # H
 
 # Flag bit masks
 FL_ZERO_MASK              = BitMask(FL_ZERO)
@@ -159,17 +177,13 @@ FL_PARITY_MASK            = BitMask(FL_PARITY)
 FL_SIGN_MASK              = BitMask(FL_SIGN)
 FL_OVERFLOW_MASK          = BitMask(FL_OVERFLOW)
 FL_INTERRUPT_MASK         = BitMask(FL_INTERRUPT)
-FL_INTERRUPT_DISABLE_MASK = BitMask(FL_INTERRUPT_DISABLE)
 FL_TRAP_MASK              = BitMask(FL_TRAP)
 FL_HPC_MASK               = BitMask(FL_HPC)
 
 # The values to increment pointer registers
-IP_INC = 1
+PC_INC = 1
 BP_INC = 1
 SP_INC = 1
-
-# The program counter increment value
-PC_INC = 1
 
 # Error codes
 PC_OVERRUN = 0x30

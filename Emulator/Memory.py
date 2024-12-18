@@ -15,6 +15,20 @@ class Memory():
         Self.Capacity = Capacity
         Self.Size = 0
     
+    def __eq__(Self, Other):
+        
+        if not isinstance(Other, Memory):
+            raise NotImplementedError
+        
+        SizeEqual = Self.Size == Other.Size
+        CapacityEqual = Self.Capacity == Other.Capacity
+        
+        # Check the size and capacity first to avoid an unnecessary check of the memory
+        if SizeEqual and CapacityEqual == False: return False
+        
+        MemoryEqual = Self.Memory == Other.Memory # TODO: This feels wrong
+        return MemoryEqual
+    
     def __str__(Self) -> str:
         Builder: str = ""
         for Index in range(0, Self.Capacity):

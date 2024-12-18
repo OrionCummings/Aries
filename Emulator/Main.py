@@ -1,10 +1,11 @@
 from CPU import CPU
 from pynput.keyboard import Key, Listener
 from Assembler import Assembler, AssemblerSettings, PrintMode
+from PrettyPrinting import PP
 
 Settings = AssemblerSettings()
 Settings.PrintMode = PrintMode.Hex
-Settings.SelfTest = True
+Settings.SelfTest = False
 
 A: Assembler = Assembler("Example.aria", Settings)
 C: CPU = CPU(InstructionMemorySize=16, DataMemorySize=64)
@@ -26,6 +27,7 @@ def Main():
     print("Press space to execute one clock cycle")
     C.Print()  
     with Listener(on_press = Press) as L: L.join()
+    print(PP.RedBold("CPU halted"))
 
 if __name__ == "__main__":
     Main()
