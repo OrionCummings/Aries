@@ -5,7 +5,7 @@
 
 ldi 1 A         ; Load 1 into register A
 ldi 4 B         ; Load 4 into register B
-add A B C       ; A + B = C
+add A B C       ; A + B -> C
 hlt             ; Halt the program
 
 ; Expected output

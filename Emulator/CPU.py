@@ -1,14 +1,14 @@
 from typing import Optional
 from option import Err, Ok, Result
-from Emulator.Instructions import get_opcode
-from PrettyPrinting import TextFormatting, ParseMode, PrintMode, bold, green_bold
-from Constants import ADDR_LENGTH, FF_LENGTH, FUNC_LENGTH, IMM_LENGTH, INS_LENGTH, OP_LENGTH, OPCODES, PC_OVERRUN, REG_LENGTH, register_map, SHAMT_LENGTH, InstructionMode, PExit
+from Transformations import encode, decode
+from PrettyPrinting import bold, green_bold
+from Constants import PC_OVERRUN
 from RegisterFile import RegisterFile
 from Memory import Memory
 from CallStack import CallStack
 
 class CPU():
-    """A CPU implementing the Simple Aries Instruction Set Architecture."""
+    """A CPU that supports the Aires Assembly Language."""
     
     def __init__(self, instruction_memory_size: int = 4096, data_memory_size: int = 4096) -> None:
         """Initializes a CPU instance with a given memory size in bytes."""

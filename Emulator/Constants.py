@@ -2,11 +2,6 @@ from enum import Enum
 
 from BitManipulation import bit_mask
 
-def p_exit(s: str, e: int = 0):
-    """A function to print an error message and exit the assembler."""
-    print(s)
-    exit(e)
-
 ########################################################################
 
 # This is the character which should be interpreted as a comment in assembly
@@ -71,7 +66,7 @@ class InstructionMode(Enum):
     Jump = 2
     
 # All valid opcodes and their information tuple (ID, ARGC, MODE, ALU?)
-OPCODES = {
+CONSTANT_OPCODE_MAP = {
     "nop":      (0, 0, InstructionMode.Jump, False),
     "hlt":      (1, 0, InstructionMode.Jump, False),
     "add":      (2, 3, InstructionMode.Register, True),
@@ -94,16 +89,16 @@ OPCODES = {
     # "sti":     (19, 2, InstructionMode.Immediate, False),
     # "str":     (20, 2, InstructionMode.Register, False),
     # "bne":     (21, 1, InstructionMode.Jump, False),
-    # "jmp":     (22, 1, InstructionMode.Jump, False),
+     "j":       (22, 1, InstructionMode.Jump, False),
     # "jr":      (23, 1, InstructionMode.Jump, False),
-    # "ret":     (24, 0, InstructionMode.Jump, False),
-    # "hpc":     (25, 1, InstructionMode.Jump, False),
-    # "syscall": (26, 1, InstructionMode.Register, False
-    # ), # Bold move
+    # "jsr":     (24, 1, InstructionMode.Jump, False),
+    # "ret":     (25, 0, InstructionMode.Jump, False),
+    # "hpc":     (26, 1, InstructionMode.Jump, False),
+    # "syscall": (27, 1, InstructionMode.Register, False), # Bold move!!
 }
 
 # This is a dictionary containing all 16 registers.
-register_map = {
+CONSTANT_REGISTER_MAP = {
     "A":    0,
     "B":    1,
     "C":    2,

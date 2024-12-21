@@ -10,8 +10,37 @@ class BitManipulationTests(unittest.TestCase):
             expected_bit_mask = 1 << i
             actual_bit_mask = bit_mask(i)
 
-            self.assertEqual(expected_bit_mask, actual_bit_mask)
+            self.assertEqual(expected_bit_mask, actual_bit_mask, "At least one actual bit mask did not match the expected bit mask!")
+            
+    def test_set_bit(self):
+        
+        for i in range(0, 32):
+            
+            number = 28739472
+            expected_set_bit = number | bit_mask(i)
+            actual_set_bit = set_bit(number, i)
 
+            self.assertEqual(expected_set_bit, actual_set_bit, "At least one actual set bit did not match the expected set bit!")
+
+    def test_get_bit(self):
+
+        for i in range(0, 32):
+            
+            number = 28739472
+            expected_get_bit = (number & bit_mask(i)) >> i
+            actual_get_bit = get_bit(number, i)
+
+            self.assertEqual(expected_get_bit, actual_get_bit, "At least one actual get bit did not match the expected get bit!")
+    
+    def test_toggle_bit(self):
+        
+        for i in range(0, 32):
+            
+            number = 28739472
+            expected_toggle_bit = (number ^ (1 << (i)))
+            actual_toggle_bit = toggle_bit(number, i)
+
+            self.assertEqual(expected_toggle_bit, actual_toggle_bit, "At least one actual toggle bit did not match the expected toggle bit!")
 
 if __name__ == '__main__':
     unittest.main()

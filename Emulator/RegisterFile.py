@@ -1,11 +1,10 @@
 from __future__ import annotations
 from option import Err, Ok, Result
-
 from BitManipulation import get_bit, set_bit, toggle_bit
-from Constants import register_map, BP_INC, PC_INC, SP_INC
+from Constants import CONSTANT_REGISTER_MAP, BP_INC, PC_INC, SP_INC
 
 def is_register(reg: str) -> bool:
-    return reg in register_map
+    return reg in CONSTANT_REGISTER_MAP
 
 class RegisterFile():
     
@@ -13,7 +12,7 @@ class RegisterFile():
         """Creates an empty RegisterFile."""
         
         self.registers = {}
-        for r in register_map.keys():
+        for r in CONSTANT_REGISTER_MAP.keys():
             self.registers[r] = 0
     
     def __eq__(self, other: RegisterFile):
@@ -21,10 +20,7 @@ class RegisterFile():
         if not isinstance(other, RegisterFile):
             return NotImplemented
         
-        for s, o in zip(self.registers.items(), other.registers.items()):
-            if s != o: return False
-            
-        return True
+        return any(s == o for s, o in zip(self.registers.items(), other.registers.items()))
         
     def __str__(self) -> str:
         """Returns a string representation of a RegisterFile."""
