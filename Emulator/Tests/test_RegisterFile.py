@@ -4,7 +4,7 @@ from RegisterFile import RegisterFile
 
 class RegisterFileTests(unittest.TestCase):
     
-    def get_demo_register_file() -> RegisterFile:
+    def get_demo_register_file(self) -> RegisterFile:
         
         register_file = RegisterFile()
         
