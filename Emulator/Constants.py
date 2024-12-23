@@ -142,6 +142,9 @@ PC_INC = 1
 BP_INC = 1
 SP_INC = 1
 
+# Max call stack depth
+MAX_CALL_STACK_DEPTH = 256
+
 # Error codes
 PC_OVERRUN = 0x30
 
