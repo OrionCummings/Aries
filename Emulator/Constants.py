@@ -1,5 +1,6 @@
 from enum import Enum
-
+from bidict import bidict
+from option import Result, Ok, Err
 from BitManipulation import bit_mask
 
 ########################################################################
@@ -97,8 +98,23 @@ CONSTANT_OPCODE_MAP = {
     # "syscall": (27, 1, InstructionMode.Register, False), # Bold move!!
 }
 
+CONSTANT_NO_ARG_OPCODES = [
+    'nop',
+    'hlt',
+    'ret',
+]
+
+def get_opcode_from_id(id: int) -> Result[str, str]:
+    for item in CONSTANT_OPCODE_MAP.items():
+        (item_key, item_value) = item
+        item_id = item_value[0]
+        if item_id == id:
+            return Ok(item_key)
+
+    return Err("No opcode with id {} found!".format(id))
+
 # This is a dictionary containing all 16 registers.
-CONSTANT_REGISTER_MAP = {
+CONSTANT_REGISTER_MAP = bidict({
     "A":    0,
     "B":    1,
     "C":    2,
@@ -115,7 +131,7 @@ CONSTANT_REGISTER_MAP = {
     "BP":   13, # Base pointer
     "PC":   14, # Program counter
     "FL":   15  # Flags register
-}
+})
 
 # Flag register bit positions
 FL_ZERO              = 0 # Z

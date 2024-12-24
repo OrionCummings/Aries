@@ -36,16 +36,17 @@ class RegisterFileTests(unittest.TestCase):
         
         self.assertIsInstance(str(register_file), str, "String representation of register file is not a string!")
 
-    def test_get_and_set_reg_A(self):
+    def test_get_and_set_regs(self):
         
         register_file = RegisterFile()
         
-        reg = 'A'
+        regs = ['A','B','C','D','E','F','G','H','I','J','K','L','SP','BP','PC','FL']
         number = 1278128
         
-        register_file.set_reg(reg, number)
-        
-        self.assertEqual(register_file.get_reg(reg).unwrap(), number)
+        for reg in regs:
+            register_file.set_reg(reg, number)
+            
+            self.assertEqual(register_file.get_reg(reg).unwrap(), number, "Register {} was not get/set properly!".format(reg))
 
     def test_increment_program_counter(self):
         

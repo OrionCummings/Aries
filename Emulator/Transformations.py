@@ -1,13 +1,22 @@
 
 from option import Result, Err, Ok
+from BitManipulation import bit_mask
 from PrettyPrinting import ParseMode, PrintMode
-from Constants import ADDR_LENGTH, CONSTANT_OPCODE_MAP, CONSTANT_REGISTER_MAP, FF_LENGTH, FUNC_LENGTH, IMM_LENGTH, INS_LENGTH, OP_LENGTH, REG_LENGTH, SHAMT_LENGTH, InstructionMode
+from Constants import ADDR_LENGTH, CONSTANT_NO_ARG_OPCODES, CONSTANT_OPCODE_MAP, CONSTANT_REGISTER_MAP, FF_LENGTH, FUNC_LENGTH, IMM_LENGTH, INS_LENGTH, OP_LENGTH, REG_LENGTH, SHAMT_LENGTH, InstructionMode, get_opcode_from_id
 
-def get_opcode(opcode: str | int) -> int:
+def get_opcode(instruction: str | int) -> Result[int, str]:
     
-    if isinstance(opcode, str):
-        opcode = opco
-
+    if isinstance(instruction, str):
+        opcode = instruction.split(" ")[0]
+        return Ok(opcode)
+    elif isinstance(instruction, int):
+        start_index = INS_LENGTH - OP_LENGTH
+        end_index = INS_LENGTH
+        mask = bit_mask(start_index, end_index)
+        opcode = (instruction & mask) >> start_index
+        return Ok(opcode)
+    else:
+        return Err("")
 
 def is_valid_opcode(opcode: str) -> bool:
     return opcode in CONSTANT_OPCODE_MAP
@@ -60,40 +69,41 @@ def encode(line: str) -> Result[int, str]:
     instruction: int = 0
     instruction |= opcode << (INS_LENGTH - OP_LENGTH)
     
-    match mode:
-        
-        case InstructionMode.Register:
+    if potential_opcode not in CONSTANT_NO_ARG_OPCODES:
+        match mode:
             
-            _, reg_a_str, reg_b_str, reg_c_str = line_vector
-            
-            reg_a = CONSTANT_REGISTER_MAP[reg_a_str]
-            reg_b = CONSTANT_REGISTER_MAP[reg_b_str]
-            reg_c = CONSTANT_REGISTER_MAP[reg_c_str]
-            
-            instruction |= reg_a << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 1))
-            instruction |= reg_b << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 2))
-            instruction |= reg_c << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 3))
-            
-            # TODO: SHAMT and FUNC are not implemented yet
-            
-        case InstructionMode.Immediate:
-            
-            _, value_str, reg_str = line_vector
-            
-            value = int(value_str)
-            reg = CONSTANT_REGISTER_MAP[reg_str]
-            
-            instruction |= reg << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 1))
-            instruction |= value
-            
-        case InstructionMode.Jump:
-            
-            _, address_str = line_vector
-            
-            address = int(address_str)
-            
-            instruction |= address
-            
+            case InstructionMode.Register:
+                
+                _, reg_a_str, reg_b_str, reg_c_str = line_vector
+                
+                reg_a = CONSTANT_REGISTER_MAP[reg_a_str]
+                reg_b = CONSTANT_REGISTER_MAP[reg_b_str]
+                reg_c = CONSTANT_REGISTER_MAP[reg_c_str]
+                
+                instruction |= reg_a << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 1))
+                instruction |= reg_b << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 2))
+                instruction |= reg_c << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 3))
+                
+                # TODO: SHAMT and FUNC are not implemented yet
+                
+            case InstructionMode.Immediate:
+                
+                _, value_str, reg_str = line_vector
+                
+                value = int(value_str)
+                reg = CONSTANT_REGISTER_MAP[reg_str]
+                
+                instruction |= reg << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 1))
+                instruction |= value
+                
+            case InstructionMode.Jump:
+                
+                _, address_str = line_vector
+                
+                address = int(address_str)
+                
+                instruction |= address
+                
     return Ok(instruction)
 
 def decode(encoded_instruction: int) -> Result[list, str]:
@@ -102,15 +112,57 @@ def decode(encoded_instruction: int) -> Result[list, str]:
     ret_list = []
     binary_instruction: str = get_encoded_instruction_as_binary(encoded_instruction)
     
-    opcode = encoded_instruction
+    opcode_id = get_opcode(encoded_instruction).unwrap()
+    opcode = get_opcode_from_id(opcode_id).unwrap()
     (_, _, instruction_mode, *_) = CONSTANT_OPCODE_MAP[opcode]
     
+    builder = ""
+    builder += opcode
+    builder += " "
+
     match instruction_mode:
-        case InstructionMode.Register:  ret_list = decode_register_instruction_as_list(binary_instruction)
-        case InstructionMode.Immediate: ret_list = decode_immediate_instruction_as_list(binary_instruction)
-        case InstructionMode.Jump:      ret_list = decode_jump_instruction_as_list(binary_instruction)
+        case InstructionMode.Register:
+            ret_list = decode_register_instruction_as_list(binary_instruction)
+            (_, *arguments) = ret_list
+            pass
+            
+        case InstructionMode.Immediate:
+            ret_list = decode_immediate_instruction_as_list(binary_instruction)
+            (_, bin_reg, _, _, bin_value) = ret_list
+            reg_id = int(bin_reg, 2)
+            reg = CONSTANT_REGISTER_MAP.inverse[reg_id]
+            value = str(int(bin_value, 2))
+            builder += value
+            builder += " "
+            builder += reg
+            pass
+            
+        case InstructionMode.Jump:
+            ret_list = decode_jump_instruction_as_list(binary_instruction)
+            (_, bin_address) = ret_list
+            address = str(int(bin_address, 2))
+            builder += address
+            pass
+
+    return Ok(builder)
+
+if __name__ == "__main__":
     
-    return Ok(ret_list)
+    line = "ldi 261 H"
+    
+    encoded_line = encode(line).unwrap()
+    decoded_line = decode(encoded_line).unwrap()
+    
+    print("Original instruction: '{}'\nReconstructed instruction: '{}'".format(line, decoded_line))
+    
+
+
+
+
+
+
+
+
 
 # def instruction_string(instruction: int, p_mode: PrintMode) -> Result[str, str]:
 #     builder: str = ""
@@ -174,13 +226,3 @@ def decode(encoded_instruction: int) -> Result[list, str]:
 #                     builder += " ".join([opcode, address])
     
 #     return Ok(builder)
-
-if __name__ == "__main__":
-    
-    line = "j 261"
-    
-    encoded_line = encode(line).unwrap()
-    decoded_line = decode(encoded_line).unwrap()
-    
-    print("Original instruction: '{}'\nReconstructed instruction: '{}'".format(line, decoded_line))
-    

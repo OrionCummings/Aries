@@ -1,6 +1,6 @@
 from typing import Optional
 from option import Err, Ok, Result
-from Transformations import encode, decode
+from Transformations import encode, decode, get_opcode
 from PrettyPrinting import bold, green_bold
 from Constants import PC_OVERRUN
 from RegisterFile import RegisterFile
@@ -29,14 +29,14 @@ class CPU():
         if not isinstance(other, CPU):
             return NotImplemented
         
-        register_file_equal       = self.register_file == other.register_file
-        instruction_memory_equal  = self.instruction_memory == other.instruction_memory
-        data_memory_equal         = self.data_memory == other.data_memory
-        call_stack               = self.call_stack == other.call_stack
+        register_file_equal        = self.register_file == other.register_file
+        instruction_memory_equal   = self.instruction_memory == other.instruction_memory
+        data_memory_equal          = self.data_memory == other.data_memory
+        call_stack                 = self.call_stack == other.call_stack
         
-        halt_equal               = self.halted == other.halted
+        halt_equal                 = self.halted == other.halted
         last_updated_address_equal = self.last_updated_address == other.last_updated_address
-        hpc_bus_equal             = self.hpc_bus == other.hpc_bus
+        hpc_bus_equal              = self.hpc_bus == other.hpc_bus
         
         return (register_file_equal and instruction_memory_equal and data_memory_equal and call_stack and halt_equal and last_updated_address_equal and hpc_bus_equal)
 
@@ -97,9 +97,7 @@ class CPU():
     
     def get_current_instruction(self):
         """Returns the current instruction."""
-        
-        # TODO: Make this call safer!
-        return self.instruction_memory.block[self.register_file.get_pc()]
+        return self.instruction_memory[self.register_file.get_pc()]
     
     def tick(self) -> Result[int, str]:
         """Executes the current instruction and returns the address that was changed."""
