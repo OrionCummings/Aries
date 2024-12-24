@@ -1,12 +1,12 @@
 from typing import Optional
 from option import Err, Ok, Result
 from Transformations import encode, decode, get_opcode
-from PrettyPrinting import bold, green_bold
+from PrettyPrinting import bold, green_bold, red_bold
 from Constants import PC_OVERRUN
 from RegisterFile import RegisterFile
 from Memory import Memory
 from CallStack import CallStack
-from Utilities import p_exit
+from Utilities import get_opcode_from_id, p_exit
 
 class CPU():
     """A CPU that supports the Aires Assembly Language."""
@@ -73,7 +73,7 @@ class CPU():
                 builder += " "
                 
                 if index == program_counter: # Highlight the current instruction in bold red
-                    builder += bold(hex_s)
+                    builder += red_bold(hex_s)
                 elif index == self.last_updated_address: # Highlight the last recently updated address in bold green
                     builder += green_bold(hex_s)
                 else: # otherwise, just add the instruction data to the builder
@@ -100,37 +100,35 @@ class CPU():
         """Returns the current instruction."""
         return self.instruction_memory[self.register_file.get_pc()]
     
-    def tick(self) -> Result[int, str]:
+    def execute(self) -> Result[None, str]:
         """Executes the current instruction and returns the address that was changed."""
         
         address = None
 
         # Get the current instruction
         current_instruction = self.get_current_instruction()
+        decoded_instruction = decode(current_instruction).unwrap()
+        opcode_id = get_opcode(current_instruction).unwrap()
+        opcode = get_opcode_from_id(opcode_id).unwrap()
+
+        # TODO: Actually execute instructions
+
+        pass
+
         
-        # Get the opcode of the current instruction
-        r_opcode = get_opcode(current_instruction)
-        if r_opcode.is_err: return Err(r_opcode.unwrap_err())
-        opcode_tuple = r_opcode.unwrap()
+        print(green_bold("Executed '{}'".format(decoded_instruction)))
         
-        # Fetch and run the function corresponding to the opcode
-        # opcode_id = opcode_tuple[0]
-        # opcode_function = CONSTANT_OPCODE_MAP[opcode_id]
-        # self = opcode_function(self, current_instruction)
-        
-        print("Executed 'N/A'".format())
-        
-        # TODO: Fix this (optional) feature!
-        return address
+        # TODO: Implement this (optional) feature!
+        self.last_updated_address = address
     
     def clock(self) -> bool:
         """Perform one clock cycle."""
 
-        # Execute the instruction
-        self.tick()
+        # Execute the current instruction
+        self.execute()
         
         # If the CPU has been halted, then don't do anything!
-        if self.halt: return False
+        if self.halted: return False
         
         # TODO: This only triggers when we go out of bounds (which is good!), but
         # it is possible to interact with uninitialized memory (index > size).

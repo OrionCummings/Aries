@@ -4,7 +4,7 @@ from BitManipulation import get_bit, set_bit, toggle_bit
 from Constants import CONSTANT_REGISTER_MAP, BP_INC, PC_INC, SP_INC
 
 def is_register(reg: str) -> bool:
-    return reg in CONSTANT_REGISTER_MAP
+    return reg in (list(CONSTANT_REGISTER_MAP.keys()) + list(CONSTANT_REGISTER_MAP.values()))
 
 class RegisterFile():
     
@@ -66,20 +66,20 @@ class RegisterFile():
     def toggle_flag(self, flag: int) -> None:
         self.registers['FL'] = toggle_bit(self.registers['FL'], flag)
     
-if __name__ == "__main__":
+# if __name__ == "__main__":
     
-    rf = RegisterFile()
-    print(rf)
-    print()
+#     rf = RegisterFile()
+#     print(rf)
+#     print()
     
-    rf.set_reg("B", 255)
-    rf.set_reg("G", 16000)
-    rf.set_reg("H", 2367471)
-    print(rf)
+#     rf.set_reg("B", 255)
+#     rf.set_reg("G", 16000)
+#     rf.set_reg("H", 2367471)
+#     print(rf)
     
-    print(rf.get_reg("A").unwrap())
-    print(rf.get_reg("B").unwrap())
-    print(rf.get_reg("G").unwrap())
-    print(rf.get_reg("H").unwrap())
+#     print(rf.get_reg("A").unwrap())
+#     print(rf.get_reg("B").unwrap())
+#     print(rf.get_reg("G").unwrap())
+#     print(rf.get_reg("H").unwrap())
     
     

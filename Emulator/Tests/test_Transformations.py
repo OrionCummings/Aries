@@ -127,6 +127,10 @@ class TransformationTests(unittest.TestCase):
         expected_opcode: int = 2**6 - 1
         self.assertEqual(expected_opcode, actual_opcode)
 
+    def test_get_opcode_from_bad_type_failure(self):
+        instruction: dict = {}
+        bad_instruction_response = get_opcode(instruction)
+        self.assertTrue(bad_instruction_response.is_err)
 
     def test_is_valid_opcode(self):
         self.assertTrue(is_valid_opcode("nop"))

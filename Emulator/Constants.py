@@ -1,6 +1,5 @@
 from enum import Enum
 from bidict import bidict
-from option import Result, Ok, Err
 from BitManipulation import bit_mask
 
 ########################################################################
@@ -103,15 +102,6 @@ CONSTANT_NO_ARG_OPCODES = bidict({
     'hlt': 1,
     'ret': 25,
 })
-
-def get_opcode_from_id(id: int) -> Result[str, str]:
-    for item in CONSTANT_OPCODE_MAP.items():
-        (item_key, item_value) = item
-        item_id = item_value[0]
-        if item_id == id:
-            return Ok(item_key)
-
-    return Err("No opcode with id {} found!".format(id))
 
 # This is a dictionary containing all 16 registers.
 CONSTANT_REGISTER_MAP = bidict({

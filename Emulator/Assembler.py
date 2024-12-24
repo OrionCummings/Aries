@@ -1,15 +1,16 @@
 from dataclasses import dataclass
-from enum import Enum
 from typing import List
 from option import Err, Ok, Result
-from Instructions import Encode, InstructionString
-from Constants import ASM_COMMENT_CHARACTER, ASM_TEST_PREFIX_CHARACTER, PExit
+from Instructions import encode
+from Constants import ASM_COMMENT_CHARACTER, ASM_TEST_PREFIX_CHARACTER
+from Transformations import instruction_string
+from Utilities import p_exit
 from PrettyPrinting import PrintMode
 
 @dataclass
 class AssemblerSettings:
     self_test: bool = False
-    print_mode      = PrintMode.no_output
+    print_mode      = PrintMode.NoOutput
 
 class Assembler():
     
@@ -41,13 +42,14 @@ class Assembler():
             p_exit(r_real.Err(), -4)
         print("Read file '{}' into assembler buffer.".format(file_name))
         
-        if settings.selfTest: print("Assembling file '{}' with self tests enabled.".format(file_name))
-        else:        print("Assembling file '{}' with self tests enabled.".format(file_name))
+        #if settings.selfTest: print("Assembling file '{}' with self tests enabled.".format(file_name))
+        #else:
+        print("Assembling file '{}' with self tests disabled.".format(file_name))
             
         # Assemble the file
         r_instructions = self.assemble(settings)
         if r_instructions.is_err:
-            if Settings.self_test: print("Failed to assemble file '{}' as a test file!".format(file_name))
+            if settings.self_test: print("Failed to assemble file '{}' as a test file!".format(file_name))
             else:        print("Failed to assemble file '{}'!".format(file_name))
             print(r_instructions.Err)
         
@@ -59,7 +61,7 @@ class Assembler():
         # Update metadata post assembly
         self.update_metadata()
         
-        if settings.print_mode != PrintMode.no_output:
+        if settings.print_mode != PrintMode.NoOutput:
             print()
             print(self)
         
@@ -154,7 +156,7 @@ class Assembler():
                 if test_instructions[index] != instructions[index]:
                     return Err("Test instructions and assembled instructions differ at index {} ({} != {})".format(index, format(test_instructions[index], "032b"), format(Instructions[Index], "032b")))
         
-        return Ok(Instructions)
+        return Ok(instructions)
     
     def read(self, settings: AssemblerSettings) -> Result[bool, str]:
         """Reads the file into an internal buffer."""

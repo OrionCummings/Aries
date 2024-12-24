@@ -1,8 +1,8 @@
 
 from option import Err, Ok, Result
-from Constants import ADDR_LENGTH, FF_LENGTH, FUNC_LENGTH, IMM_LENGTH, INS_LENGTH, OP_LENGTH, OPCODES, REG_LENGTH, SHAMT_LENGTH, InstructionMode
+from Constants import CONSTANT_OPCODE_MAP, InstructionMode
 from CPU import CPU
-from Transformations import verify_opcode
+from Transformations import decode, encode
 
 def nop(cpu: CPU, instruction: int) -> Result[CPU, str]:
     """Executes a 'nop' instruction."""
@@ -35,16 +35,16 @@ def add(cpu: CPU, instruction: int) -> Result[CPU, str]:
     # TODO: This code probably already exists in this project, so find and reuse it!
     # Or make it generic!
 
-    opcode_tuple = OPCODES[instruction_mnemonic]
+    opcode_tuple = CONSTANT_OPCODE_MAP[instruction_mnemonic]
     mode = opcode_tuple[2]
 
     if mode != InstructionMode.Register: return Err("Expected nemonic '{}' to be Register!".format(instruction_mnemonic))
     
-    r_extraction = extract(instruction)
-    if r_extraction.is_err: return Err(r_extraction.unwrap_err())
-    extraction = r_extraction.unwrap()
+    r_decoded_instruction_list = decode(instruction)
+    if r_decoded_instruction_list.is_err: return Err(r_decoded_instruction_list.unwrap_err())
+    decoded_instruction_list = r_decoded_instruction_list.unwrap()
     
-    if extraction[0] != InstructionMode.Register:
+    if decoded_instruction_list[0] != InstructionMode.Register:
         return Err("Extracted instruction mode '{}' does not match expected instruction mode '{}'".format(extraction[0], InstructionMode.Register))
     
     # BUG: This is stupid lol. Use ya damn classes

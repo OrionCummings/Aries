@@ -1,6 +1,6 @@
 import unittest
 from Constants import BP_INC, CONSTANT_REGISTER_MAP, PC_INC, SP_INC
-from RegisterFile import RegisterFile
+from RegisterFile import RegisterFile, is_register
 
 class RegisterFileTests(unittest.TestCase):
     
@@ -93,4 +93,14 @@ class RegisterFileTests(unittest.TestCase):
         register_file.clear_flags()
 
         self.assertEqual(register_file.get_reg('FL').unwrap(), 0)
+
+    def test_is_register(self):
+        real_registers = CONSTANT_REGISTER_MAP.keys()
+        for reg in real_registers:
+            self.assertTrue(is_register(reg))
+
+        real_registers = CONSTANT_REGISTER_MAP.values()
+        for reg in real_registers:
+            self.assertTrue(is_register(reg))
+
 

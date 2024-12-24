@@ -1,8 +1,9 @@
 
 from option import Result, Err, Ok
 from BitManipulation import bit_mask
-from PrettyPrinting import ParseMode, PrintMode
-from Constants import ADDR_LENGTH, CONSTANT_NO_ARG_OPCODES, CONSTANT_OPCODE_MAP, CONSTANT_REGISTER_MAP, FF_LENGTH, FUNC_LENGTH, IMM_LENGTH, INS_LENGTH, OP_LENGTH, REG_LENGTH, SHAMT_LENGTH, InstructionMode, get_opcode_from_id
+from Constants import CONSTANT_NO_ARG_OPCODES, CONSTANT_OPCODE_MAP, CONSTANT_REGISTER_MAP, FF_LENGTH, FUNC_LENGTH, IMM_LENGTH, INS_LENGTH, OP_LENGTH, REG_LENGTH, SHAMT_LENGTH, InstructionMode
+from PrettyPrinting import PrintMode
+from Utilities import get_opcode_from_id
 
 def get_opcode(instruction: str | int) -> Result[int, str]:
     
@@ -16,7 +17,24 @@ def get_opcode(instruction: str | int) -> Result[int, str]:
         opcode = (instruction & mask) >> start_index
         return Ok(opcode)
     else:
-        return Err("")
+        return Err("Unknown type passed to get_opcode()!")
+
+def get_instruction_mode(instruction: str | int) -> Result[InstructionMode, str]:
+    if isinstance(instruction, str):
+        opcode = instruction.split(" ")[0]
+    elif isinstance(instruction, int):
+        decoded_instruction = decode(instruction).unwrap()
+        opcode = decoded_instruction.split(" ")[0]
+    else:
+        return Err("Unknown type passed to get_instruction_mode()!")
+    
+    if opcode in CONSTANT_OPCODE_MAP:
+        opcode_tuple = CONSTANT_OPCODE_MAP[opcode]
+    else:
+        return Err("Unknown opcode '{}' passed to get_instruction_mode()!".format(opcode))
+    (_, _, i_mode, *_) = opcode_tuple
+
+    return Ok(i_mode)
 
 def is_valid_opcode(opcode: str) -> bool:
     return opcode in CONSTANT_OPCODE_MAP
@@ -106,8 +124,8 @@ def encode(line: str) -> Result[int, str]:
                 
     return Ok(instruction)
 
-def decode(encoded_instruction: int) -> Result[list, str]:
-    """Decodes an integer-encoded instruction. Returns a list containing each component of the instruction"""
+def decode(encoded_instruction: int) -> Result[str, str]:
+    """Decodes an integer-encoded instruction."""
     
     ret_list = []
     binary_instruction: str = get_encoded_instruction_as_binary(encoded_instruction)
@@ -157,83 +175,59 @@ def decode(encoded_instruction: int) -> Result[list, str]:
 
     return Ok(builder)
 
-if __name__ == "__main__":
+def instruction_string(instruction: int, p_mode: PrintMode) -> Result[str, str]:
+    builder: str = ""
     
-    line = "ldi 261 H"
+    i_mode: InstructionMode = get_instruction_mode(instruction)
     
-    encoded_line = encode(line).unwrap()
-    decoded_line = decode(encoded_line).unwrap()
+    # Convert the intruction to a binary string
+    instruction_str: str = format(instruction, "032b")
     
-    print("Original instruction: '{}'\nReconstructed instruction: '{}'".format(line, decoded_line))
-    
-
-
-
-
-
-
-
-
-
-# def instruction_string(instruction: int, p_mode: PrintMode) -> Result[str, str]:
-#     builder: str = ""
-    
-#     r_opcode = get_opcode(instruction)
-#     if r_opcode.is_err: return Err(r_opcode.Err())
-#     opcode = r_opcode.unwrap()
-#     i_mode: InstructionMode = opcode[2]
-    
-#     # Convert the intruction to a binary string
-#     instruction_str: str = format(instruction, "032b")
-    
-#     match p_mode:
+    match p_mode:
         
-#         case PrintMode.NoOutput:
-#             pass
+        case PrintMode.Binary:
+            builder += instruction_str
         
-#         case PrintMode.Binary:
-#             builder += instruction_str
-        
-#         case PrintMode.Bytes: # TODO: Magic numbers (but I think they are justified here)!
-#             byte0 = instruction_str[0:8]
-#             byte1 = instruction_str[8:16]
-#             byte2 = instruction_str[16:24]
-#             byte3 = instruction_str[24:32]
-#             builder += " ".join([byte0, byte1, byte2, byte3])
+        case PrintMode.Bytes: # TODO: Magic numbers (but I think they are justified here)!
+            byte0 = instruction_str[0:8]
+            byte1 = instruction_str[8:16]
+            byte2 = instruction_str[16:24]
+            byte3 = instruction_str[24:32]
+            builder += " ".join([byte0, byte1, byte2, byte3])
             
-#         case PrintMode.Hex:
-#             byte0 = "{:X}".format(int(instruction_str[0 : 4], 2))
-#             byte1 = "{:X}".format(int(instruction_str[4 : 8], 2))
-#             byte2 = "{:X}".format(int(instruction_str[8 :12], 2))
-#             byte3 = "{:X}".format(int(instruction_str[12:16], 2))
-#             byte4 = "{:X}".format(int(instruction_str[16:20], 2))
-#             byte5 = "{:X}".format(int(instruction_str[20:24], 2))
-#             byte6 = "{:X}".format(int(instruction_str[24:28], 2))
-#             byte7 = "{:X}".format(int(instruction_str[28:32], 2))
-#             builder += "".join([byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7])
+        case PrintMode.Hex:
+            byte0 = "{:X}".format(int(instruction_str[0 : 4], 2))
+            byte1 = "{:X}".format(int(instruction_str[4 : 8], 2))
+            byte2 = "{:X}".format(int(instruction_str[8 :12], 2))
+            byte3 = "{:X}".format(int(instruction_str[12:16], 2))
+            byte4 = "{:X}".format(int(instruction_str[16:20], 2))
+            byte5 = "{:X}".format(int(instruction_str[20:24], 2))
+            byte6 = "{:X}".format(int(instruction_str[24:28], 2))
+            byte7 = "{:X}".format(int(instruction_str[28:32], 2))
+            builder += "".join([byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7])
         
-#         case PrintMode.Instructions:
-#             match i_mode:
-#                 case InstructionMode.Register:
-#                     opcode   = instruction_str[:OP_LENGTH]
-#                     reg_a    = instruction_str[OP_LENGTH : OP_LENGTH + (1 * REG_LENGTH)]
-#                     reg_b    = instruction_str[OP_LENGTH + (1 * REG_LENGTH) : OP_LENGTH + (2 * REG_LENGTH)]
-#                     reg_c    = instruction_str[OP_LENGTH + (2 * REG_LENGTH) : OP_LENGTH + (3 * REG_LENGTH)]
-#                     shamt    = instruction_str[OP_LENGTH + (3 * REG_LENGTH) : OP_LENGTH + (3 * REG_LENGTH) + SHAMT_LENGTH]
-#                     func     = instruction_str[-FUNC_LENGTH:]
-#                     builder += " ".join([opcode, reg_a, reg_b, reg_c, shamt, func])
+        case PrintMode.Instructions:
+            match i_mode:
+                case InstructionMode.Register:
+                    opcode   = instruction_str[:OP_LENGTH]
+                    reg_a    = instruction_str[OP_LENGTH : OP_LENGTH + (1 * REG_LENGTH)]
+                    reg_b    = instruction_str[OP_LENGTH + (1 * REG_LENGTH) : OP_LENGTH + (2 * REG_LENGTH)]
+                    reg_c    = instruction_str[OP_LENGTH + (2 * REG_LENGTH) : OP_LENGTH + (3 * REG_LENGTH)]
+                    shamt    = instruction_str[OP_LENGTH + (3 * REG_LENGTH) : OP_LENGTH + (3 * REG_LENGTH) + SHAMT_LENGTH]
+                    func     = instruction_str[-FUNC_LENGTH:]
+                    builder += " ".join([opcode, reg_a, reg_b, reg_c, shamt, func])
                     
-#                 case InstructionMode.Immediate:
-#                     opcode  = instruction_str[:OP_LENGTH]
-#                     reg_a   = instruction_str[OP_LENGTH : OP_LENGTH + REG_LENGTH]
-#                     reg_b   = instruction_str[OP_LENGTH + (1 * REG_LENGTH) : OP_LENGTH + (2 * REG_LENGTH)]
-#                     unk     = instruction_str[OP_LENGTH + (2 * REG_LENGTH) : OP_LENGTH + (2 * REG_LENGTH) + FF_LENGTH]
-#                     value   = instruction_str[-IMM_LENGTH:]
-#                     builder += " ".join([opcode, reg_a, reg_b, unk, value])
+                case InstructionMode.Immediate:
+                    opcode  = instruction_str[:OP_LENGTH]
+                    reg_a   = instruction_str[OP_LENGTH : OP_LENGTH + REG_LENGTH]
+                    reg_b   = instruction_str[OP_LENGTH + (1 * REG_LENGTH) : OP_LENGTH + (2 * REG_LENGTH)]
+                    unk     = instruction_str[OP_LENGTH + (2 * REG_LENGTH) : OP_LENGTH + (2 * REG_LENGTH) + FF_LENGTH]
+                    value   = instruction_str[-IMM_LENGTH:]
+                    builder += " ".join([opcode, reg_a, reg_b, unk, value])
                     
-#                 case InstructionMode.Jump:
-#                     opcode  = instruction_str[:OP_LENGTH]
-#                     address = instruction_str[OP_LENGTH:]
-#                     builder += " ".join([opcode, address])
+                case InstructionMode.Jump:
+                    opcode  = instruction_str[:OP_LENGTH]
+                    address = instruction_str[OP_LENGTH:]
+                    builder += " ".join([opcode, address])
     
-#     return Ok(builder)
+    return Ok(builder)
