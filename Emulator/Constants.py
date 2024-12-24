@@ -93,16 +93,16 @@ CONSTANT_OPCODE_MAP = {
      "j":       (22, 1, InstructionMode.Jump, False),
     # "jr":      (23, 1, InstructionMode.Jump, False),
     # "jsr":     (24, 1, InstructionMode.Jump, False),
-    # "ret":     (25, 0, InstructionMode.Jump, False),
+    "ret":     (25, 0, InstructionMode.Jump, False),
     # "hpc":     (26, 1, InstructionMode.Jump, False),
-    # "syscall": (27, 1, InstructionMode.Register, False), # Bold move!!
+    # "syscall": (27, 1, InstructionMode.Register, False), # Reconsider
 }
 
-CONSTANT_NO_ARG_OPCODES = [
-    'nop',
-    'hlt',
-    'ret',
-]
+CONSTANT_NO_ARG_OPCODES = bidict({
+    'nop': 0,
+    'hlt': 1,
+    'ret': 25,
+})
 
 def get_opcode_from_id(id: int) -> Result[str, str]:
     for item in CONSTANT_OPCODE_MAP.items():

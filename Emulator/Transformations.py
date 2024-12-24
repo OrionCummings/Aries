@@ -118,31 +118,42 @@ def decode(encoded_instruction: int) -> Result[list, str]:
     
     builder = ""
     builder += opcode
-    builder += " "
 
-    match instruction_mode:
-        case InstructionMode.Register:
-            ret_list = decode_register_instruction_as_list(binary_instruction)
-            (_, *arguments) = ret_list
-            pass
-            
-        case InstructionMode.Immediate:
-            ret_list = decode_immediate_instruction_as_list(binary_instruction)
-            (_, bin_reg, _, _, bin_value) = ret_list
-            reg_id = int(bin_reg, 2)
-            reg = CONSTANT_REGISTER_MAP.inverse[reg_id]
-            value = str(int(bin_value, 2))
-            builder += value
-            builder += " "
-            builder += reg
-            pass
-            
-        case InstructionMode.Jump:
-            ret_list = decode_jump_instruction_as_list(binary_instruction)
-            (_, bin_address) = ret_list
-            address = str(int(bin_address, 2))
-            builder += address
-            pass
+    if opcode not in CONSTANT_NO_ARG_OPCODES:
+        builder += " "
+        match instruction_mode:
+            case InstructionMode.Register:
+                ret_list = decode_register_instruction_as_list(binary_instruction)
+                (_, bin_reg1, bin_reg2, bin_reg3, bin_shamt, bin_func) = ret_list
+                reg1 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg1, 2)]
+                reg2 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg2, 2)]
+                reg3 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg3, 2)]
+                
+                # TODO: Implement shift amount and function
+                # shamt = int(bin_shamt, 2)
+                # func = int(bin_func, 2)
+                           
+                builder += reg1
+                builder += " "
+                builder += reg2
+                builder += " "
+                builder += reg3
+                
+            case InstructionMode.Immediate:
+                ret_list = decode_immediate_instruction_as_list(binary_instruction)
+                (_, bin_reg, _, _, bin_value) = ret_list
+                reg_id = int(bin_reg, 2)
+                reg = CONSTANT_REGISTER_MAP.inverse[reg_id]
+                value = str(int(bin_value, 2))
+                builder += value
+                builder += " "
+                builder += reg
+                
+            case InstructionMode.Jump:
+                ret_list = decode_jump_instruction_as_list(binary_instruction)
+                (_, bin_address) = ret_list
+                address = str(int(bin_address, 2))
+                builder += address
 
     return Ok(builder)
 

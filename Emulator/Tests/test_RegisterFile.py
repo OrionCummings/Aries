@@ -94,5 +94,3 @@ class RegisterFileTests(unittest.TestCase):
 
         self.assertEqual(register_file.get_reg('FL').unwrap(), 0)
 
-if __name__ == '__main__':
-    unittest.main()

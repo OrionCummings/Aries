@@ -51,5 +51,3 @@ class BitManipulationTests(unittest.TestCase):
 
             self.assertEqual(expected_toggle_bit, actual_toggle_bit, "At least one actual toggle bit did not match the expected toggle bit!")
 
-if __name__ == '__main__':
-    unittest.main()

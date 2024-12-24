@@ -5,7 +5,7 @@ from Instructions import ADD, NOP, encode, get_opcode
 from Memory import Memory
 from RegisterFile import RegisterFile
 from CPU import CPU
-from Constants import *
+from Constants import BP_INC, CONSTANT_REGISTER_MAP, FL_CARRY, FL_ZERO, PC_INC, SP_INC, FL_PARITY, FL_SIGN, FL_OVERFLOW, FL_INTERRUPT, FL_TRAP, FL_HPC
 
 def print_expected_and_actual_binary(expected: int, actual: int):
     print()
@@ -28,10 +28,10 @@ class RegisterFileUnitTests(unittest.TestCase):
         # Create a RegisterFile
         r = RegisterFile()
         
-        for reg in REGISTERS.keys():
+        for reg in CONSTANT_REGISTER_MAP.keys():
             r.registers[reg] = 4
         
-        for reg in REGISTERS.keys():
+        for reg in CONSTANT_REGISTER_MAP.keys():
             r_value = r.get_reg(reg)
             if r_value.is_err: self.fail(r_value.Err)
             value = r_value.unwrap()
@@ -43,7 +43,7 @@ class RegisterFileUnitTests(unittest.TestCase):
         r = RegisterFile()
         
         # Set all registers to
-        for reg in REGISTERS.keys():
+        for reg in CONSTANT_REGISTER_MAP.keys():
             r.set_reg(reg, 4)
             
             r_value = r.get_reg(reg)
@@ -102,31 +102,31 @@ class RegisterFileUnitTests(unittest.TestCase):
     def test_ClearFlags(self):
         
         # Create a RegisterFile
-        R = RegisterFile()
+        register_file = RegisterFile()
         
         # Set the value of the flags register
-        R.registers['FL'] = int(0b0000000111111111)
+        register_file.registers['FL'] = int(0b0000000111111111)
         
         # Clear the flags register
-        R.clear_flags()
+        register_file.clear_flags()
         
         # Check that the value for the flag register is zero
-        self.assertEqual(r.registers['FL'], 0)
+        self.assertEqual(register_file.registers['FL'], 0)
     
     def test_SetFlag(self):
         
         # Create a RegisterFile
-        r = RegisterFile()
+        register_file = RegisterFile()
         
         # Set all flags
-        r.set_flag(FL_ZERO)
-        r.set_flag(FL_CARRY)
-        r.set_flag(FL_PARITY)
-        r.set_flag(FL_SIGN)
-        r.set_flag(FL_OVERFLOW)
-        r.set_flag(FL_INTERRUPT)
-        r.set_flag(FL_TRAP)
-        r.set_flag(FL_HPC)
+        register_file.set_flag(FL_ZERO)
+        register_file.set_flag(FL_CARRY)
+        register_file.set_flag(FL_PARITY)
+        register_file.set_flag(FL_SIGN)
+        register_file.set_flag(FL_OVERFLOW)
+        register_file.set_flag(FL_INTERRUPT)
+        register_file.set_flag(FL_TRAP)
+        register_file.set_flag(FL_HPC)
         
         # Check that the value for the flag register is zero
         self.assertEqual(r.registers['FL'], int(0b0000000011111111))
@@ -134,20 +134,20 @@ class RegisterFileUnitTests(unittest.TestCase):
     def test_GetFlag(self):
         
         # Create a RegisterFile
-        r = RegisterFile()
+        register_file = RegisterFile()
         
         # Set the flags register
-        r.registers['FL'] = int(0x000000FF)
+        register_file.registers['FL'] = int(0x000000FF)
         
         # Get all flags
-        zero_value = r.GetFlag(FL_ZERO)
-        carry_value = r.GetFlag(FL_CARRY)
-        parity_value = r.GetFlag(FL_PARITY)
-        sign_value = r.GetFlag(FL_SIGN)
-        overflow_value = r.GetFlag(FL_OVERFLOW)
-        interrupt_value = r.GetFlag(FL_INTERRUPT)
-        trap_value = r.GetFlag(FL_TRAP)
-        hpc_value = r.GetFlag(FL_HPC)
+        zero_value      = register_file.GetFlag(FL_ZERO)
+        carry_value     = register_file.GetFlag(FL_CARRY)
+        parity_value    = register_file.GetFlag(FL_PARITY)
+        sign_value      = register_file.GetFlag(FL_SIGN)
+        overflow_value  = register_file.GetFlag(FL_OVERFLOW)
+        interrupt_value = register_file.GetFlag(FL_INTERRUPT)
+        trap_value      = register_file.GetFlag(FL_TRAP)
+        hpc_value       = register_file.GetFlag(FL_HPC)
         
         # Check that the values match
         self.assertEqual(zero_value, 1)
@@ -162,23 +162,23 @@ class RegisterFileUnitTests(unittest.TestCase):
     def test_ToggleFlag(self):
         
         # Create a RegisterFile
-        r = RegisterFile()
+        register_file = RegisterFile()
 
         # Set the flags register
-        r.registers['FL'] = int(0x000000FF)
+        register_file.registers['FL'] = int(0x000000FF)
         
         # Toggle all flags
-        r.toggle_flag(FL_ZERO)
-        r.toggle_flag(FL_CARRY)
-        r.toggle_flag(FL_PARITY)
-        r.toggle_flag(FL_SIGN)
-        r.toggle_flag(FL_OVERFLOW)
-        r.toggle_flag(FL_INTERRUPT)
-        r.toggle_flag(FL_TRAP)
-        r.toggle_flag(FL_HPC)
+        register_file.toggle_flag(FL_ZERO)
+        register_file.toggle_flag(FL_CARRY)
+        register_file.toggle_flag(FL_PARITY)
+        register_file.toggle_flag(FL_SIGN)
+        register_file.toggle_flag(FL_OVERFLOW)
+        register_file.toggle_flag(FL_INTERRUPT)
+        register_file.toggle_flag(FL_TRAP)
+        register_file.toggle_flag(FL_HPC)
         
         # Check that the value for the flag register is zero
-        self.assertEqual(r.registers['FL'], int(0x00000000))
+        self.assertEqual(register_file.registers['FL'], int(0x00000000))
 
 class CPUUnitTests(unittest.TestCase):
     
@@ -188,7 +188,7 @@ class CPUUnitTests(unittest.TestCase):
         cpu_b = CPU(16, 16)
         
         # TODO: Make this test more robust; this doesn't test much at all
-        self.assertTrue(cpu_a == cpu_b)
+        self.assertEqual(cpu_a, cpu_b)
 
 class InstructionUnitTests(unittest.TestCase):
     
@@ -227,7 +227,7 @@ class InstructionUnitTests(unittest.TestCase):
         if r_actual_cpu.is_err: self.fail(r_actual_cpu.unwrap_err())
         actual_cpu = r_actual_cpu.unwrap()
         
-        self.assertTrue(expected_cpu == actual_cpu)
+        self.assertEqual(expected_cpu, actual_cpu)
         
     @unittest.skip("Not implemented")
     def test_ADDI(self):

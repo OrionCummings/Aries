@@ -6,6 +6,7 @@ from Constants import PC_OVERRUN
 from RegisterFile import RegisterFile
 from Memory import Memory
 from CallStack import CallStack
+from Utilities import p_exit
 
 class CPU():
     """A CPU that supports the Aires Assembly Language."""
@@ -102,18 +103,20 @@ class CPU():
     def tick(self) -> Result[int, str]:
         """Executes the current instruction and returns the address that was changed."""
         
-        from Instructions import INSTRUCTIONS, GetOpcode
-        
         address = None
+
+        # Get the current instruction
         current_instruction = self.get_current_instruction()
         
+        # Get the opcode of the current instruction
         r_opcode = get_opcode(current_instruction)
         if r_opcode.is_err: return Err(r_opcode.unwrap_err())
         opcode_tuple = r_opcode.unwrap()
         
-        opcode_id = opcode_tuple[0]
-        opcode_function = INSTRUCTIONS[opcode_id]
-        self = opcode_function(self, current_instruction)
+        # Fetch and run the function corresponding to the opcode
+        # opcode_id = opcode_tuple[0]
+        # opcode_function = CONSTANT_OPCODE_MAP[opcode_id]
+        # self = opcode_function(self, current_instruction)
         
         print("Executed 'N/A'".format())
         
@@ -132,9 +135,10 @@ class CPU():
         # TODO: This only triggers when we go out of bounds (which is good!), but
         # it is possible to interact with uninitialized memory (index > size).
         # It may be a good idea to raise a warning of some kind, but there is no
-        # such mechanism at the moment. 
+        # such mechanism at the moment.
+        
         # Increment the program counter
-        if self.register_file.get_pc() >= self.instruction_memory.capacity - 1: PExit("Program counter overrun!", PC_OVERRUN)
+        if self.register_file.get_pc() >= self.instruction_memory.capacity - 1: p_exit("Program counter overrun!", PC_OVERRUN)
             
         self.register_file.increment_program_counter()
         
