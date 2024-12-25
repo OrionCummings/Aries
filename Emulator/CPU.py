@@ -2,7 +2,7 @@ from typing import Optional
 from option import Err, Ok, Result
 from Transformations import encode, decode, get_opcode
 from PrettyPrinting import bold, green_bold, red_bold
-from Constants import PC_OVERRUN
+from Constants import PC_OVERRUN, InstructionMode
 from RegisterFile import RegisterFile
 from Memory import Memory
 from CallStack import CallStack
@@ -85,10 +85,15 @@ class CPU():
         """Loads a program into memory at the given address."""
         
         if base_address >= self.instruction_memory.capacity:
-            print("Base address '{}' exceeds the instruction memory address space of {}!".format(base_address, self.instruction_memory.size))
+            print("Failed to load program: Base address '{}' exceeds the instruction memory address space of {}!".format(base_address, self.instruction_memory.capacity))
             exit(2)
         
-        if len(program) == 0: print("WARNING: Loading null program.")
+        program_length = len(program)
+        if program_length + base_address >= self.instruction_memory.capacity:
+            print("Failed to load program: program size ({}) exceeds the instruction memory capacity ({})!".format(program_length, self.instruction_memory.capacity))
+            exit(2)
+        
+        if program_length == 0: print("WARNING: Loading null program.")
         
         r_update = self.instruction_memory.update_chunk(program, base_address)
         if r_update.is_err: return Err(r_update.unwrap_err())
@@ -108,11 +113,12 @@ class CPU():
         # Get the current instruction
         current_instruction = self.get_current_instruction()
         decoded_instruction = decode(current_instruction).unwrap()
-        opcode_id = get_opcode(current_instruction).unwrap()
-        opcode = get_opcode_from_id(opcode_id).unwrap()
+        decoded_instruction_list = decoded_instruction.split(" ")
+        (opcode, *arguments) = decoded_instruction_list
 
-        # TODO: Actually execute instructions
-
+        function = CONSTANT_INSTRUCTION_FUNCTIONS[opcode]
+        self = function(self, arguments).unwrap() # TODO: Reassigning 'self' is probably bad practice
+        
         pass
 
         
@@ -141,3 +147,55 @@ class CPU():
         self.register_file.increment_program_counter()
         
         return True
+
+
+def nop(cpu: CPU, arguments: list) -> Result[CPU, str]:
+    """Executes a 'nop' instruction."""
+
+    # Do nothing
+
+    return Ok(cpu)
+
+def hlt(cpu: CPU, arguments: list) -> Result[CPU, str]:
+    """Executes a 'hlt' instruction."""
+
+    # Halt the CPU
+    cpu.halted = True
+
+    return Ok(cpu)
+
+def add(cpu: CPU, arguments: list) -> Result[CPU, str]:
+    """Executes an 'add' instruction."""
+    
+    (reg1, reg2, reg3) = arguments
+    reg1_value = cpu.register_file.get_reg(reg1)
+    reg2_value = cpu.register_file.get_reg(reg2)
+    reg3_value_new = reg1_value + reg2_value
+    cpu.register_file.set_reg(reg3, reg3_value_new)
+
+    return Ok(cpu)
+
+def addi(cpu: CPU, arguments: list) -> Result[CPU, str]:
+    
+    (value, src_reg, dest_reg) = arguments
+    src_value = cpu.register_file.get_reg(src_reg).unwrap()
+    dest_value = value + src_value
+    cpu.register_file.set_reg(dest_reg, dest_value)
+    
+    return Ok(cpu)
+
+def ldi(cpu: CPU, arguments: list) -> Result[CPU, str]:
+
+    (value, reg) = arguments
+    cpu.register_file.set_reg(reg, value)
+    
+    return Ok(cpu)
+
+# A list of all instruction functions
+CONSTANT_INSTRUCTION_FUNCTIONS = {
+    "nop":      nop,    # 0
+    "hlt":      hlt,    # 1
+    "add":      add,    # 2
+    "addi":     addi,   # 3
+    "ldi":      ldi,    # 15
+}

@@ -1,9 +1,8 @@
 from dataclasses import dataclass
 from typing import List
 from option import Err, Ok, Result
-from Instructions import encode
 from Constants import ASM_COMMENT_CHARACTER, ASM_TEST_PREFIX_CHARACTER
-from Transformations import instruction_string
+from Transformations import encode, instruction_string
 from Utilities import p_exit
 from PrettyPrinting import PrintMode
 
@@ -37,7 +36,7 @@ class Assembler():
         
         # Read the file into FileContents
         print("Reading file '{}' into assembler buffer.".format(file_name))
-        r_real: result[bool, str] = self.read(settings)
+        r_real: Result[bool, str] = self.read(settings)
         if r_real.is_err:
             p_exit(r_real.Err(), -4)
         print("Read file '{}' into assembler buffer.".format(file_name))
@@ -154,7 +153,7 @@ class Assembler():
         
             for index in range(0, len(test_instructions)):
                 if test_instructions[index] != instructions[index]:
-                    return Err("Test instructions and assembled instructions differ at index {} ({} != {})".format(index, format(test_instructions[index], "032b"), format(Instructions[Index], "032b")))
+                    return Err("Test instructions and assembled instructions differ at index {} ({} != {})".format(index, format(test_instructions[index], "032b"), format(instructions[index], "032b")))
         
         return Ok(instructions)
     

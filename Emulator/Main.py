@@ -7,17 +7,17 @@ settings = AssemblerSettings()
 settings.print_mode = PrintMode.Hex
 settings.self_test = False
 
-a = Assembler("Example.aria", settings)
-c = CPU(instruction_memory_size=8, data_memory_size=64)
-c.load_program(a.instructions, a.file_name, 0)
+assembler = Assembler("Instructions/ldi.aria", settings)
+cpu = CPU(instruction_memory_size=16, data_memory_size=64)
+cpu.load_program(assembler.instructions, assembler.file_name, 0)
 
 def press(key) -> bool:
     """Runs one clock cycle if the space bar is pressed.
     Runs many clock cycles if the space bar is held.""" 
 
     if key == Key.space:
-        clock = c.clock()
-        print(c)
+        clock = cpu.clock()
+        print(cpu)
         return clock #?
     else:
         return False 
@@ -25,7 +25,7 @@ def press(key) -> bool:
 def main():
     
     print("Press space to execute one clock cycle")
-    print(c) 
+    print(cpu) 
     with Listener(on_press = press) as l: l.join()
     print(red_bold("CPU halted"))
 

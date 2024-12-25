@@ -1,0 +1,11 @@
+; This is a program to test the add
+; immediate instruction (addi).
+
+; Add 1 to the contents of register A
+; and place the result in register B.
+; Register begins at zero, so this 
+; program should halt with a 1 in register B.
+addi 1 A B
+
+; Halt the program
+hlt

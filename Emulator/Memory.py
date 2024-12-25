@@ -17,14 +17,7 @@ class Memory():
         if not isinstance(other, self.block):
             raise NotImplementedError
         
-        size_equal = self.size == other.size
-        capacity_equal = self.capacity == other.capacity
-        
-        # Check the size and capacity first to avoid an unnecessary check of the memory
-        if size_equal and capacity_equal == False: return False
-        
-        memory_equal = self.block == other.block # TODO: This feels wrong
-        return memory_equal
+        return self.block == other.block
     
     def __str__(self) -> str:
         builder: str = ""
