@@ -7,7 +7,7 @@ settings = AssemblerSettings()
 settings.print_mode = PrintMode.Hex
 settings.self_test = False
 
-assembler = Assembler("Instructions/j.aria", settings)
+assembler = Assembler("labels.aria", settings)
 cpu = CPU(instruction_memory_size=16, data_memory_size=64)
 cpu.load_program(assembler.instructions, assembler.file_name, 0)
 

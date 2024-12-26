@@ -49,13 +49,13 @@ class Assembler():
         r_instructions = self.assemble(settings)
         if r_instructions.is_err:
             if settings.self_test: print("Failed to assemble file '{}' as a test file!".format(file_name))
-            else:        print("Failed to assemble file '{}'!".format(file_name))
+            else: print("Failed to assemble file '{}'!".format(file_name))
             print(r_instructions.Err)
         
         self.instructions = r_instructions.unwrap()
             
         if settings.self_test: print("Assembled file '{}' with self tests enabled.".format(file_name))
-        else:        print("Assembled file '{}'.".format(file_name))
+        else: print("Assembled file '{}'.".format(file_name))
         
         # Update metadata post assembly
         self.update_metadata()
@@ -69,16 +69,17 @@ class Assembler():
         if self.settings.print_mode == PrintMode.NoOutput:
             return ""
         
-        builder: str = ""
-        builder += "[" + self.file_name + " - " + str(self.size) + " Bytes]\n"
-        
         if len(self.instructions) < 1:
             builder += "No File Contents"
             return builder
         
+        builder: str = ""
+        builder += "[" + self.file_name + " - " + str(self.size) + " Bytes]\n"
+        
         index = 0
         for instruction in self.instructions:
             
+            # TODO: Get a better constant; 1 is a temporary number!
             if index != 0 and index % 1 == 0:
                 builder += "\n"
 
