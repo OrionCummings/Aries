@@ -106,13 +106,30 @@ def encode(line: str) -> Result[int, str]:
                 
             case InstructionMode.Immediate:
                 
-                _, value_str, reg_str = line_vector
+                _, *arguments = line_vector
                 
-                value = int(value_str)
-                reg = CONSTANT_REGISTER_MAP[reg_str]
+                # Immediate loads/stores have 2 arguments
+                if len(arguments) == 2:
                 
-                instruction |= reg << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 1))
-                instruction |= value
+                    value = int(arguments[0])
+                    reg = CONSTANT_REGISTER_MAP[arguments[1]]
+                    
+                    instruction |= reg << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 1))
+                    instruction |= value
+                
+                # Immediate operations have 3 arguments
+                elif len(arguments) == 3:
+                
+                    value = int(arguments[0])
+                    src_reg = CONSTANT_REGISTER_MAP[arguments[1]]
+                    dest_reg = CONSTANT_REGISTER_MAP[arguments[2]]
+                    
+                    instruction |= src_reg  << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 1))
+                    instruction |= dest_reg << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 2))
+                    instruction |= value
+                
+                else:
+                    return Err("Invalid number of arguments found in instruction '{}'!".format(line))
                 
             case InstructionMode.Jump:
                 
@@ -132,7 +149,7 @@ def decode(encoded_instruction: int) -> Result[str, str]:
     
     opcode_id = get_opcode(encoded_instruction).unwrap()
     opcode = get_opcode_from_id(opcode_id).unwrap()
-    (_, _, instruction_mode, *_) = CONSTANT_OPCODE_MAP[opcode]
+    (_, argc, instruction_mode, *_) = CONSTANT_OPCODE_MAP[opcode]
     
     builder = ""
     builder += opcode
@@ -159,13 +176,20 @@ def decode(encoded_instruction: int) -> Result[str, str]:
                 
             case InstructionMode.Immediate:
                 ret_list = decode_immediate_instruction_as_list(binary_instruction)
-                (_, bin_reg, _, _, bin_value) = ret_list
-                reg_id = int(bin_reg, 2)
-                reg = CONSTANT_REGISTER_MAP.inverse[reg_id]
+                (_, bin_src_reg, bin_dest_reg, _, bin_value) = ret_list
+                src_reg_id = int(bin_src_reg, 2)
+                src_reg = CONSTANT_REGISTER_MAP.inverse[src_reg_id]
                 value = str(int(bin_value, 2))
                 builder += value
                 builder += " "
-                builder += reg
+                builder += src_reg
+                
+                # If this is an immediate operator instruction, it has 3 arguments
+                if argc == 3:
+                    dest_reg_id = int(bin_dest_reg, 2)
+                    dest_reg = CONSTANT_REGISTER_MAP.inverse[dest_reg_id]
+                    builder += " "
+                    builder += dest_reg
                 
             case InstructionMode.Jump:
                 ret_list = decode_jump_instruction_as_list(binary_instruction)

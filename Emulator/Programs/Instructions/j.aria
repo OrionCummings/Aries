@@ -1,0 +1,7 @@
+j 5
+ldi 255 B
+ldi 255 C
+ldi 255 D
+hlt
+ldi 255 A
+hlt

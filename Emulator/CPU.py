@@ -119,9 +119,6 @@ class CPU():
         function = CONSTANT_INSTRUCTION_FUNCTIONS[opcode]
         self = function(self, arguments).unwrap() # TODO: Reassigning 'self' is probably bad practice
         
-        pass
-
-        
         print(green_bold("Executed '{}'".format(decoded_instruction)))
         
         # TODO: Implement this (optional) feature!
@@ -177,7 +174,8 @@ def add(cpu: CPU, arguments: list) -> Result[CPU, str]:
 
 def addi(cpu: CPU, arguments: list) -> Result[CPU, str]:
     
-    (value, src_reg, dest_reg) = arguments
+    (value_str, src_reg, dest_reg) = arguments
+    value = int(value_str)
     src_value = cpu.register_file.get_reg(src_reg).unwrap()
     dest_value = value + src_value
     cpu.register_file.set_reg(dest_reg, dest_value)
@@ -186,8 +184,17 @@ def addi(cpu: CPU, arguments: list) -> Result[CPU, str]:
 
 def ldi(cpu: CPU, arguments: list) -> Result[CPU, str]:
 
-    (value, reg) = arguments
+    (value_str, reg) = arguments
+    value = int(value_str)
     cpu.register_file.set_reg(reg, value)
+    
+    return Ok(cpu)
+
+def j(cpu: CPU, arguments: list) -> Result[CPU, str]:
+
+    (address_str,) = arguments
+    address = int(address_str)
+    cpu.register_file.set_reg("PC", address)
     
     return Ok(cpu)
 
@@ -198,4 +205,5 @@ CONSTANT_INSTRUCTION_FUNCTIONS = {
     "add":      add,    # 2
     "addi":     addi,   # 3
     "ldi":      ldi,    # 15
+    "j":        j,      # 22
 }

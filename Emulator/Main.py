@@ -7,7 +7,7 @@ settings = AssemblerSettings()
 settings.print_mode = PrintMode.Hex
 settings.self_test = False
 
-assembler = Assembler("Instructions/ldi.aria", settings)
+assembler = Assembler("Instructions/j.aria", settings)
 cpu = CPU(instruction_memory_size=16, data_memory_size=64)
 cpu.load_program(assembler.instructions, assembler.file_name, 0)
 
@@ -16,8 +16,17 @@ def press(key) -> bool:
     Runs many clock cycles if the space bar is held.""" 
 
     if key == Key.space:
+        
+        # Clear the screen
+        # print("\033c", end="")
+        
+        # Run one clock cycle of the CPU
         clock = cpu.clock()
+        
+        # Print the CPU state
         print(cpu)
+        
+        
         return clock #?
     else:
         return False 

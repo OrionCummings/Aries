@@ -70,9 +70,9 @@ CONSTANT_OPCODE_MAP = {
     "nop":      (0, 0, InstructionMode.Jump, False),
     "hlt":      (1, 0, InstructionMode.Jump, False),
     "add":      (2, 3, InstructionMode.Register, True),
-    "addi":     (3, 2, InstructionMode.Immediate, True),
+    "addi":     (3, 3, InstructionMode.Immediate, True),
     # "sub":      (5, 3, InstructionMode.Register, True),
-    # "subi":     (4, 2, InstructionMode.Immediate, True),
+    # "subi":     (4, 3, InstructionMode.Immediate, True),
     # "not":      (6, 2, InstructionMode.Register, True),
     # "and":      (7, 3, InstructionMode.Register, True),
     # "nand":     (8, 3, InstructionMode.Register, True),
@@ -82,19 +82,20 @@ CONSTANT_OPCODE_MAP = {
     # "xnor":    (12, 3, InstructionMode.Register, True),
     # "shl":     (13, 2, InstructionMode.Register, True),
     # "shr":     (14, 2, InstructionMode.Register, True),
-    "ldi":     (15, 2, InstructionMode.Immediate, True),
+    "ldi":       (15, 2, InstructionMode.Immediate, True),
     # "lui":     (16, 2, InstructionMode.Immediate, True),
     # "lli":     (17, 2, InstructionMode.Immediate, True),
     # "ld":      (18, 2, InstructionMode.Register, True),
     # "sti":     (19, 2, InstructionMode.Immediate, False),
     # "str":     (20, 2, InstructionMode.Register, False),
     # "bne":     (21, 1, InstructionMode.Jump, False),
-     "j":       (22, 1, InstructionMode.Jump, False),
+     "j":        (22, 1, InstructionMode.Jump, False),
     # "jr":      (23, 1, InstructionMode.Jump, False),
     # "jsr":     (24, 1, InstructionMode.Jump, False),
-    "ret":     (25, 0, InstructionMode.Jump, False),
-    # "hpc":     (26, 1, InstructionMode.Jump, False),
-    # "syscall": (27, 1, InstructionMode.Register, False), # Reconsider
+    "call":      (25, 1, InstructionMode.Jump, False),
+    "ret":       (26, 0, InstructionMode.Jump, False),
+    # "hpc":     (27, 1, InstructionMode.Jump, False),
+    # "syscall": (28, 1, InstructionMode.Register, False), # Reconsider
 }
 
 CONSTANT_NO_ARG_OPCODES = bidict({
