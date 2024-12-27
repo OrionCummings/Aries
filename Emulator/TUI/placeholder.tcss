@@ -1,0 +1,25 @@
+Placeholder {
+    height: 100%;
+}
+
+#page {
+    height: 100%;
+    width: 100%;
+    layout: grid;
+    grid-size: 8 8;
+}
+
+#program_dissassembly {
+    row-span: 8;
+    column-span: 2;
+}
+
+#register_file {
+    row-span: 2;
+    column-span: 6;
+}
+
+#data_memory {
+    row-span: 6;
+    column-span: 6;
+}
