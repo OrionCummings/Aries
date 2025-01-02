@@ -1,7 +1,8 @@
 from __future__ import annotations
+from enum import Enum
 from option import Err, Ok, Result
 from BitManipulation import get_bit, set_bit, toggle_bit
-from Constants import CONSTANT_REGISTER_MAP, BP_INC, PC_INC, SP_INC
+from Constants import CONSTANT_REGISTER_MAP, BP_INC, PC_INC, SP_INC, TextRenderTarget
 
 def is_register(reg: str) -> bool:
     return reg in (list(CONSTANT_REGISTER_MAP.keys()) + list(CONSTANT_REGISTER_MAP.values()))
@@ -26,12 +27,36 @@ class RegisterFile():
         """Returns a string representation of a RegisterFile."""
 
         builder = ""
-        for r in self.registers.items():
-            builder += ("{:2} = {:032b}".format(r[0], r[1]))
+        for (name, value) in self.registers.items():
+            builder += ("{:2} = {:032b}".format(name, value))
             builder += "\n"
         builder += "                             HTIOSPCZ"
 
         return builder
+    
+    def to_string(self, target: TextRenderTarget = TextRenderTarget.Terminal):
+        """Returns a string representation of a register file
+        for either a terminal location or widget rendering."""
+
+        # If this is a terminal render, then just use the str override
+        if target == TextRenderTarget.Terminal:
+            return str(self)
+        
+        # If this is a widget render, then split it up a bit
+        if target == TextRenderTarget.Widget:
+            builder = ""
+            for index, (name, value) in enumerate(self.registers.items()):
+                builder += " "
+                builder += ("{:2} = {:032b}".format(name, value))
+                if index % 4 == 3:
+                    builder += "\n"
+            
+            builder += " " * 119 # This sucks
+            builder += "    ---- UNUSED ----     HTIOSPCZ"
+            
+            return builder
+        
+        return f"Invalid TextRenderTarget '{target}'"
     
     def set_reg(self, reg: str, value: int) -> None:
         if reg in self.registers:
@@ -69,17 +94,6 @@ class RegisterFile():
 # if __name__ == "__main__":
     
 #     rf = RegisterFile()
-#     print(rf)
-#     print()
-    
-#     rf.set_reg("B", 255)
-#     rf.set_reg("G", 16000)
-#     rf.set_reg("H", 2367471)
-#     print(rf)
-    
-#     print(rf.get_reg("A").unwrap())
-#     print(rf.get_reg("B").unwrap())
-#     print(rf.get_reg("G").unwrap())
-#     print(rf.get_reg("H").unwrap())
+#     print(rf.to_string(TextRenderTarget.Widget))
     
     

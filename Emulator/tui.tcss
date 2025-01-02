@@ -3,6 +3,13 @@ Placeholder {
     width: 100%;
 }
 
+WidgetRegisterFile {
+    min-height: 7;
+    min-width: 155;
+    border: round #e0e1dd;
+    align: center middle;
+}
+
 #main_view {
     height: 100%;
     width: 100%;

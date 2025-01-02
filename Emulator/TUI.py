@@ -7,6 +7,7 @@ from textual.widgets import Footer
 from textual.widgets import DataTable
 from textual.widgets import Header
 from textual.color import Color
+from WidgetRegisterFile import WidgetRegisterFile
 
 FILENAME = "ldi.aria"
 
@@ -78,7 +79,7 @@ class CPUApp(App):
         return widget_program_disassembly_table
 
     def create_register_file(self):
-        widget_register_file = Placeholder(" ", id="register_file")
+        widget_register_file = WidgetRegisterFile("N/A", id="register_file")
         widget_register_file.border_title = "Register File"
         widget_register_file.styles.background = COLOR_BACKGROUND
         widget_register_file.styles.color = COLOR_TEXT
@@ -103,7 +104,6 @@ class CPUApp(App):
         widget_data_memory = self.create_data_memory()
         
         # Create a container with all three main widgets
-        
         container_main_view = Container(
                 widget_program_disassembly_table,
                 widget_register_file,
@@ -117,19 +117,6 @@ class CPUApp(App):
             container_main_view,
             widget_footer
         )
-        
-        
-        # yield VerticalScroll(
-        #     Container(
-        #         Header(icon=None, time_format="%H:%M:%S", show_clock=True, id="header"),
-        #         # Placeholder("Program Dissassembly", id="program_dissassembly"),
-        #         DataTable(id="program_dissassembly"),
-        #         Placeholder("Register File", id="register_file"),
-        #         Placeholder("Data Memory", id="data_memory"),
-        #         id="page",
-        #     ),
-        #     Footer(show_command_palette=False),
-        # )
 
     def on_mount(self) -> None:
         

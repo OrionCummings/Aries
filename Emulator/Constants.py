@@ -157,3 +157,8 @@ PC_OVERRUN = 0x30
 
 
 
+
+class TextRenderTarget(Enum):
+    Terminal = 0,
+    Widget = 1,
+
