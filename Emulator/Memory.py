@@ -4,30 +4,25 @@ from option import Err, Ok, Result
 from Constants import TextRenderTarget
 from PrettyPrinting import bold
 
-# The number of memory entries to show per line when printed
-TERMINAL_MEMORY_DISPLAY_LENGTH = 16
-WIDGET_MEMORY_DISPLAY_LENGTH = 16
-
-# TODO: Fix this class
-# There a many assumptions about the layout/alignment of memory
-# that are not documented nor consistent!
-# * Should memory be bit-addressable?
-# * How is (1 byte) memory alignment being enforced?
-# * How should numbers larger than a single byte be handled?
-# * How should negative numbers be handled? -This one is more complex, and should be addressed last!
 class Memory():
     """A byte-addressable block of memory designed to simulate either data or instruction memory.
     """
     
-    def __init__(self, capacity: int):
+    def __init__(self, capacity: int, bytes_per_line: int = 8):
         """Creates an empty Memory class. Initializes all memory to zero.
 
         Args:
             capacity (int): The size of memory. Expected (but not required) to be a power of 2.
+            bytes_per_line (int): The number of bytes to display per line in a text representation of
+            a Memory instance. Defaults to 8.
         """
         
         self.bytes = bytearray(capacity)
         self.capacity = capacity
+        
+        """The number of bytes to display per line of rendered text.
+        """
+        self.bytes_per_line: int = bytes_per_line
     
     def __eq__(self, other: Memory) -> bool:
         """Equality operator overload. Determines if two Memory instances are equivalent.
@@ -49,7 +44,7 @@ class Memory():
         return self.bytes == other.bytes
     
     def __str__(self) -> str:
-        """Converts a Memory instance into a string representation. Ideal for printing.
+        """Converts a Memory instance into a string representation.
 
         Returns:
             str: A string representation of the Memory instance.
@@ -58,39 +53,14 @@ class Memory():
         builder: str = ""
         for index in range(0, self.capacity):
             
-            if index != 0 and index % TERMINAL_MEMORY_DISPLAY_LENGTH == 0:
-                builder += "\n"
+            # TODO: Temporarily removed this for TUI testing!
+            # if index != 0 and index % self.bytes_per_line == 0:
+            #     builder += "\n"
             
             builder += "{:02X}".format(self.bytes[index])
             builder += " "
 
         return builder
-    
-    def to_string(self, target: TextRenderTarget = TextRenderTarget.Terminal) -> str:
-        """A function to convert a Memory instance into a string, similar to the string overload. Accepts an additional
-        parameter to determine the target display.
-
-        Args:
-            target (TextRenderTarget, optional): The target render location. Defaults to TextRenderTarget.Terminal.
-
-        Returns:
-            str: A string representation of a Memory instance that is suitable for the given render target.
-        """
-        
-        if target == TextRenderTarget.Terminal:
-            return str(self)
-        
-        if target == TextRenderTarget.Widget:
-            builder: str = ""
-            for index in range(0, self.capacity):
-                
-                if index != 0 and index % WIDGET_MEMORY_DISPLAY_LENGTH == 0:
-                    builder += "\n"
-                
-                builder += "{:02X}".format(self.bytes[index])
-                builder += " "
-
-            return builder
     
     def get_bytes(self, start_index: int, end_index: int) -> Result[bytes, str]:
         """Gets the bytes between the given indices.
@@ -113,9 +83,10 @@ class Memory():
 
         Args:
             values (bytearray): An array of bytes to be written to memory
-            indices (list[int] | range): Either a list of indices corresponding to each values passed as `values` or 
-            a contiguous range of indices. If this is of type `range`, then the `values` array is expected to contain 
-            a single element that will be written to all memory addresses as specified by `indices`
+            indices (list[int] | range): One of several types:
+            `indices` could be a list of indices corresponding to each values passed as `values`.
+            `indices` could be a contiguous range of indices. If so, then the `values` array is expected to contain
+            a single element that will be written to all memory addresses as specified by `indices`.
 
         Returns:
             Result[bool, str]: A result type containing a boolean True on success or a string error message on failure.
@@ -127,7 +98,7 @@ class Memory():
         
         if isinstance(indices, range):
             indices = list(indices)
-        
+            
         for (i, index) in enumerate(indices):
             if index < 0: return Err("Memory location out of bounds: {} < 0!".format(index))
             if index >= self.capacity: return Err("Memory location out of bounds: {} > {}!".format(index, self.capacity))
@@ -170,16 +141,13 @@ class Memory():
 if __name__ == "__main__":
     
     memory = Memory(128)
-    r = memory.set_bytes(bytearray([255]), range(0, 4))
+    # r = memory.set_bytes(bytearray([255]), range(0, 4))
+    r = memory.set_bytes(bytearray([255]), [2])
     
     i1 = [0b11111111_11111111_00000000_00000000] * 8
     i2 = [0b11001100_00001111_00001111_00001010] * 8
     instructions = [val for pair in zip(i1, i2) for val in pair]
     memory.load_instructions(instructions, 16)
     
-    print("Terminal")
-    print(memory.to_string(TextRenderTarget.Terminal))
-    print()
-    print("Widget")
-    print(memory.to_string(TextRenderTarget.Widget))
+    print(memory)
     

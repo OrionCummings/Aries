@@ -8,11 +8,23 @@ from textual.widgets import DataTable
 from textual.widgets import Header
 from textual.color import Color
 from WidgetRegisterFile import WidgetRegisterFile
+from WidgetMemory import WidgetMemory
 
 FILENAME = "ldi.aria"
-
 DISASSEMBLY_HEADER = ["address", "instruction"]
 ROWS_RAW = [
+"ldi 1 A",
+"ldi 2 B",
+"ldi 4 C",
+"ldi 8 D",
+"ldi 16 E",
+"ldi 32 F",
+"ldi 64 G",
+"ldi 128 H",
+"ldi 256 I",
+"ldi 512 J",
+"ldi 1024 K",
+"ldi 2048 L",
 "ldi 1 A",
 "ldi 2 B",
 "ldi 4 C",
@@ -76,10 +88,11 @@ class CPUApp(App):
         widget_program_disassembly_table.styles.background = COLOR_BACKGROUND
         widget_program_disassembly_table.styles.color = COLOR_TEXT
         widget_program_disassembly_table.styles.border_title_align = 'center'
+        widget_program_disassembly_table.zebra_stripes = True
         return widget_program_disassembly_table
 
     def create_register_file(self):
-        widget_register_file = WidgetRegisterFile("N/A", id="register_file")
+        widget_register_file = WidgetRegisterFile(id="register_file")
         widget_register_file.border_title = "Register File"
         widget_register_file.styles.background = COLOR_BACKGROUND
         widget_register_file.styles.color = COLOR_TEXT
@@ -87,11 +100,14 @@ class CPUApp(App):
         return widget_register_file
 
     def create_data_memory(self):
-        widget_data_memory = Placeholder(" ", id="data_memory")
+        widget_data_memory = WidgetMemory("N/A", id="data_memory")
         widget_data_memory.border_title = "Data Memory"
         widget_data_memory.styles.background = COLOR_BACKGROUND
         widget_data_memory.styles.color = COLOR_TEXT
         widget_data_memory.styles.border_title_align = 'center'
+        
+        widget_data_memory.bytes_per_line = 16
+        
         return widget_data_memory
 
     def compose(self) -> ComposeResult:

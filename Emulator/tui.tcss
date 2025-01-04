@@ -1,11 +1,5 @@
-Placeholder {
-    height: 100%;
-    width: 100%;
-}
-
 WidgetRegisterFile {
-    min-height: 7;
-    min-width: 155;
+    layout: grid;
     border: round #e0e1dd;
     align: center middle;
 }
@@ -39,4 +33,15 @@ WidgetRegisterFile {
     row-span: 6;
     column-span: 6;
     border: round #e0e1dd;
+}
+
+
+#register_grid {
+    min-height: 7;
+    min-width: 155;
+    row-span: 1;
+    column-span: 1;
+    layout: grid;
+    grid-size: 4 4;
+    align: left middle;
 }

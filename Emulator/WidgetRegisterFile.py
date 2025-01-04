@@ -1,10 +1,12 @@
-from textual.containers import Container
+from textual.containers import Container, Grid, Horizontal, Vertical
 from textual.app import App, ComposeResult, RenderResult
 from textual.reactive import Reactive
 from textual.widget import Widget, Color
-from textual.widgets import Static
+from textual.widgets import Static, Placeholder, Label, Pretty
+from textual.message import Message
 from textual import events
-from RegisterFile import RegisterFile, RegisterFileRenderTarget
+from RegisterFile import RegisterFile
+from Constants import TextRenderTarget
 
 COLOR_TEXT = Color.parse('#e0e1dd')
 COLOR_BACKGROUND = Color.parse('#1b263b')
@@ -14,23 +16,53 @@ This class must be focusable for the current set up! If a class
 is not focusable, then it cannot receive input (i.e. on_click(), etc...)
 """
 # class WidgetRegisterFile(Static, can_focus = True):
-class WidgetRegisterFile(Static, can_focus = False):
+class WidgetRegisterFile(Widget, can_focus = True):
     """Display the current state of a register file."""
 
     rf = RegisterFile()
 
-    def on_mount(self) -> None:
-        self.update_register_file()
+    def update(self) -> None:
+        
+        # Test: increment PC
+        self.rf.increment_program_counter()
+        
+        # Update the displayed text
+        labels = self.query(Label)
+        for label in labels:
+            reg_name = label._content[:2].strip()
+            if reg_name == 'PC':
+                content = self.rf.get_reg('PC').unwrap()
+                formatted_content = format(content, "04x")
+                label._content = f"PC 0x{formatted_content}"
+                
+        pass
 
-    def on_click(self) -> None:
-        self.update_register_file()
+    def on_mount(self) -> None:
+        self.update()
 
     def on_key(self, event: events.Key) -> None:
-        self.update_register_file()
+        self.update()
         
-    def update_register_file(self) -> None:
-        self.rf.increment_program_counter()
-        self.update(self.rf.to_string(RegisterFileRenderTarget.Widget))
+    def compose(self) -> ComposeResult:
+        yield Grid(
+            Label("PC "),
+            Label("SP "),
+            Label("BP "),
+            Label("FL "),
+            Label("A "),
+            Label("B "),
+            Label("C "),
+            Label("D "),
+            Label("E "),
+            Label("F "),
+            Label("G "),
+            Label("H "),
+            Label("I "),
+            Label("J "),
+            Label("K "),
+            Label("L "),
+            id = "register_grid"
+            )
 
 class CustomApp(App):
     
@@ -51,7 +83,7 @@ class CustomApp(App):
     def compose(self) -> ComposeResult:
         
         main_view = self.create_register_file_widget()
-        yield Container(
+        yield Grid(
             main_view
         )
         

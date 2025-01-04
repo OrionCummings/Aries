@@ -3,33 +3,31 @@ from textual.app import App, ComposeResult
 from textual.widget import Color
 from textual.widgets import Static
 from textual import events
-from Memory import Memory, MemoryRenderTarget
+from Memory import Memory
+from Constants import TextRenderTarget
 
 COLOR_TEXT = Color.parse('#e0e1dd')
 COLOR_BACKGROUND = Color.parse('#1b263b')
 
-
 class WidgetMemory(Static, can_focus = True):
     """Display the current state of memory."""
 
-    memory = Memory(capacity=512)
-    value = 1
+    memory = Memory(capacity=128)
+    index = 0
+    value = 255
+    bytes_per_line = 2
 
     def on_mount(self) -> None:
         self.update_memory()
-        
 
-    def on_click(self) -> None:
-        self.update_memory()
- 
     def on_key(self, event: events.Key) -> None:
         self.update_memory()
         
     def update_memory(self) -> None:
-        self.value *= 2
-        self.memory.update(self.value, self.memory.size)
-        self.memory.size += 1
-        self.update(self.memory.to_string(MemoryRenderTarget.Widget))
+        self.memory.bytes_per_line = self.bytes_per_line
+        self.memory.set_bytes([self.value], [self.index])
+        self.index += 1
+        self.update(str(self.memory))
 
 class CustomApp(App):
     
