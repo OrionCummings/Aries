@@ -15,13 +15,12 @@ COLOR_BACKGROUND = Color.parse('#1b263b')
 This class must be focusable for the current set up! If a class
 is not focusable, then it cannot receive input (i.e. on_click(), etc...)
 """
-# class WidgetRegisterFile(Static, can_focus = True):
 class WidgetRegisterFile(Widget, can_focus = True):
     """Display the current state of a register file."""
 
     rf = RegisterFile()
 
-    def update(self) -> None:
+    def test(self) -> None:
         
         # Test: increment PC
         self.rf.increment_program_counter()
@@ -37,11 +36,15 @@ class WidgetRegisterFile(Widget, can_focus = True):
                 
         pass
 
+    def render(self):
+        self.test()
+        return "TEST"
+
     def on_mount(self) -> None:
-        self.update()
+        self.test()
 
     def on_key(self, event: events.Key) -> None:
-        self.update()
+        self.test()
         
     def compose(self) -> ComposeResult:
         yield Grid(
