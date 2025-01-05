@@ -61,9 +61,11 @@ FUNC_LENGTH = 5
 # 0-6       7-32
 # 
 class InstructionMode(Enum):
-    Register = 0
-    Immediate = 1
-    Jump = 2
+    Simple = 0,
+    Register = 1,
+    Immediate = 2,
+    Jump = 3,
+    Compare = 4,
     
 # All valid opcodes and their information tuple (ID, ARGC, MODE, ALU?)
 CONSTANT_OPCODE_MAP = {
@@ -88,14 +90,15 @@ CONSTANT_OPCODE_MAP = {
     # "ld":      (18, 2, InstructionMode.Register, True),
     # "sti":     (19, 2, InstructionMode.Immediate, False),
     # "str":     (20, 2, InstructionMode.Register, False),
-    # "bne":     (21, 1, InstructionMode.Jump, False),
-     "j":        (22, 1, InstructionMode.Jump, False),
+    "bne":       (21, 1, InstructionMode.Jump, False),
+    "j":         (22, 1, InstructionMode.Jump, False),
     # "jr":      (23, 1, InstructionMode.Jump, False),
     # "jsr":     (24, 1, InstructionMode.Jump, False),
     "call":      (25, 1, InstructionMode.Jump, False),
     "ret":       (26, 0, InstructionMode.Jump, False),
     # "hpc":     (27, 1, InstructionMode.Jump, False),
     # "syscall": (28, 1, InstructionMode.Register, False), # Reconsider
+    "cmp":       (28, 2, InstructionMode.Compare, False),
 }
 
 CONSTANT_NO_ARG_OPCODES = bidict({
@@ -145,7 +148,7 @@ FL_TRAP_MASK              = bit_mask(FL_TRAP)
 FL_HPC_MASK               = bit_mask(FL_HPC)
 
 # The values to increment pointer registers
-PC_INC = 1
+PC_INC = 4
 BP_INC = 1
 SP_INC = 1
 

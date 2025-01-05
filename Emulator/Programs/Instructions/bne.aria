@@ -1,0 +1,7 @@
+ldi 1 A
+ldi 1 B
+cmp A B
+bne 5
+ldi 255 L
+ldi 255 C
+hlt

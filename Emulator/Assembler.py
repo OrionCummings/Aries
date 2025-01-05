@@ -3,17 +3,17 @@ from typing import List
 from option import Err, Ok, Result
 from Constants import ASM_COMMENT_CHARACTER, ASM_TEST_PREFIX_CHARACTER
 from Transformations import encode, instruction_string
-from Utilities import p_exit
-from PrettyPrinting import PrintMode
+from PrettyPrinting import PrintMode, print_red, print_green, print_blue
 
 @dataclass
 class AssemblerSettings:
-    self_test: bool = False
+    file_name       = None
     print_mode      = PrintMode.NoOutput
 
 class Assembler():
     
-    def __init__(self, file_name: str, settings: AssemblerSettings) -> None:
+    # TODO: Refactor this function: it's quite messy.
+    def __init__(self, settings: AssemblerSettings) -> None:
         """Assembles an Aires program from an Aries assembly (.aria) file."""
         
         # Assembler settings
@@ -23,7 +23,7 @@ class Assembler():
         self.program_directory = "Programs"
         
         # The name of the Aires assembly file (.aria) 
-        self.file_name: str = file_name
+        self.file_name: str = settings.file_name
         
         # The raw .aria file contents
         self.file_contents: List[str] = []
@@ -34,35 +34,30 @@ class Assembler():
         # The current line in the .aria file
         self.current_line: int = 0
         
-        # Read the file into FileContents
-        print("Reading file '{}' into assembler buffer.".format(file_name))
-        r_real: Result[bool, str] = self.read(settings)
-        if r_real.is_err:
-            p_exit(r_real.Err(), -4)
-        print("Read file '{}' into assembler buffer.".format(file_name))
+        # TODO: Make this better with generators/yields
+        # Read the file
+        print_blue(f"Reading file '{self.file_name}'...")
+        r_contents: Result[bool, str] = self.read(settings)
+        if r_contents.is_err:
+            print_red(f"Failed to read file {self.file_name}: {r_contents.unwrap_err()}")
+            exit()
+
+        print_green(f"Read file '{self.file_name}' into assembler buffer.")
         
-        #if settings.selfTest: print("Assembling file '{}' with self tests enabled.".format(file_name))
-        #else:
-        print("Assembling file '{}' with self tests disabled.".format(file_name))
-            
         # Assemble the file
+        print_blue(f"Assembling file '{self.file_name}'...")
         r_instructions = self.assemble(settings)
         if r_instructions.is_err:
-            if settings.self_test: print("Failed to assemble file '{}' as a test file!".format(file_name))
-            else: print("Failed to assemble file '{}'!".format(file_name))
-            print(r_instructions.Err)
-        
-        self.instructions = r_instructions.unwrap()
+            print_red(f"Failed to assemble file '{self.file_name}': {r_instructions.unwrap_err()}")
+            exit()
             
-        if settings.self_test: print("Assembled file '{}' with self tests enabled.".format(file_name))
-        else: print("Assembled file '{}'.".format(file_name))
+        print_green(f"Assembled file '{self.file_name}'.")
+
+        # Capture parsed instructions
+        self.instructions = r_instructions.unwrap()
         
         # Update metadata post assembly
         self.update_metadata()
-        
-        if settings.print_mode != PrintMode.NoOutput:
-            print()
-            print(self)
         
     def __str__(self) -> str:
         
@@ -99,62 +94,49 @@ class Assembler():
         
         # BUG: Magic number!
         # Program size in bytes
-        self.size = len(self.instructions * 4)
+        self.size = len(self.instructions * 4) # BUG: This may conflict with the memory rework!!!!
         
         # Other metadata
         # ...
     
     def assemble(self, settings: AssemblerSettings) -> Result[List[int], str]:
-        """Assembles the santized file into Aries machine code. Accepts a 
-        boolean value to determine if the given file should be interpreted
-        as a test file. Test files contain additional information such as
-        manually compiled machine code prefixed by ASM_TEST_PREFIX_CHARACTER
-        that will be tested against the actual resulting machine code. An 
-        error will be thrown if these two do not match.
+        """Assembles the santized file into Aries machine code.
         """
         
         if len(self.file_contents) == 0:
             return Ok(True)
         
         instructions: List[int] = []
-        test_instructions: List[int] = []
         
         # For every line of assembly code
         for line in self.file_contents:
             
-            # Parse the instruction
-            if r_instruction := encode(line):
-                
+            # Check if there is any content in this line
+            stripped_line = line.strip()
+            if stripped_line == '' or stripped_line[0] == ASM_COMMENT_CHARACTER:
+
+                # TODO: This will offset all line numbers in error messages,
+                # so this should be refactored eventually!
+
+                # There is no content, so move on
+                continue
+
+            # Check if the first character indicates that this line should be ignored
+            elif stripped_line[0] == ASM_TEST_PREFIX_CHARACTER:
+
+                # TODO: Capture the line to be checked later
+                pass
+
+            else:
+
+                # Encode the line as an instruction
+                r_instruction = encode(line)
+
                 # If parsing fails, propagate the error
-                if r_instruction.is_err: return Err(r_instruction.Err)
+                if r_instruction.is_err: return Err(r_instruction.unwrap_err())
                 
                 # Append the machine code instruction to the program
                 instructions.append(r_instruction.unwrap())
-            
-            # Check if the first non-whitespace character is a colon; if so,
-            # this is a test file!
-            # TODO: Could use decode here to add an additional check
-            elif line.strip()[0] == ASM_TEST_PREFIX_CHARACTER:
-                
-                instruction_str = "".join(line.split())
-                instruction_str = instruction_str.replace(ASM_TEST_PREFIX_CHARACTER, "")
-
-                instruction: int = int(instruction_str, 2)
-
-                test_instructions.append(instruction)
-            
-            else:
-                p_exit("Invalid instruction '{}'".format(line))
-        
-        # If this is a test file, then compare the assembled
-        # instructions and the test instructions
-        if settings.self_test:
-            if len(test_instructions) != len(instructions):
-                return Err("Test instructions and assembled instructions differ in size ({} != {})".format(len(test_instructions), len(instructions)))
-        
-            for index in range(0, len(test_instructions)):
-                if test_instructions[index] != instructions[index]:
-                    return Err("Test instructions and assembled instructions differ at index {} ({} != {})".format(index, format(test_instructions[index], "032b"), format(instructions[index], "032b")))
         
         return Ok(instructions)
     
@@ -186,7 +168,7 @@ class Assembler():
 if __name__ == "__main__":
     
     settings = AssemblerSettings()
-    settings.print_mode = PrintMode.Bytes
-    settings.self_test = True
+    settings.print_mode = PrintMode.Hex
     
-    a: Assembler = Assembler("Example.aria", settings=settings)
+    a: Assembler = Assembler("infinite_loop.aria", settings=settings)
+    print(a)

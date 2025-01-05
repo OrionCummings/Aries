@@ -2,7 +2,7 @@ from __future__ import annotations
 from enum import Enum
 from option import Err, Ok, Result
 from Constants import TextRenderTarget
-from PrettyPrinting import bold
+from PrettyPrinting import bold, red_bold
 
 # The number of memory entries to show per line when printed
 TERMINAL_MEMORY_DISPLAY_LENGTH = 16
@@ -23,11 +23,11 @@ class Memory():
         """Creates an empty Memory class. Initializes all memory to zero.
 
         Args:
-            capacity (int): The size of memory. Expected (but not required) to be a power of 2.
+            capacity (int): The size of memory in bytes. Expected (but not required) to be a power of 2.
         """
         
-        self.bytes = bytearray(capacity)
-        self.capacity = capacity
+        self.bytes = bytearray(capacity * 4)
+        self.capacity_in_bytes = capacity * 4
     
     def __eq__(self, other: Memory) -> bool:
         """Equality operator overload. Determines if two Memory instances are equivalent.
@@ -56,7 +56,7 @@ class Memory():
         """
         
         builder: str = ""
-        for index in range(0, self.capacity):
+        for index in range(0, self.capacity_in_bytes):
             
             if index != 0 and index % TERMINAL_MEMORY_DISPLAY_LENGTH == 0:
                 builder += "\n"
@@ -64,9 +64,11 @@ class Memory():
             builder += "{:02X}".format(self.bytes[index])
             builder += " "
 
+        builder += '\n'
+
         return builder
     
-    def to_string(self, target: TextRenderTarget = TextRenderTarget.Terminal) -> str:
+    def to_string(self, target: TextRenderTarget = TextRenderTarget.Terminal, pc: int = None) -> str:
         """A function to convert a Memory instance into a string, similar to the string overload. Accepts an additional
         parameter to determine the target display.
 
@@ -77,17 +79,21 @@ class Memory():
             str: A string representation of a Memory instance that is suitable for the given render target.
         """
         
-        if target == TextRenderTarget.Terminal:
-            return str(self)
+        # if target == TextRenderTarget.Terminal:
+            # return str(self)
         
-        if target == TextRenderTarget.Widget:
+        if target == TextRenderTarget.Widget or target == TextRenderTarget.Terminal:
             builder: str = ""
-            for index in range(0, self.capacity):
+            for index in range(0, self.capacity_in_bytes):
                 
                 if index != 0 and index % WIDGET_MEMORY_DISPLAY_LENGTH == 0:
                     builder += "\n"
                 
-                builder += "{:02X}".format(self.bytes[index])
+                if index in [pc, pc+1, pc+2, pc+3]:
+                    builder += red_bold("{:02X}".format(self.bytes[index]))
+                else:
+                    builder += "{:02X}".format(self.bytes[index])
+
                 builder += " "
 
             return builder
@@ -104,9 +110,25 @@ class Memory():
         """
         
         if start_index > end_index: return Err(f"Start index {start_index} > end index {end_index}!")
-        if start_index < 0 or start_index > self.capacity: return Err(f"Start index {start_index} out of range!")
-        if end_index   < 0 or   end_index > self.capacity: return Err(f"End index {end_index} out of range!")
-        return Ok(self.bytes[start_index, end_index])
+        if start_index < 0 or start_index > self.capacity_in_bytes: return Err(f"Start index {start_index} out of range!")
+        if end_index   < 0 or   end_index > self.capacity_in_bytes: return Err(f"End index {end_index} out of range!")
+        bs = [self.bytes[index] for index in range(start_index, end_index+1)]
+        return Ok(bs)
+    
+    def get_instruction(self, index: int) -> Result[int, str]:
+        
+        if index < 0 or index > self.capacity_in_bytes: return Err(f"Index ({index}) out of range!")
+
+        r = list(range(index, index + 4))
+
+        b = [self.bytes[i] for i in r]
+        instruction = int.from_bytes(b, byteorder='little')
+
+        return Ok(instruction)
+
+    def get_instructions(self, start_index: int, end_index: int) -> Result[int, str]:
+
+        pass
     
     def set_bytes(self, values: bytearray, indices: list[int] | range) -> Result[bool, str]:
         """Sets the contents of memory based on the passed values and types.
@@ -130,7 +152,7 @@ class Memory():
         
         for (i, index) in enumerate(indices):
             if index < 0: return Err("Memory location out of bounds: {} < 0!".format(index))
-            if index >= self.capacity: return Err("Memory location out of bounds: {} > {}!".format(index, self.capacity))
+            if index >= self.capacity_in_bytes: return Err("Memory location out of bounds: {} > {}!".format(index, self.capacity_in_bytes))
             self.bytes[index] = values[i]
 
         return Ok(True)
@@ -155,7 +177,7 @@ class Memory():
         
         deconstructed_instruction = instruction.to_bytes(4, endianness)
         set_bytes_result = self.set_bytes(deconstructed_instruction, list(range(index, index + len(deconstructed_instruction))))
-        if set_bytes_result.is_err: return Err(set_bytes_result.Err())
+        if set_bytes_result.is_err: return Err(set_bytes_result.unwrap_err())
         
         return Ok(True)
     
@@ -163,7 +185,7 @@ class Memory():
         
         for (i, instruction) in enumerate(instructions):
             load_result = self.load_instruction(instruction, index + (i * 4), endianness)
-            if load_result.is_err: return Err(load_result.Err())
+            if load_result.is_err: return Err(load_result.unwrap_err())
         
         return Ok(True)
 

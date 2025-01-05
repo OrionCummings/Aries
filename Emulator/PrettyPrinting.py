@@ -36,6 +36,15 @@ def green(s: str) -> str:
 def blue(s: str) -> str:
     return str(TextFormatting.BLUE) + str(s) + str(TextFormatting.END)
 
+def print_red(s: str) -> None:
+    print(red(s))
+
+def print_green(s: str) -> None:
+    print(green(s))
+
+def print_blue(s: str) -> None:
+    print(blue(s))
+
 class ParseMode(Enum):
     Register = 0,
     ImmediateValue = 1,

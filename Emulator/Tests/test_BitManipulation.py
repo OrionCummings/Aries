@@ -1,5 +1,5 @@
 import unittest
-from BitManipulation import bit_mask, set_bit, get_bit, toggle_bit
+from BitManipulation import bit_mask, reset_bit, set_bit, get_bit, toggle_bit
 
 class BitManipulationTests(unittest.TestCase):
     
@@ -28,6 +28,16 @@ class BitManipulationTests(unittest.TestCase):
             number = 28739472
             expected_set_bit = number | bit_mask(i)
             actual_set_bit = set_bit(number, i)
+
+            self.assertEqual(expected_set_bit, actual_set_bit, "At least one actual set bit did not match the expected set bit!")
+    
+    def test_reset_bit(self):
+        
+        for i in range(0, 32):
+            
+            number = 28739472
+            expected_set_bit = number & ~bit_mask(i)
+            actual_set_bit = reset_bit(number, i)
 
             self.assertEqual(expected_set_bit, actual_set_bit, "At least one actual set bit did not match the expected set bit!")
 

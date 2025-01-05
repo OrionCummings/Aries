@@ -1,5 +1,6 @@
 def bit_mask(start_index: int, end_index: int = None) -> int:
-    """Returns a 1-bit mask between the given indices."""
+    """Returns a 32-bit bit mask between the given indices."""
+    
     if end_index is None:
         return (1 << start_index)
 
@@ -10,8 +11,12 @@ def bit_mask(start_index: int, end_index: int = None) -> int:
     return mask
 
 def set_bit(number: int, index: int) -> int:
-    """Sets bit `index` in number `number`."""
+    """Sets bit `index` in number `number` to 1."""
     return number | bit_mask(index)
+
+def reset_bit(number: int, index: int) -> int:
+    """Resets bit `index` in number `number` to 0."""
+    return number & ~bit_mask(index)
 
 def get_bit(number: int, index: int) -> int:
     """Gets bit `index` in number `number`."""

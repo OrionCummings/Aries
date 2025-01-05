@@ -1,0 +1,3 @@
+addi 1 A A
+j 0
+hlt

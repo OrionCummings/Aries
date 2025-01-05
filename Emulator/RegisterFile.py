@@ -2,7 +2,7 @@ from __future__ import annotations
 from enum import Enum
 from option import Err, Ok, Result
 from BitManipulation import get_bit, set_bit, toggle_bit
-from Constants import CONSTANT_REGISTER_MAP, BP_INC, PC_INC, SP_INC, TextRenderTarget
+from Constants import CONSTANT_REGISTER_MAP, BP_INC, FL_ZERO, PC_INC, SP_INC, TextRenderTarget
 
 def is_register(reg: str) -> bool:
     return reg in (list(CONSTANT_REGISTER_MAP.keys()) + list(CONSTANT_REGISTER_MAP.values()))
@@ -30,7 +30,7 @@ class RegisterFile():
         for (name, value) in self.registers.items():
             builder += ("{:2} = {:032b}".format(name, value))
             builder += "\n"
-        builder += "                             HTIOSPCZ"
+        builder += "                             HTIOSPCZ\n"
 
         return builder
     
@@ -52,7 +52,7 @@ class RegisterFile():
                     builder += "\n"
             
             builder += " " * 119 # This sucks
-            builder += "    ---- UNUSED ----     HTIOSPCZ"
+            builder += "    ---- UNUSED ----     HTIOSPCZ\n"
             
             return builder
         
@@ -84,6 +84,9 @@ class RegisterFile():
     
     def set_flag(self, flag: int) -> None:
         self.registers['FL'] = set_bit(self.registers['FL'], flag)
+
+    def reset_flag(self, flag: int) -> None:
+        self.registers['FL'] = reset_bit(self.registers['FL'], flag)
     
     def get_flag(self, flag: int) -> bool:
         return get_bit(self.registers['FL'], flag)
@@ -91,9 +94,11 @@ class RegisterFile():
     def toggle_flag(self, flag: int) -> None:
         self.registers['FL'] = toggle_bit(self.registers['FL'], flag)
     
-# if __name__ == "__main__":
+if __name__ == "__main__":
     
-#     rf = RegisterFile()
-#     print(rf.to_string(TextRenderTarget.Widget))
-    
-    
+    rf = RegisterFile()
+    print(rf.to_string(TextRenderTarget.Widget))
+    rf.set_flag(FL_ZERO)
+    print(rf.to_string(TextRenderTarget.Widget))
+    rf.reset_flag(FL_ZERO)
+    print(rf.to_string(TextRenderTarget.Widget))

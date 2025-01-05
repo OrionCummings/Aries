@@ -42,6 +42,10 @@ def is_valid_opcode(opcode: str) -> bool:
 def get_encoded_instruction_as_binary(encoded_instruction: int):
     return format(encoded_instruction, "032b")
 
+def decode_simple_instruction_as_list(binary_instruction: str) -> list:
+    opcode  = binary_instruction[:OP_LENGTH]
+    return [opcode]
+
 def decode_register_instruction_as_list(binary_instruction: str) -> list:
     opcode = binary_instruction[:OP_LENGTH]
     reg_a  = binary_instruction[OP_LENGTH : OP_LENGTH + (1 * REG_LENGTH)]
@@ -51,7 +55,7 @@ def decode_register_instruction_as_list(binary_instruction: str) -> list:
     func   = binary_instruction[-FUNC_LENGTH:]
     return [opcode, reg_a, reg_b, reg_c, shamt, func]
 
-def decode_immediate_instruction_as_list(binary_instruction: str):
+def decode_immediate_instruction_as_list(binary_instruction: str) -> list:
     opcode = binary_instruction[:OP_LENGTH]
     reg_a  = binary_instruction[OP_LENGTH : OP_LENGTH + REG_LENGTH]
     reg_b  = binary_instruction[OP_LENGTH + (1 * REG_LENGTH) : OP_LENGTH + (2 * REG_LENGTH)]
@@ -59,10 +63,16 @@ def decode_immediate_instruction_as_list(binary_instruction: str):
     value  = binary_instruction[-IMM_LENGTH:]
     return [opcode, reg_a, reg_b, unk, value]
 
-def decode_jump_instruction_as_list(binary_instruction: str):
+def decode_jump_instruction_as_list(binary_instruction: str) -> list:
     opcode  = binary_instruction[:OP_LENGTH]
     address = binary_instruction[OP_LENGTH:]
     return [opcode, address]
+
+def decode_compare_instruction_as_list(binary_instruction: str) -> list:
+    opcode = binary_instruction[:OP_LENGTH]
+    reg_a  = binary_instruction[OP_LENGTH : OP_LENGTH + (1 * REG_LENGTH)]
+    reg_b  = binary_instruction[OP_LENGTH + (1 * REG_LENGTH) : OP_LENGTH + (2 * REG_LENGTH)]
+    return [opcode, reg_a, reg_b]
 
 def encode(line: str) -> Result[int, str]:
         
@@ -157,6 +167,11 @@ def decode(encoded_instruction: int) -> Result[str, str]:
     if opcode not in CONSTANT_NO_ARG_OPCODES:
         builder += " "
         match instruction_mode:
+            case InstructionMode.Simple:
+                
+                # TODO: Add this
+                pass
+
             case InstructionMode.Register:
                 ret_list = decode_register_instruction_as_list(binary_instruction)
                 (_, bin_reg1, bin_reg2, bin_reg3, bin_shamt, bin_func) = ret_list
@@ -196,6 +211,16 @@ def decode(encoded_instruction: int) -> Result[str, str]:
                 (_, bin_address) = ret_list
                 address = str(int(bin_address, 2))
                 builder += address
+
+            case InstructionMode.Compare:
+                ret_list = decode_compare_instruction_as_list(binary_instruction)
+                (_, bin_reg1, bin_reg2) = ret_list
+                reg1 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg1, 2)]
+                reg2 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg2, 2)]
+                           
+                builder += reg1
+                builder += " "
+                builder += reg2
 
     return Ok(builder)
 
