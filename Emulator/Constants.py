@@ -60,52 +60,34 @@ FUNC_LENGTH = 5
 # 6         26
 # 0-6       7-32
 # 
-class InstructionMode(Enum):
+class InstructionFormat(Enum):
     Simple = 0,
     Register = 1,
     Immediate = 2,
     Jump = 3,
     Compare = 4,
-    
+
 # All valid opcodes and their information tuple (ID, ARGC, MODE, ALU?)
+# ID is added later! This dict contains (ARGC, MODE, ALU?)
 CONSTANT_OPCODE_MAP = {
-    "nop":      (0, 0, InstructionMode.Jump, False),
-    "hlt":      (1, 0, InstructionMode.Jump, False),
-    "add":      (2, 3, InstructionMode.Register, True),
-    "addi":     (3, 3, InstructionMode.Immediate, True),
-    # "sub":      (5, 3, InstructionMode.Register, True),
-    # "subi":     (4, 3, InstructionMode.Immediate, True),
-    # "not":      (6, 2, InstructionMode.Register, True),
-    # "and":      (7, 3, InstructionMode.Register, True),
-    # "nand":     (8, 3, InstructionMode.Register, True),
-    # "or":       (9, 3, InstructionMode.Register, True),
-    # "nor":     (10, 3, InstructionMode.Register, True),
-    # "xor":     (11, 3, InstructionMode.Register, True),
-    # "xnor":    (12, 3, InstructionMode.Register, True),
-    # "shl":     (13, 2, InstructionMode.Register, True),
-    # "shr":     (14, 2, InstructionMode.Register, True),
-    "ldi":       (15, 2, InstructionMode.Immediate, True),
-    # "lui":     (16, 2, InstructionMode.Immediate, True),
-    # "lli":     (17, 2, InstructionMode.Immediate, True),
-    # "ld":      (18, 2, InstructionMode.Register, True),
-    # "sti":     (19, 2, InstructionMode.Immediate, False),
-    # "str":     (20, 2, InstructionMode.Register, False),
-    "bne":       (21, 1, InstructionMode.Jump, False),
-    "j":         (22, 1, InstructionMode.Jump, False),
-    # "jr":      (23, 1, InstructionMode.Jump, False),
-    # "jsr":     (24, 1, InstructionMode.Jump, False),
-    "call":      (25, 1, InstructionMode.Jump, False),
-    "ret":       (26, 0, InstructionMode.Jump, False),
-    # "hpc":     (27, 1, InstructionMode.Jump, False),
-    # "syscall": (28, 1, InstructionMode.Register, False), # Reconsider
-    "cmp":       (28, 2, InstructionMode.Compare, False),
+    "nop":  (0, InstructionFormat.Simple, False),
+    "ret":  (0, InstructionFormat.Simple, False),
+    "hlt":  (0, InstructionFormat.Simple, False),
+    "add":  (3, InstructionFormat.Register, True),
+    "addi": (3, InstructionFormat.Immediate, True),
+    "ldi":  (2, InstructionFormat.Immediate, True),
+    "bne":  (1, InstructionFormat.Jump, False),
+    "j":    (1, InstructionFormat.Jump, False),
+    "call": (1, InstructionFormat.Jump, False),
+    "cmp":  (2, InstructionFormat.Compare, False),
 }
 
-CONSTANT_NO_ARG_OPCODES = bidict({
-    'nop': 0,
-    'hlt': 1,
-    'ret': 25,
-})
+# Starting at 1, assign sequential IDs to each opcode in the order
+# defined above. Leave zero open as an invalid opcode.
+for index in range(0, len(CONSTANT_OPCODE_MAP)):
+    (argc, mode, alu) = list(CONSTANT_OPCODE_MAP.values())[index]
+    key = list(CONSTANT_OPCODE_MAP.keys())[index]
+    CONSTANT_OPCODE_MAP[key] = (index+1, argc, mode, alu)
 
 # This is a dictionary containing all 16 registers.
 CONSTANT_REGISTER_MAP = bidict({

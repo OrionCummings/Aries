@@ -21,6 +21,9 @@ def red_bold(s: str) -> str:
 def green_bold(s: str) -> str:
     return green(bold(s))
 
+def yellow_bold(s: str) -> str:
+    return yellow(bold(s))
+
 def blue_bold(s: str) -> str:
     return blue(bold(s))
 
@@ -36,6 +39,9 @@ def green(s: str) -> str:
 def blue(s: str) -> str:
     return str(TextFormatting.BLUE) + str(s) + str(TextFormatting.END)
 
+def yellow(s: str) -> str:
+    return str(TextFormatting.YELLOW) + str(s) + str(TextFormatting.END)
+
 def print_red(s: str) -> None:
     print(red(s))
 
@@ -44,6 +50,21 @@ def print_green(s: str) -> None:
 
 def print_blue(s: str) -> None:
     print(blue(s))
+
+def print_yellow(s: str) -> None:
+    print(yellow(s))
+
+def info(s: str) -> None:
+    print_blue(f"[INFO] {s}")
+
+def success(s: str) -> None:
+    print_green(f"[SUCCESS] {s}")
+
+def warning(s: str) -> None:
+    print_yellow(f"[WARNING] {s}")
+
+def error(s: str) -> None:
+    print_red(f"[ERROR] {s}")
 
 class ParseMode(Enum):
     Register = 0,

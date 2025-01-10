@@ -1,7 +1,12 @@
-ldi 255 A
-call target
-ldi 4294967295 C
-hlt
-target:
-ldi 255 B
+test:
+
+test2:
+1:
+1test:
+
+
+
+
+another_test:
+something else:
 hlt

@@ -1,0 +1,4 @@
+j target
+ldi 65534 A
+target:
+hlt

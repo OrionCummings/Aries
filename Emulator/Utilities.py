@@ -1,10 +1,14 @@
-
+import inspect
+import os
 from option import Result, Ok, Err
 from Constants import CONSTANT_OPCODE_MAP
+from PrettyPrinting import print_red, yellow
+
+debug = lambda: str(yellow(os.path.split(inspect.stack()[1][1])[1] + ":" + str(inspect.stack()[1][2]) + ":" + str(inspect.stack()[1][3]) + "()"))
 
 def p_exit(s: str, e: int = 0):
     """A function to print an error message and exit."""
-    print(s)
+    print_red(s)
     exit(e)
 
 def get_opcode_from_id(id: int) -> Result[str, str]:
@@ -14,4 +18,4 @@ def get_opcode_from_id(id: int) -> Result[str, str]:
         if item_id == id:
             return Ok(item_key)
 
-    return Err("No opcode with id {} found!".format(id))
+    return Err(f"{debug()}: no opcode with id {id} found!")

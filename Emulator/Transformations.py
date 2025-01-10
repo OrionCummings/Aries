@@ -1,9 +1,9 @@
 
 from option import Result, Err, Ok
 from BitManipulation import bit_mask
-from Constants import CONSTANT_NO_ARG_OPCODES, CONSTANT_OPCODE_MAP, CONSTANT_REGISTER_MAP, FF_LENGTH, FUNC_LENGTH, IMM_LENGTH, INS_LENGTH, OP_LENGTH, REG_LENGTH, SHAMT_LENGTH, InstructionMode
+from Constants import CONSTANT_OPCODE_MAP, CONSTANT_REGISTER_MAP, FF_LENGTH, FUNC_LENGTH, IMM_LENGTH, INS_LENGTH, OP_LENGTH, REG_LENGTH, SHAMT_LENGTH, InstructionFormat
 from PrettyPrinting import PrintMode
-from Utilities import get_opcode_from_id
+from Utilities import get_opcode_from_id, debug
 
 def get_opcode(instruction: str | int) -> Result[int, str]:
     
@@ -17,21 +17,21 @@ def get_opcode(instruction: str | int) -> Result[int, str]:
         opcode = (instruction & mask) >> start_index
         return Ok(opcode)
     else:
-        return Err("Unknown type passed to get_opcode()!")
+        return Err(f"{debug()}: unknown type")
 
-def get_instruction_mode(instruction: str | int) -> Result[InstructionMode, str]:
+def get_instruction_mode(instruction: str | int) -> Result[InstructionFormat, str]:
     if isinstance(instruction, str):
         opcode = instruction.split(" ")[0]
     elif isinstance(instruction, int):
         decoded_instruction = decode(instruction).unwrap()
         opcode = decoded_instruction.split(" ")[0]
     else:
-        return Err("Unknown type passed to get_instruction_mode()!")
+        return Err(f"{debug()}: unknown type '{type(instruction)}'")
     
     if opcode in CONSTANT_OPCODE_MAP:
         opcode_tuple = CONSTANT_OPCODE_MAP[opcode]
     else:
-        return Err("Unknown opcode '{}' passed to get_instruction_mode()!".format(opcode))
+        return Err(f"{debug()}: unknown opcode '{opcode}'")
     (_, _, i_mode, *_) = opcode_tuple
 
     return Ok(i_mode)
@@ -78,76 +78,102 @@ def encode(line: str) -> Result[int, str]:
         
     # Create the line vector
     line_vector = line.split(' ')
-    if len(line_vector) < 1: return Err("Malformed instruction '{}' (too few arguments)".format(line))
-    if len(line_vector) > 4: return Err("Malformed instruction '{}' (too many arguments)".format(line))
+    if len(line_vector) < 1: return Err(f"{debug()} malformed instruction '{line}' (too few arguments)")
+    if len(line_vector) > 4: return Err(f"{debug()} malformed instruction '{line}' (too many arguments)")
     
     # Get the potential opcode
     potential_opcode = line_vector[0]
     
     # Check that it's a valid opcode
-    if not is_valid_opcode(potential_opcode): return Err("Unknown opcode '{}'".format(potential_opcode))
+    if not is_valid_opcode(potential_opcode): return Err(f"{debug()} unknown opcode '{potential_opcode}'")
     
     # Get the opcode tuple and extract the important information
     opcode_tuple = CONSTANT_OPCODE_MAP[potential_opcode]
     (opcode, num_args, mode, *unused) = opcode_tuple
     
     # Check that the number of expected arguments matches the number of actual arguments.
-    if len(line_vector) == num_args: return Err("Expected number of arguments ({}) does not match the actual number of arguments ({})!".format(num_args, len(line_vector)))
+    # The line vector includes the opcode, whereas the num_args constant does not => +1
+    if len(line_vector) != num_args+1:
+        return Err(f"{debug()}: expected number of arguments ({num_args}) does not match the actual number of arguments ({len(line_vector)})")
 
     instruction: int = 0
     instruction |= opcode << (INS_LENGTH - OP_LENGTH)
     
-    if potential_opcode not in CONSTANT_NO_ARG_OPCODES:
-        match mode:
+    match mode:
+        
+        case InstructionFormat.Simple:
+
+            # Do nothing
+            pass
+
+        case InstructionFormat.Register:
             
-            case InstructionMode.Register:
-                
+            # Try to unpack the line vector. If this fails on a ValueError,
+            # then we are likely trying to unpack something with the 
+            # incorrect number of arguments, so return an error!
+            try:
                 _, reg_a_str, reg_b_str, reg_c_str = line_vector
+            except ValueError:
+                return Err(f"{debug()}: unexpected number of arguments in line '{line}'")
                 
-                reg_a = CONSTANT_REGISTER_MAP[reg_a_str]
-                reg_b = CONSTANT_REGISTER_MAP[reg_b_str]
-                reg_c = CONSTANT_REGISTER_MAP[reg_c_str]
+            reg_a = CONSTANT_REGISTER_MAP[reg_a_str]
+            reg_b = CONSTANT_REGISTER_MAP[reg_b_str]
+            reg_c = CONSTANT_REGISTER_MAP[reg_c_str]
+            
+            instruction |= reg_a << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 1))
+            instruction |= reg_b << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 2))
+            instruction |= reg_c << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 3))
+            
+            # TODO: SHAMT and FUNC are not implemented yet
                 
-                instruction |= reg_a << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 1))
-                instruction |= reg_b << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 2))
-                instruction |= reg_c << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 3))
+
+            
+        case InstructionFormat.Immediate:
+            
+            _, *arguments = line_vector
+            
+            # Immediate loads/stores have 2 arguments
+            if len(arguments) == 2:
+            
+                potential_value = arguments[0]
+                try:
+                    value = int(potential_value)
+                except ValueError:
+                    if isinstance(potential_value, str):
+                        # If this is a register, then the programmer probably mixed up the order of arguments
+                        if potential_value in CONSTANT_REGISTER_MAP.keys():
+                            return Err(f"{debug()}: str value '{potential_value}' found; did you mix up the order or arguments?")
+                        return Err(f"{debug()}: str value '{potential_value}' found")
+                    return Err(f"{debug()}: unknown value '{potential_value}' found")
+
+                potential_reg = arguments[1]
+                if potential_reg not in CONSTANT_REGISTER_MAP.keys():
+                    return Err(f"{debug()}: parsed invalid register '{potential_reg}'")
+
+                reg = CONSTANT_REGISTER_MAP[potential_reg]
                 
-                # TODO: SHAMT and FUNC are not implemented yet
+                instruction |= reg << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 1))
+                instruction |= value
+            
+            # Immediate operations have 3 arguments
+            elif len(arguments) == 3:
+            
+                value = int(arguments[0])
+                src_reg = CONSTANT_REGISTER_MAP[arguments[1]]
+                dest_reg = CONSTANT_REGISTER_MAP[arguments[2]]
                 
-            case InstructionMode.Immediate:
-                
-                _, *arguments = line_vector
-                
-                # Immediate loads/stores have 2 arguments
-                if len(arguments) == 2:
-                
-                    value = int(arguments[0])
-                    reg = CONSTANT_REGISTER_MAP[arguments[1]]
-                    
-                    instruction |= reg << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 1))
-                    instruction |= value
-                
-                # Immediate operations have 3 arguments
-                elif len(arguments) == 3:
-                
-                    value = int(arguments[0])
-                    src_reg = CONSTANT_REGISTER_MAP[arguments[1]]
-                    dest_reg = CONSTANT_REGISTER_MAP[arguments[2]]
-                    
-                    instruction |= src_reg  << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 1))
-                    instruction |= dest_reg << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 2))
-                    instruction |= value
-                
-                else:
-                    return Err("Invalid number of arguments found in instruction '{}'!".format(line))
-                
-            case InstructionMode.Jump:
-                
-                _, address_str = line_vector
-                
-                address = int(address_str)
-                
-                instruction |= address
+                instruction |= src_reg  << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 1))
+                instruction |= dest_reg << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 2))
+                instruction |= value
+            
+            else:
+                return Err(f"{debug()}: invalid number of arguments found in instruction '{line}'")
+            
+        case InstructionFormat.Jump:
+            
+            _, address_str = line_vector
+            address = int(address_str)
+            instruction |= address
                 
     return Ok(instruction)
 
@@ -157,77 +183,92 @@ def decode(encoded_instruction: int) -> Result[str, str]:
     ret_list = []
     binary_instruction: str = get_encoded_instruction_as_binary(encoded_instruction)
     
-    opcode_id = get_opcode(encoded_instruction).unwrap()
-    opcode = get_opcode_from_id(opcode_id).unwrap()
+    # Given an encoded instruction, attempt to get the opcode
+    r_opcode_id = get_opcode(encoded_instruction)
+    if r_opcode_id.is_err:
+        return Err(r_opcode_id.unwrap_err())
+    opcode_id = r_opcode_id.unwrap()
+
+    # Given an opcode id, attempt to get the opcode
+    r_opcode = get_opcode_from_id(opcode_id)
+    if r_opcode.is_err:
+        return Err(r_opcode.unwrap_err())
+    opcode = r_opcode.unwrap()
+
+    # Use the opcode to look up in the dictionary of opcodes for
+    # the relavent information
     (_, argc, instruction_mode, *_) = CONSTANT_OPCODE_MAP[opcode]
     
     builder = ""
     builder += opcode
 
-    if opcode not in CONSTANT_NO_ARG_OPCODES:
-        builder += " "
-        match instruction_mode:
-            case InstructionMode.Simple:
-                
-                # TODO: Add this
-                pass
+    match instruction_mode:
+        case InstructionFormat.Simple:
 
-            case InstructionMode.Register:
-                ret_list = decode_register_instruction_as_list(binary_instruction)
-                (_, bin_reg1, bin_reg2, bin_reg3, bin_shamt, bin_func) = ret_list
-                reg1 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg1, 2)]
-                reg2 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg2, 2)]
-                reg3 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg3, 2)]
-                
-                # TODO: Implement shift amount and function
-                # shamt = int(bin_shamt, 2)
-                # func = int(bin_func, 2)
-                           
-                builder += reg1
-                builder += " "
-                builder += reg2
-                builder += " "
-                builder += reg3
-                
-            case InstructionMode.Immediate:
-                ret_list = decode_immediate_instruction_as_list(binary_instruction)
-                (_, bin_src_reg, bin_dest_reg, _, bin_value) = ret_list
-                src_reg_id = int(bin_src_reg, 2)
-                src_reg = CONSTANT_REGISTER_MAP.inverse[src_reg_id]
-                value = str(int(bin_value, 2))
-                builder += value
-                builder += " "
-                builder += src_reg
-                
-                # If this is an immediate operator instruction, it has 3 arguments
-                if argc == 3:
-                    dest_reg_id = int(bin_dest_reg, 2)
-                    dest_reg = CONSTANT_REGISTER_MAP.inverse[dest_reg_id]
-                    builder += " "
-                    builder += dest_reg
-                
-            case InstructionMode.Jump:
-                ret_list = decode_jump_instruction_as_list(binary_instruction)
-                (_, bin_address) = ret_list
-                address = str(int(bin_address, 2))
-                builder += address
+            # Do nothing; the opcode is already appended above
+            pass
 
-            case InstructionMode.Compare:
-                ret_list = decode_compare_instruction_as_list(binary_instruction)
-                (_, bin_reg1, bin_reg2) = ret_list
-                reg1 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg1, 2)]
-                reg2 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg2, 2)]
-                           
-                builder += reg1
+        case InstructionFormat.Register:
+            ret_list = decode_register_instruction_as_list(binary_instruction)
+            (_, bin_reg1, bin_reg2, bin_reg3, bin_shamt, bin_func) = ret_list
+            reg1 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg1, 2)]
+            reg2 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg2, 2)]
+            reg3 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg3, 2)]
+            
+            # TODO: Implement shift amount and function
+            # shamt = int(bin_shamt, 2)
+            # func = int(bin_func, 2)
+            
+            builder += " "
+            builder += reg1
+            builder += " "
+            builder += reg2
+            builder += " "
+            builder += reg3
+            
+        case InstructionFormat.Immediate:
+            ret_list = decode_immediate_instruction_as_list(binary_instruction)
+            (_, bin_src_reg, bin_dest_reg, _, bin_value) = ret_list
+            src_reg_id = int(bin_src_reg, 2)
+            src_reg = CONSTANT_REGISTER_MAP.inverse[src_reg_id]
+            value = str(int(bin_value, 2))
+
+            builder += " "
+            builder += value
+            builder += " "
+            builder += src_reg
+            
+            # If this is an immediate operator instruction, it has 3 arguments
+            if argc == 3:
+                dest_reg_id = int(bin_dest_reg, 2)
+                dest_reg = CONSTANT_REGISTER_MAP.inverse[dest_reg_id]
                 builder += " "
-                builder += reg2
+                builder += dest_reg
+            
+        case InstructionFormat.Jump:
+            ret_list = decode_jump_instruction_as_list(binary_instruction)
+            (_, bin_address) = ret_list
+            address = str(int(bin_address, 2))
+            builder += " "
+            builder += address
+
+        case InstructionFormat.Compare:
+            ret_list = decode_compare_instruction_as_list(binary_instruction)
+            (_, bin_reg1, bin_reg2) = ret_list
+            reg1 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg1, 2)]
+            reg2 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg2, 2)]
+
+            builder += " "
+            builder += reg1
+            builder += " "
+            builder += reg2
 
     return Ok(builder)
 
 def instruction_string(instruction: int, p_mode: PrintMode) -> Result[str, str]:
     builder: str = ""
     
-    i_mode: InstructionMode = get_instruction_mode(instruction)
+    i_mode: InstructionFormat = get_instruction_mode(instruction)
     
     # Convert the intruction to a binary string
     instruction_str: str = format(instruction, "032b")
@@ -257,7 +298,7 @@ def instruction_string(instruction: int, p_mode: PrintMode) -> Result[str, str]:
         
         case PrintMode.Instructions:
             match i_mode:
-                case InstructionMode.Register:
+                case InstructionFormat.Register:
                     opcode   = instruction_str[:OP_LENGTH]
                     reg_a    = instruction_str[OP_LENGTH : OP_LENGTH + (1 * REG_LENGTH)]
                     reg_b    = instruction_str[OP_LENGTH + (1 * REG_LENGTH) : OP_LENGTH + (2 * REG_LENGTH)]
@@ -266,7 +307,7 @@ def instruction_string(instruction: int, p_mode: PrintMode) -> Result[str, str]:
                     func     = instruction_str[-FUNC_LENGTH:]
                     builder += " ".join([opcode, reg_a, reg_b, reg_c, shamt, func])
                     
-                case InstructionMode.Immediate:
+                case InstructionFormat.Immediate:
                     opcode  = instruction_str[:OP_LENGTH]
                     reg_a   = instruction_str[OP_LENGTH : OP_LENGTH + REG_LENGTH]
                     reg_b   = instruction_str[OP_LENGTH + (1 * REG_LENGTH) : OP_LENGTH + (2 * REG_LENGTH)]
@@ -274,7 +315,7 @@ def instruction_string(instruction: int, p_mode: PrintMode) -> Result[str, str]:
                     value   = instruction_str[-IMM_LENGTH:]
                     builder += " ".join([opcode, reg_a, reg_b, unk, value])
                     
-                case InstructionMode.Jump:
+                case InstructionFormat.Jump:
                     opcode  = instruction_str[:OP_LENGTH]
                     address = instruction_str[OP_LENGTH:]
                     builder += " ".join([opcode, address])

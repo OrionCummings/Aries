@@ -1,7 +1,7 @@
 from __future__ import annotations
 from enum import Enum
 from option import Err, Ok, Result
-from Constants import TextRenderTarget
+from Constants import PC_INC, TextRenderTarget
 from PrettyPrinting import bold, red_bold
 
 # The number of memory entries to show per line when printed
@@ -9,25 +9,20 @@ TERMINAL_MEMORY_DISPLAY_LENGTH = 16
 WIDGET_MEMORY_DISPLAY_LENGTH = 16
 
 # TODO: Fix this class
-# There a many assumptions about the layout/alignment of memory
-# that are not documented nor consistent!
-# * Should memory be bit-addressable?
-# * How is (1 byte) memory alignment being enforced?
-# * How should numbers larger than a single byte be handled?
 # * How should negative numbers be handled? -This one is more complex, and should be addressed last!
 class Memory():
     """A byte-addressable block of memory designed to simulate either data or instruction memory.
     """
     
-    def __init__(self, capacity: int):
+    def __init__(self, capacity_in_bytes: int):
         """Creates an empty Memory class. Initializes all memory to zero.
 
         Args:
             capacity (int): The size of memory in bytes. Expected (but not required) to be a power of 2.
         """
         
-        self.bytes = bytearray(capacity * 4)
-        self.capacity_in_bytes = capacity * 4
+        self.bytes = bytearray(capacity_in_bytes)
+        self.capacity_in_bytes = capacity_in_bytes
     
     def __eq__(self, other: Memory) -> bool:
         """Equality operator overload. Determines if two Memory instances are equivalent.
@@ -89,7 +84,7 @@ class Memory():
                 if index != 0 and index % WIDGET_MEMORY_DISPLAY_LENGTH == 0:
                     builder += "\n"
                 
-                if index in [pc, pc+1, pc+2, pc+3]:
+                if pc is not None and index in [pc, pc+1, pc+2, pc+3]:
                     builder += red_bold("{:02X}".format(self.bytes[index]))
                 else:
                     builder += "{:02X}".format(self.bytes[index])
@@ -98,7 +93,7 @@ class Memory():
 
             return builder
     
-    def get_bytes(self, start_index: int, end_index: int) -> Result[bytes, str]:
+    def get_bytes(self, start_index_in_bytes: int, end_index_in_bytes: int) -> Result[bytes, str]:
         """Gets the bytes between the given indices.
 
         Args:
@@ -109,28 +104,31 @@ class Memory():
             Result[bytes, str]: A boolean True on success or a error message string on failure.
         """
         
-        if start_index > end_index: return Err(f"Start index {start_index} > end index {end_index}!")
-        if start_index < 0 or start_index > self.capacity_in_bytes: return Err(f"Start index {start_index} out of range!")
-        if end_index   < 0 or   end_index > self.capacity_in_bytes: return Err(f"End index {end_index} out of range!")
-        bs = [self.bytes[index] for index in range(start_index, end_index+1)]
+        if start_index_in_bytes > end_index_in_bytes: return Err(f"Start index {start_index_in_bytes} > end index {end_index_in_bytes}!")
+        if start_index_in_bytes < 0 or start_index_in_bytes > self.capacity_in_bytes: return Err(f"Start index {start_index_in_bytes} out of range!")
+        if end_index_in_bytes   < 0 or   end_index_in_bytes > self.capacity_in_bytes: return Err(f"End index {end_index_in_bytes} out of range!")
+        bs = [self.bytes[index] for index in range(start_index_in_bytes, end_index_in_bytes+1)]
+        
         return Ok(bs)
     
-    def get_instruction(self, index: int) -> Result[int, str]:
+    def get_instruction(self, index_in_bytes: int) -> Result[int, str]:
         
-        if index < 0 or index > self.capacity_in_bytes: return Err(f"Index ({index}) out of range!")
+        if index_in_bytes < 0 or index_in_bytes > self.capacity_in_bytes: return Err(f"Index ({index_in_bytes}) out of range!")
 
-        r = list(range(index, index + 4))
+        r = list(range(index_in_bytes, index_in_bytes + 4))
 
         b = [self.bytes[i] for i in r]
         instruction = int.from_bytes(b, byteorder='little')
 
         return Ok(instruction)
 
-    def get_instructions(self, start_index: int, end_index: int) -> Result[int, str]:
+    def get_instructions(self, start_index_in_bytes: int, end_index_in_bytes: int) -> Result[int, str]:
+
+        raise NotImplementedError
 
         pass
     
-    def set_bytes(self, values: bytearray, indices: list[int] | range) -> Result[bool, str]:
+    def set_bytes(self, values: bytearray, indices_in_bytes: list[int] | range) -> Result[bool, str]:
         """Sets the contents of memory based on the passed values and types.
 
         Args:
@@ -144,20 +142,20 @@ class Memory():
         """
         
         if len(values) == 0: return Err("No values to write!")
-        if len(values) != len(indices) and len(values) == 1:
-            values = values * len(indices)
+        if len(values) != len(indices_in_bytes) and len(values) == 1:
+            values = values * len(indices_in_bytes)
         
-        if isinstance(indices, range):
-            indices = list(indices)
+        if isinstance(indices_in_bytes, range):
+            indices_in_bytes = list(indices_in_bytes)
         
-        for (i, index) in enumerate(indices):
-            if index < 0: return Err("Memory location out of bounds: {} < 0!".format(index))
-            if index >= self.capacity_in_bytes: return Err("Memory location out of bounds: {} > {}!".format(index, self.capacity_in_bytes))
-            self.bytes[index] = values[i]
+        for (i, index_in_bytes) in enumerate(indices_in_bytes):
+            if index_in_bytes < 0: return Err("Memory location out of bounds: {} < 0!".format(index_in_bytes))
+            if index_in_bytes >= self.capacity_in_bytes: return Err("Memory location out of bounds: {} > {}!".format(index_in_bytes, self.capacity_in_bytes))
+            self.bytes[index_in_bytes] = values[i]
 
         return Ok(True)
     
-    def load_instruction(self, instruction: int, index: int, endianness: str = 'little') -> Result[bool, str]:
+    def load_instruction(self, instruction: int, index_in_bytes: int, endianness: str = 'little') -> Result[bool, str]:
         """Loads the given instruction into the Memory instance in the specified endian order and beginning at the start
         index. All instructions are 32-bit, so this function will update `index` and the following three indices after `index`.
 
@@ -173,10 +171,10 @@ class Memory():
         if instruction > 2**32: return Err(f"Invalid instruction '{instruction}': too large!")
         if instruction < 0: return Err(f"Invalid instruction '{instruction}': too small!")
         if endianness not in ['little', 'big']: return Err(f"Invalid endianness '{endianness}'!")
-        if len(self.bytes) < index: return Err(f"Memory location '{index}' out of bounds!")
+        if len(self.bytes) < index_in_bytes: return Err(f"Memory location '{index_in_bytes}' out of bounds!")
         
         deconstructed_instruction = instruction.to_bytes(4, endianness)
-        set_bytes_result = self.set_bytes(deconstructed_instruction, list(range(index, index + len(deconstructed_instruction))))
+        set_bytes_result = self.set_bytes(deconstructed_instruction, list(range(index_in_bytes, index_in_bytes + PC_INC)))
         if set_bytes_result.is_err: return Err(set_bytes_result.unwrap_err())
         
         return Ok(True)
@@ -191,7 +189,7 @@ class Memory():
 
 if __name__ == "__main__":
     
-    memory = Memory(128)
+    memory = Memory(32)
     r = memory.set_bytes(bytearray([255]), range(0, 4))
     
     i1 = [0b11111111_11111111_00000000_00000000] * 8
