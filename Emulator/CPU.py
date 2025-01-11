@@ -2,7 +2,7 @@ from typing import Optional
 from option import Err, Ok, Result
 from Transformations import encode, decode, get_opcode
 from PrettyPrinting import PrintMode, bold, green_bold, info, print_yellow, red_bold, warning
-from Constants import FL_ZERO, PC_INC, PC_OVERRUN, InstructionFormat, TextRenderTarget
+from Constants import CONSTANT_REGISTER_MAP, FL_ZERO, PC_INC, PC_OVERRUN, InstructionFormat, TextRenderTarget
 from RegisterFile import RegisterFile
 from Memory import Memory
 from CallStack import CallStack
@@ -257,18 +257,26 @@ def i_ld(cpu: CPU, arguments: list) -> Result[CPU, str]:
     """Execute a 'Load' instruction."""
 
     # Get the memory address
-
+    potential_address = arguments[0]
+    try:
+        address = int(potential_address)
+    except ValueError:
+        return Err(f"{debug()}: failed to convert address '{potential_address}' to an integer")
 
     # Get the value at that memory address
-
+    # TODO: Magic numbers!
+    r_value_vector_bytes = cpu.data_memory.get_bytes(address, address+3)
+    value = int.from_bytes(r_value_vector_bytes, byteorder='little')
 
     # Get the register
-
+    potential_reg = arguments[1]
+    if potential_reg not in CONSTANT_REGISTER_MAP.keys():
+        return Err(f"{debug()}: parsed unknown register '{potential_reg}'")
 
     # Set the register value to the value in memory
+    cpu.register_file.set_reg(potential_reg, value)
 
-
-    # Just increment the program counter
+    # Increment the program counter
     cpu.register_file.increment_program_counter()
 
     return Ok(cpu)
@@ -277,18 +285,29 @@ def i_str(cpu: CPU, arguments: list) -> Result[CPU, str]:
     """Execute a 'Store' instruction."""
 
     # Get the register
-
- 
-    # Get the register value
-
+    potential_reg = arguments[0]
+    if potential_reg not in CONSTANT_REGISTER_MAP.keys():
+        return Err(f"{debug()}: parsed unknown register '{potential_reg}'")
+    
+    # Get the value of the register and split it into 4 bytes
+    r_reg_value = cpu.register_file.get_reg(potential_reg)
+    if r_reg_value.is_err:
+        return Err(f"{debug()}: failed to get register '{potential_reg}'")
+    reg_value = r_reg_value.unwrap()
+    byte_array = int.to_bytes(reg_value, byteorder='little')
 
     # Get the memory address
-
+    potential_address = arguments[1]
+    try:
+        address = int(potential_address)
+    except ValueError:
+        return Err(f"{debug()}: failed to convert address '{potential_address}' to an integer")
 
     # Set the value in memory to the register value
+    # TODO: Magic numbers!
+    cpu.data_memory.set_bytes(byte_array, range(address, address+3))
 
-
-    # Just increment the program counter
+    # Increment the program counter
     cpu.register_file.increment_program_counter()
     
     return Ok(cpu)
