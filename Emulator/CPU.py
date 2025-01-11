@@ -115,13 +115,23 @@ class CPU():
         decoded_instruction = r_decoded_instruction.unwrap()
 
         decoded_instruction_list = decoded_instruction.split(" ")
-        (opcode, *arguments) = decoded_instruction_list
+        (potential_opcode, *arguments) = decoded_instruction_list
 
-        # Get the instruction function
-        function = CONSTANT_INSTRUCTION_FUNCTIONS[opcode]
-        self = function(self, arguments).unwrap() # TODO: Reassigning 'self' is probably bad practice
+        # If it exists, get the instruction function
+        if potential_opcode not in CONSTANT_INSTRUCTION_FUNCTIONS.keys():
+            return Err(f"{debug()}: found opcode '{potential_opcode}' without function definition")
         
-        print(green_bold("Executed '{}'".format(decoded_instruction)))
+        function = CONSTANT_INSTRUCTION_FUNCTIONS[potential_opcode]
+
+        r_new_cpu_state = function(self, arguments)
+        if r_new_cpu_state.is_err:
+            return Err(f"{debug()}: invalid cpu state\n{r_new_cpu_state.unwrap_err()}")
+        
+        # TODO: Reassigning 'self' is probably bad practice. Should there be an object
+        # that contains a CPU that handles CPU state changes?
+        self = r_new_cpu_state.unwrap()
+        
+        print(green_bold(f"Executed '{decoded_instruction}'"))
 
         return Ok(True)
         
@@ -138,16 +148,16 @@ class CPU():
 
         return not self.halted
 
-def nop(cpu: CPU, arguments: list) -> Result[CPU, str]:
-    """Executes a 'nop' instruction."""
+def i_nop(cpu: CPU, arguments: list) -> Result[CPU, str]:
+    """Executes a 'No Operation' instruction."""
 
     # Just increment the program counter
     cpu.register_file.increment_program_counter()
 
     return Ok(cpu)
 
-def hlt(cpu: CPU, arguments: list) -> Result[CPU, str]:
-    """Executes a 'hlt' instruction."""
+def i_hlt(cpu: CPU, arguments: list) -> Result[CPU, str]:
+    """Executes a 'Halt' instruction."""
 
     # Halt the CPU
     cpu.halted = True
@@ -156,8 +166,8 @@ def hlt(cpu: CPU, arguments: list) -> Result[CPU, str]:
 
     return Ok(cpu)
 
-def add(cpu: CPU, arguments: list) -> Result[CPU, str]:
-    """Executes an 'add' instruction."""
+def i_add(cpu: CPU, arguments: list) -> Result[CPU, str]:
+    """Executes an 'Addition' instruction."""
     
     (reg1, reg2, reg3) = arguments
     reg1_value = cpu.register_file.get_reg(reg1).unwrap()
@@ -169,7 +179,8 @@ def add(cpu: CPU, arguments: list) -> Result[CPU, str]:
 
     return Ok(cpu)
 
-def addi(cpu: CPU, arguments: list) -> Result[CPU, str]:
+def i_addi(cpu: CPU, arguments: list) -> Result[CPU, str]:
+    """Executes a 'Addition Immediate' instruction."""
     
     (value_str, src_reg, dest_reg) = arguments
     value = int(value_str)
@@ -188,7 +199,8 @@ def addi(cpu: CPU, arguments: list) -> Result[CPU, str]:
     
     return Ok(cpu)
 
-def ldi(cpu: CPU, arguments: list) -> Result[CPU, str]:
+def i_ldi(cpu: CPU, arguments: list) -> Result[CPU, str]:
+    """Executes a 'Load Immediate' instruction."""
 
     (value_str, reg) = arguments
     value = int(value_str)
@@ -198,8 +210,8 @@ def ldi(cpu: CPU, arguments: list) -> Result[CPU, str]:
     
     return Ok(cpu)
 
-def j(cpu: CPU, arguments: list) -> Result[CPU, str]:
-
+def i_j(cpu: CPU, arguments: list) -> Result[CPU, str]:
+    """Executes a 'Jump' instruction."""
     (address_str,) = arguments
     address = int(address_str)
     address_in_bytes = address * PC_INC
@@ -208,8 +220,8 @@ def j(cpu: CPU, arguments: list) -> Result[CPU, str]:
     
     return Ok(cpu)
 
-def cmp(cpu: CPU, arguments: list) -> Result[CPU, str]:
-    """Executes an 'cmp' instruction."""
+def i_cmp(cpu: CPU, arguments: list) -> Result[CPU, str]:
+    """Executes an 'Compare' instruction."""
     
     (reg1, reg2) = arguments
     reg1_value = cpu.register_file.get_reg(reg1).unwrap()
@@ -225,8 +237,8 @@ def cmp(cpu: CPU, arguments: list) -> Result[CPU, str]:
 
     return Ok(cpu)
 
-def bne(cpu: CPU, arguments: list) -> Result[CPU, str]:
-    """Executes an 'bne' instruction."""
+def i_bne(cpu: CPU, arguments: list) -> Result[CPU, str]:
+    """Executes a 'Branch Not Equal' instruction."""
 
     (address_str,) = arguments
     address = int(address_str)
@@ -241,14 +253,56 @@ def bne(cpu: CPU, arguments: list) -> Result[CPU, str]:
     
     return Ok(cpu)
 
+def i_ld(cpu: CPU, arguments: list) -> Result[CPU, str]:
+    """Execute a 'Load' instruction."""
+
+    # Get the memory address
+
+
+    # Get the value at that memory address
+
+
+    # Get the register
+
+
+    # Set the register value to the value in memory
+
+
+    # Just increment the program counter
+    cpu.register_file.increment_program_counter()
+
+    return Ok(cpu)
+
+def i_str(cpu: CPU, arguments: list) -> Result[CPU, str]:
+    """Execute a 'Store' instruction."""
+
+    # Get the register
+
+ 
+    # Get the register value
+
+
+    # Get the memory address
+
+
+    # Set the value in memory to the register value
+
+
+    # Just increment the program counter
+    cpu.register_file.increment_program_counter()
+    
+    return Ok(cpu)
+
 # A list of all instruction functions
 CONSTANT_INSTRUCTION_FUNCTIONS = {
-    "nop":      nop,
-    "hlt":      hlt,
-    "add":      add,
-    "addi":     addi,
-    "ldi":      ldi,
-    "bne":      bne,
-    "j":        j,
-    "cmp":      cmp,
+    "nop":      i_nop,
+    "hlt":      i_hlt,
+    "add":      i_add,
+    "addi":     i_addi,
+    "ldi":      i_ldi,
+    "bne":      i_bne,
+    "j":        i_j,
+    "cmp":      i_cmp,
+    "ld":       i_ld,
+    "str":      i_str,
 }

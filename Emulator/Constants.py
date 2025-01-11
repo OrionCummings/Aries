@@ -76,6 +76,8 @@ CONSTANT_OPCODE_MAP = {
     "add":  (3, InstructionFormat.Register, True),
     "addi": (3, InstructionFormat.Immediate, True),
     "ldi":  (2, InstructionFormat.Immediate, True),
+    "str":  (2, InstructionFormat.Immediate, True),
+    "ld":   (2, InstructionFormat.Immediate, True),
     "bne":  (1, InstructionFormat.Jump, False),
     "j":    (1, InstructionFormat.Jump, False),
     "call": (1, InstructionFormat.Jump, False),
