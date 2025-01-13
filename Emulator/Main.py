@@ -7,7 +7,7 @@ from PrettyPrinting import error, info, print_red, red_bold
 # Create assembler settings 
 settings = AssemblerSettings()
 settings.print_mode = PrintMode.Hex
-settings.file_name = "Instructions/ld.aria"
+settings.file_name = "Instructions/ldi_failure.aria"
 
 # Create the assembler
 assembler = Assembler(settings)

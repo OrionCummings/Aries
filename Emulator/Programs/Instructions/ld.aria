@@ -1,2 +1,4 @@
-ld 4 A
+ldi 65535 A
+str 0 A
+ld 0 B
 hlt

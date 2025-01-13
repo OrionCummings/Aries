@@ -125,8 +125,6 @@ def encode(line: str) -> Result[int, str]:
             instruction |= reg_c << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 3))
             
             # TODO: SHAMT and FUNC are not implemented yet
-                
-
             
         case InstructionFormat.Immediate:
             
@@ -135,16 +133,20 @@ def encode(line: str) -> Result[int, str]:
             # Immediate loads/stores have 2 arguments
             if len(arguments) == 2:
             
-                potential_value = arguments[0]
+                potential_value_str = arguments[0]
+
                 try:
-                    value = int(potential_value)
+                    potential_value = int(potential_value_str)
                 except ValueError:
-                    if isinstance(potential_value, str):
+                    if isinstance(potential_value_str, str):
                         # If this is a register, then the programmer probably mixed up the order of arguments
-                        if potential_value in CONSTANT_REGISTER_MAP.keys():
-                            return Err(f"{debug()}: str value '{potential_value}' found; did you mix up the order or arguments?")
-                        return Err(f"{debug()}: str value '{potential_value}' found")
-                    return Err(f"{debug()}: unknown value '{potential_value}' found")
+                        if potential_value_str in CONSTANT_REGISTER_MAP.keys():
+                            return Err(f"{debug()}: str value '{potential_value_str}' found; did you mix up the order or arguments?")
+                        return Err(f"{debug()}: str value '{potential_value_str}' found")
+                    return Err(f"{debug()}: unknown value '{potential_value_str}' found")
+
+                if potential_value >= 2**16:
+                    return Err(f"{debug()}: failed to encode immediate value '{potential_value}' as it is too large (>= 2^16)")
 
                 potential_reg = arguments[1]
                 if potential_reg not in CONSTANT_REGISTER_MAP.keys():
@@ -153,7 +155,7 @@ def encode(line: str) -> Result[int, str]:
                 reg = CONSTANT_REGISTER_MAP[potential_reg]
                 
                 instruction |= reg << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 1))
-                instruction |= value
+                instruction |= potential_value
             
             # Immediate operations have 3 arguments
             elif len(arguments) == 3:

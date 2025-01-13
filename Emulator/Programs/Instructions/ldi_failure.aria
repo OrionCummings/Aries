@@ -1,0 +1,4 @@
+; this value is too large for 16 bits,
+; so this should fail!
+ldi 65535 A
+hlt

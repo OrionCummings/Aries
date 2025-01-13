@@ -1,3 +1,4 @@
+import struct
 from typing import Optional
 from option import Err, Ok, Result
 from Transformations import encode, decode, get_opcode
@@ -202,9 +203,18 @@ def i_addi(cpu: CPU, arguments: list) -> Result[CPU, str]:
 def i_ldi(cpu: CPU, arguments: list) -> Result[CPU, str]:
     """Executes a 'Load Immediate' instruction."""
 
-    (value_str, reg) = arguments
-    value = int(value_str)
-    cpu.register_file.set_reg(reg, value)
+    (value_str, potential_reg) = arguments
+    potential_value = int(value_str)
+
+    if potential_reg not in CONSTANT_REGISTER_MAP.keys():
+        return Err(f"{debug()}: invalid register '{potential_reg}' parsed")
+
+    # 2^16-1 = 65535 is the largest value these instructions can hold,
+    # so attempting to load any larger number should fail!
+    if potential_value >= 2**16:
+        return Err(f"{debug()}: failed to load immediate '{potential_value}' into register '{potential_reg}' (value is too large for 16 bits!)")
+
+    cpu.register_file.set_reg(potential_reg, potential_value)
 
     cpu.register_file.increment_program_counter()
     
@@ -266,7 +276,10 @@ def i_ld(cpu: CPU, arguments: list) -> Result[CPU, str]:
     # Get the value at that memory address
     # TODO: Magic numbers!
     r_value_vector_bytes = cpu.data_memory.get_bytes(address, address+3)
-    value = int.from_bytes(r_value_vector_bytes, byteorder='little')
+    if r_value_vector_bytes.is_err:
+        return Err(f"{debug()}: failed to get bytes\n{r_value_vector_bytes.unwrap_err()}")
+    value_vector_bytes = r_value_vector_bytes.unwrap()
+    value = int.from_bytes(value_vector_bytes, byteorder='little')
 
     # Get the register
     potential_reg = arguments[1]
@@ -285,7 +298,7 @@ def i_str(cpu: CPU, arguments: list) -> Result[CPU, str]:
     """Execute a 'Store' instruction."""
 
     # Get the register
-    potential_reg = arguments[0]
+    potential_reg = arguments[1]
     if potential_reg not in CONSTANT_REGISTER_MAP.keys():
         return Err(f"{debug()}: parsed unknown register '{potential_reg}'")
     
@@ -293,11 +306,27 @@ def i_str(cpu: CPU, arguments: list) -> Result[CPU, str]:
     r_reg_value = cpu.register_file.get_reg(potential_reg)
     if r_reg_value.is_err:
         return Err(f"{debug()}: failed to get register '{potential_reg}'")
+    
+    # This value may be 1-4 bytes in size, so we need to treat it accordingly!
     reg_value = r_reg_value.unwrap()
-    byte_array = int.to_bytes(reg_value, byteorder='little')
+
+    # This assumes all loaded values are 4 bytes!
+    # Create a list of each byte of the value (little endian!)
+    parts = []
+    for _ in range(0, 4):
+        parts.append(reg_value & 255)
+        reg_value >>= 8
+
+    # Pack the bytes into a single number.
+    # '<' => little endian
+    # 'B' => one unsigned char (duplicated four times!)
+    try:
+        packed_bytes = struct.pack('>BBBB', *parts)
+    except struct.error as _:
+        return Err(f"{debug()}: failed to pack bytes")
 
     # Get the memory address
-    potential_address = arguments[1]
+    potential_address = arguments[0]
     try:
         address = int(potential_address)
     except ValueError:
@@ -305,7 +334,9 @@ def i_str(cpu: CPU, arguments: list) -> Result[CPU, str]:
 
     # Set the value in memory to the register value
     # TODO: Magic numbers!
-    cpu.data_memory.set_bytes(byte_array, range(address, address+3))
+    r_set_bytes = cpu.data_memory.set_bytes(packed_bytes, range(address, address+4))
+    if r_set_bytes.is_err:
+        return Err(f"{debug()}: failed to set bytes\n{r_set_bytes.unwrap_err()}")
 
     # Increment the program counter
     cpu.register_file.increment_program_counter()

@@ -1,1 +1,3 @@
-str A 4
+ldi 65535 A
+str 0 A
+hlt
