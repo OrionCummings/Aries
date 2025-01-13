@@ -68,6 +68,8 @@ def decode_jump_instruction_as_list(binary_instruction: str) -> list:
     address = binary_instruction[OP_LENGTH:]
     return [opcode, address]
 
+# TODO: This should not be a thing: why are compare instruction treated differently??
+# Just differentiate in encode()???
 def decode_compare_instruction_as_list(binary_instruction: str) -> list:
     opcode = binary_instruction[:OP_LENGTH]
     reg_a  = binary_instruction[OP_LENGTH : OP_LENGTH + (1 * REG_LENGTH)]
@@ -145,6 +147,7 @@ def encode(line: str) -> Result[int, str]:
                         return Err(f"{debug()}: str value '{potential_value_str}' found")
                     return Err(f"{debug()}: unknown value '{potential_value_str}' found")
 
+                # TODO: This could be handled with a psuedoinstruction!
                 if potential_value >= 2**16:
                     return Err(f"{debug()}: failed to encode immediate value '{potential_value}' as it is too large (>= 2^16)")
 
