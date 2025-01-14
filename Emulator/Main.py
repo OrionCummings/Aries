@@ -7,8 +7,8 @@ from PrettyPrinting import error, info, red_bold
 # Create assembler settings 
 settings = AssemblerSettings()
 settings.print_mode = PrintMode.Hex
-settings.file_name = "call.aria"
-settings.file_directory = "Programs/Instructions"
+settings.file_name = "while_loop.aria"
+settings.file_directory = "Programs/"
 
 # Create the assembler
 assembler = Assembler(settings)
@@ -40,7 +40,7 @@ def press(key) -> bool:
         clock = cpu.clock()
         
         # Print the CPU state
-        #print(cpu)
+        print(cpu)
          
         return clock #?
     else:
@@ -49,7 +49,7 @@ def press(key) -> bool:
 def main():
 
     info("Press space to execute one clock cycle")
-    #print(cpu) 
+    print(cpu) 
     l = Listener(on_press=press)
     l.start()
     l.join()

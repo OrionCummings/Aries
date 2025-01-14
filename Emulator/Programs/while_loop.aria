@@ -1,0 +1,8 @@
+
+ldi 8 I         ; Load the value 8 into I
+cmp A I         ; Compare A and I
+bne HALT        ; If A and I are equal, hlt
+addi 1 A        ; Increment A by 1
+
+HALT:
+hlt             ; Halt the program
