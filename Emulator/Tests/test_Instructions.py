@@ -3,6 +3,7 @@ import unittest
 from Assembler import Assembler, AssemblerSettings
 from CPU import CPU
 from PrettyPrinting import PrintMode
+from Transformations import decode
 from Utilities import get_current_function_name
 
 class InstructionTests(unittest.TestCase):
@@ -30,6 +31,20 @@ class InstructionTests(unittest.TestCase):
         r_load = cpu.load_program(assembler.instructions, assembler.file_name)
         if r_load.is_err:
             self.fail(f"{r_load.unwrap_err()}")
+
+        # Check if the jump address is correct
+        instruction = cpu.get_current_instruction()
+        r_decoded_instruction = decode(instruction)
+        if r_decoded_instruction.is_err:
+            self.fail(r_decoded_instruction.unwrap_err())
+        decoded_instruction = r_decoded_instruction.unwrap()
+        decoded_instruction_vector = decoded_instruction.split(" ")
+
+        # There should be two elements in this vector: ['j', '4']
+        self.assertEqual(len(decoded_instruction_vector), 2)
+
+        # The second element should be '4'
+        self.assertEqual(decoded_instruction_vector[1], '4')
 
         clock = cpu.clock() # j target
         self.assertTrue(clock, "CPU stopped prematurely")
