@@ -64,7 +64,7 @@ class CPU():
         builder += self.data_memory.to_string(TextRenderTarget.Terminal, -4)
         
         return builder
-    
+
     def load_program(self, program: list[int], program_name: str, base_address_in_bytes: int = 0) -> Result[bool, str]:
         """Loads a program into memory at the given address."""
         
@@ -153,6 +153,29 @@ class CPU():
 
         return not self.halted
 
+    def save_context(self) -> Result[bool, str]:
+        """Saves the current CPU context to the Call Stack."""
+
+        # Get the program counter
+        pc = self.register_file.get_pc()
+
+        # Save the program counter on the call stack
+        r_push = self.call_stack.push(pc)
+        if r_push.is_err:
+            return trace(f"failed to push program counter '{pc}' to call stack:\n{r_push.unwrap_err()}")
+
+        return Ok(r_push.unwrap())
+
+    def restore_context(self) -> Result[bool, str]:
+        """Restores the previous CPU context from the Call Stack."""
+
+        # Save the program counter on the call stack
+        r_pop = self.call_stack.pop()
+        if r_pop.is_err:
+            return trace(f"failed to pop program counter from call stack:\n{r_pop.unwrap_err()}")
+
+        return Ok(r_pop.unwrap())
+
 def i_nop(cpu: CPU, arguments: list) -> Result[CPU, str]:
     """Executes a 'No Operation' instruction."""
 
@@ -226,6 +249,7 @@ def i_ldi(cpu: CPU, arguments: list) -> Result[CPU, str]:
 
 def i_j(cpu: CPU, arguments: list) -> Result[CPU, str]:
     """Executes a 'Jump' instruction."""
+
     (address_str,) = arguments
     address = int(address_str)
     address_in_bytes = address * PC_INC
@@ -347,6 +371,41 @@ def i_str(cpu: CPU, arguments: list) -> Result[CPU, str]:
     
     return Ok(cpu)
 
+def i_call(cpu: CPU, arguments: list) -> Result[CPU, str]:
+    """Executes a 'Call' instruction."""
+    
+    # Labels are resolved during assembly, so the single argument
+    # of a call instruction will be a precomputed address
+    (address_str,) = arguments
+    address = int(address_str)
+    address_in_bytes = address * PC_INC
+
+    pass
+
+    # Increment the program counter and save the CPU context to the top of the call stack
+    cpu.register_file.increment_program_counter()
+    r_save = cpu.save_context()
+    if r_save.is_err:
+        return trace(f"failed to save cpu context:\n{r_save.unwrap_err()}")
+
+    # Set the program counter
+    cpu.register_file.set_reg("PC", address_in_bytes)
+
+    return Ok(cpu)
+
+def i_ret(cpu: CPU, arguments: list) -> Result[CPU, str]:
+    """Executes a 'Return' instruction."""
+    
+    # Restore the CPU context that is on the top of the call stack
+    r_restore_address = cpu.restore_context()
+    if r_restore_address.is_err:
+        return trace(f"failed to restore cpu context:\n{r_restore_address.unwrap_err()}")
+
+    restore_address = r_restore_address.unwrap()
+    cpu.register_file.set_reg("PC", restore_address)
+
+    return Ok(cpu)
+
 # A list of all instruction functions
 CONSTANT_INSTRUCTION_FUNCTIONS = {
     "nop":      i_nop,
@@ -359,4 +418,12 @@ CONSTANT_INSTRUCTION_FUNCTIONS = {
     "cmp":      i_cmp,
     "ld":       i_ld,
     "str":      i_str,
+    "call":     i_call,
+    "ret":     i_ret,
 }
+
+if __name__ == '__main__':
+    c = CPU(8,8)
+    r_b = c.save_context()
+    print(c.call_stack)
+    pass

@@ -7,8 +7,8 @@ from PrettyPrinting import error, info, red_bold
 # Create assembler settings 
 settings = AssemblerSettings()
 settings.print_mode = PrintMode.Hex
-settings.file_name = "test_label_success.aria"
-settings.file_directory = "Tests/Test Programs"
+settings.file_name = "call.aria"
+settings.file_directory = "Programs/Instructions"
 
 # Create the assembler
 assembler = Assembler(settings)

@@ -1,0 +1,16 @@
+            ; Execution Order
+nop         ; 1
+nop         ; 2
+nop         ; 3
+
+call f      ; 4
+ldi 1 A     ; 9
+ldi 1 B     ; 10
+ldi 1 C     ; 11
+hlt         ; 12
+
+f:          ; (not executed)
+ldi 255 D   ; 5
+ldi 255 E   ; 6
+ldi 255 F   ; 7
+ret         ; 8
