@@ -1,8 +1,9 @@
 from __future__ import annotations
 from enum import Enum
 from option import Err, Ok, Result
-from BitManipulation import get_bit, set_bit, toggle_bit
+from BitManipulation import get_bit, reset_bit, set_bit, toggle_bit
 from Constants import CONSTANT_REGISTER_MAP, BP_INC, FL_ZERO, PC_INC, SP_INC, TextRenderTarget
+from Utilities import trace
 
 def is_register(reg: str) -> bool:
     return reg in (list(CONSTANT_REGISTER_MAP.keys()) + list(CONSTANT_REGISTER_MAP.values()))
@@ -38,6 +39,8 @@ class RegisterFile():
         """Returns a string representation of a register file
         for either a terminal location or widget rendering."""
 
+        # TODO: TUI: Fix this stuff
+
         # If this is a terminal render, then just use the str override
         if target == TextRenderTarget.Terminal:
             return str(self)
@@ -65,7 +68,7 @@ class RegisterFile():
     def get_reg(self, reg: str) -> Result[int, str]:
         if reg in self.registers:
             return Ok(self.registers[reg])
-        return Err("No register with key '{}'!".format(reg))
+        return trace(f"No register with key '{reg}'!")
     
     def get_pc(self) -> int:
         return self.registers["PC"]

@@ -2,12 +2,12 @@ from functools import partial
 from pynput.keyboard import Key, Listener
 from CPU import CPU
 from Assembler import Assembler, AssemblerSettings, PrintMode
-from PrettyPrinting import error, info, print_red, red_bold
+from PrettyPrinting import error, info, red_bold
 
 # Create assembler settings 
 settings = AssemblerSettings()
 settings.print_mode = PrintMode.Hex
-settings.file_name = "label.aria"
+settings.file_name = "example.aria"
 
 # Create the assembler
 assembler = Assembler(settings)

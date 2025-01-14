@@ -3,7 +3,7 @@ from option import Result, Err, Ok
 from BitManipulation import bit_mask
 from Constants import CONSTANT_OPCODE_MAP, CONSTANT_REGISTER_MAP, FF_LENGTH, FUNC_LENGTH, IMM_LENGTH, INS_LENGTH, OP_LENGTH, REG_LENGTH, SHAMT_LENGTH, InstructionFormat
 from PrettyPrinting import PrintMode
-from Utilities import get_opcode_from_id, debug
+from Utilities import get_opcode_from_id, debug, trace
 
 def get_opcode(instruction: str | int) -> Result[int, str]:
     
@@ -17,7 +17,7 @@ def get_opcode(instruction: str | int) -> Result[int, str]:
         opcode = (instruction & mask) >> start_index
         return Ok(opcode)
     else:
-        return Err(f"{debug()}: unknown type")
+        return trace(f"unknown type")
 
 def get_instruction_mode(instruction: str | int) -> Result[InstructionFormat, str]:
     if isinstance(instruction, str):
@@ -26,12 +26,12 @@ def get_instruction_mode(instruction: str | int) -> Result[InstructionFormat, st
         decoded_instruction = decode(instruction).unwrap()
         opcode = decoded_instruction.split(" ")[0]
     else:
-        return Err(f"{debug()}: unknown type '{type(instruction)}'")
+        return trace(f"unknown type '{type(instruction)}'")
     
     if opcode in CONSTANT_OPCODE_MAP:
         opcode_tuple = CONSTANT_OPCODE_MAP[opcode]
     else:
-        return Err(f"{debug()}: unknown opcode '{opcode}'")
+        return trace(f"unknown opcode '{opcode}'")
     (_, _, i_mode, *_) = opcode_tuple
 
     return Ok(i_mode)
@@ -96,7 +96,7 @@ def encode(line: str) -> Result[int, str]:
     # Check that the number of expected arguments matches the number of actual arguments.
     # The line vector includes the opcode, whereas the num_args constant does not => +1
     if len(line_vector) != num_args+1:
-        return Err(f"{debug()}: expected number of arguments ({num_args}) does not match the actual number of arguments ({len(line_vector)})")
+        return trace(f"expected number of arguments ({num_args}) does not match the actual number of arguments ({len(line_vector)})")
 
     instruction: int = 0
     instruction |= opcode << (INS_LENGTH - OP_LENGTH)
@@ -116,7 +116,7 @@ def encode(line: str) -> Result[int, str]:
             try:
                 _, reg_a_str, reg_b_str, reg_c_str = line_vector
             except ValueError:
-                return Err(f"{debug()}: unexpected number of arguments in line '{line}'")
+                return trace(f"unexpected number of arguments in line '{line}'")
                 
             reg_a = CONSTANT_REGISTER_MAP[reg_a_str]
             reg_b = CONSTANT_REGISTER_MAP[reg_b_str]
@@ -143,17 +143,17 @@ def encode(line: str) -> Result[int, str]:
                     if isinstance(potential_value_str, str):
                         # If this is a register, then the programmer probably mixed up the order of arguments
                         if potential_value_str in CONSTANT_REGISTER_MAP.keys():
-                            return Err(f"{debug()}: str value '{potential_value_str}' found; did you mix up the order or arguments?")
-                        return Err(f"{debug()}: str value '{potential_value_str}' found")
-                    return Err(f"{debug()}: unknown value '{potential_value_str}' found")
+                            return trace(f"str value '{potential_value_str}' found; did you mix up the order or arguments?")
+                        return trace(f"str value '{potential_value_str}' found")
+                    return trace(f"unknown value '{potential_value_str}' found")
 
                 # TODO: This could be handled with a psuedoinstruction!
                 if potential_value >= 2**16:
-                    return Err(f"{debug()}: failed to encode immediate value '{potential_value}' as it is too large (>= 2^16)")
+                    return trace(f"failed to encode immediate value '{potential_value}' as it is too large (>= 2^16)")
 
                 potential_reg = arguments[1]
                 if potential_reg not in CONSTANT_REGISTER_MAP.keys():
-                    return Err(f"{debug()}: parsed invalid register '{potential_reg}'")
+                    return trace(f"parsed invalid register '{potential_reg}'")
 
                 reg = CONSTANT_REGISTER_MAP[potential_reg]
                 
@@ -172,7 +172,7 @@ def encode(line: str) -> Result[int, str]:
                 instruction |= value
             
             else:
-                return Err(f"{debug()}: invalid number of arguments found in instruction '{line}'")
+                return trace(f"invalid number of arguments found in instruction '{line}'")
             
         case InstructionFormat.Jump:
             

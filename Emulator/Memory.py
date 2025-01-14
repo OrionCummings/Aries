@@ -3,6 +3,7 @@ from enum import Enum
 from option import Err, Ok, Result
 from Constants import PC_INC, TextRenderTarget
 from PrettyPrinting import bold, red_bold
+from Utilities import trace
 
 # The number of memory entries to show per line when printed
 TERMINAL_MEMORY_DISPLAY_LENGTH = 16
@@ -104,16 +105,16 @@ class Memory():
             Result[bytes, str]: A boolean True on success or a error message string on failure.
         """
         
-        if start_index_in_bytes > end_index_in_bytes: return Err(f"Start index {start_index_in_bytes} > end index {end_index_in_bytes}!")
-        if start_index_in_bytes < 0 or start_index_in_bytes > self.capacity_in_bytes: return Err(f"Start index {start_index_in_bytes} out of range!")
-        if end_index_in_bytes   < 0 or   end_index_in_bytes > self.capacity_in_bytes: return Err(f"End index {end_index_in_bytes} out of range!")
+        if start_index_in_bytes > end_index_in_bytes: return trace(f"Start index {start_index_in_bytes} > end index {end_index_in_bytes}!")
+        if start_index_in_bytes < 0 or start_index_in_bytes > self.capacity_in_bytes: return trace(f"Start index {start_index_in_bytes} out of range!")
+        if end_index_in_bytes   < 0 or   end_index_in_bytes > self.capacity_in_bytes: return trace(f"End index {end_index_in_bytes} out of range!")
         bs = [self.bytes[index] for index in range(start_index_in_bytes, end_index_in_bytes+1)]
         
         return Ok(bs)
     
     def get_instruction(self, index_in_bytes: int) -> Result[int, str]:
         
-        if index_in_bytes < 0 or index_in_bytes > self.capacity_in_bytes: return Err(f"Index ({index_in_bytes}) out of range!")
+        if index_in_bytes < 0 or index_in_bytes > self.capacity_in_bytes: return trace(f"Index ({index_in_bytes}) out of range!")
 
         r = list(range(index_in_bytes, index_in_bytes + 4))
 
@@ -168,10 +169,10 @@ class Memory():
             Result[bool, str]: A result type containing a boolean True on success or a string error message on failure.
         """
 
-        if instruction > 2**32: return Err(f"Invalid instruction '{instruction}': too large!")
-        if instruction < 0: return Err(f"Invalid instruction '{instruction}': too small!")
-        if endianness not in ['little', 'big']: return Err(f"Invalid endianness '{endianness}'!")
-        if len(self.bytes) < index_in_bytes: return Err(f"Memory location '{index_in_bytes}' out of bounds!")
+        if instruction > 2**32: return trace(f"Invalid instruction '{instruction}': too large!")
+        if instruction < 0: return trace(f"Invalid instruction '{instruction}': too small!")
+        if endianness not in ['little', 'big']: return trace(f"Invalid endianness '{endianness}'!")
+        if len(self.bytes) < index_in_bytes: return trace(f"Memory location '{index_in_bytes}' out of bounds!")
         
         deconstructed_instruction = instruction.to_bytes(4, endianness)
         set_bytes_result = self.set_bytes(deconstructed_instruction, list(range(index_in_bytes, index_in_bytes + PC_INC)))

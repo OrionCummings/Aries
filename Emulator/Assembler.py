@@ -4,7 +4,7 @@ from option import Err, Ok, Result
 from Constants import ASM_COMMENT_CHARACTER, ASM_TEST_PREFIX_CHARACTER, InstructionFormat
 from Transformations import decode, encode, get_instruction_mode, instruction_string
 from PrettyPrinting import PrintMode, error, info, print_red, print_green, print_blue, print_yellow, red_bold, success, warning
-from Utilities import debug
+from Utilities import debug, trace
 
 @dataclass
 class AssemblerSettings:
@@ -37,7 +37,7 @@ class Assembler():
 
         # The disassembly of the file
         self.disassembly: str = Optional[str]
-        
+
     def __str__(self) -> str:
         
         if self.settings.print_mode == PrintMode.NoOutput:
@@ -59,7 +59,9 @@ class Assembler():
 
             r_instruction: Result[str, str] = instruction_string(instruction, self.settings.print_mode)
             if r_instruction.is_err:
-                builder += "Failed to convert instruction '{}': {}".format(format(instruction, "032b"), r_instruction.unwrap_err()) # TODO: Inconsistent use of 'format()'
+                formatted_instruction = format(instruction, "032b")
+                instruction_err = r_instruction.unwrap_err()
+                builder += f"Failed to convert instruction '{formatted_instruction}': {instruction_err}"
                 return builder
             
             builder += r_instruction.unwrap()
@@ -67,7 +69,7 @@ class Assembler():
             index += 1
             
         return builder
-    
+
     def read(self) -> Result[bool, str]:
         """Reads the file into an internal buffer."""
         
@@ -124,12 +126,12 @@ class Assembler():
                     real_line_number += 1
                         
         except FileNotFoundError:
-            return Err(f"{debug()}: Unable to parse program: file '{full_file_name}' not found!")
+            return trace(f"unable to parse program: file '{full_file_name}' not found!")
         
         success(f"Read file '{self.file_name}' into assembler buffer.")
 
         return Ok(True)
-    
+
     def validate(self) -> Result[bool, str]:
 
         # TODO: Label resolution is currently a double pass algorithm when it doesn't
@@ -157,7 +159,7 @@ class Assembler():
             # If this a jump instruction, then it COULD use a label
             r_mode = get_instruction_mode(line)
             if r_mode.is_err:
-                return Err(f"{debug()}: failed to get instruction mode:\n{r_mode.unwrap_err()}")
+                return trace(f"failed to get instruction mode:\n{r_mode.unwrap_err()}")
             mode = r_mode.unwrap()
 
             if mode == InstructionFormat.Jump:
@@ -188,13 +190,13 @@ class Assembler():
                     # BUG: This does not account for TRUE numeric address arguments to jump instructions.
                     # Add a check for str[0].alpha() to determine if this is a number (address) or
                     # a string (label).
-                    return Err(f"{self.file_name}:{real_line_number} Undefined label '{parsed_label}'!")
+                    return trace(f"{self.file_name}:{real_line_number} Undefined label '{parsed_label}'!")
 
         if known_labels_count != resolved_labels_count:
-            return Err(f"{debug()} Failed to resolve all labels: {known_labels_count - resolved_labels_count} label(s) remaining!")
+            label_diff = known_labels_count - resolved_labels_count
+            return trace(f"Failed to resolve all labels: {label_diff} label(s) remaining!")
         
         success(f"Resolved {known_labels_count}/{resolved_labels_count} label(s).")
-
         success(f"Validated file '{self.file_name}'.")
 
         return Ok(True)
@@ -243,7 +245,7 @@ class Assembler():
 
                 # If parsing fails, propagate the error
                 if r_instruction.is_err:
-                    return Err(f"{debug()} failed to encode instruction:\n{r_instruction.unwrap_err()}")
+                    return trace(f"failed to encode instruction:\n{r_instruction.unwrap_err()}")
                 
                 # Append the machine code instruction to the program
                 self.instructions.append(r_instruction.unwrap())
@@ -269,22 +271,22 @@ class Assembler():
         # Read the file
         r_contents = self.read()
         if r_contents.is_err:
-            return Err(f"{debug()}: failed to read file {self.file_name}\n{r_contents.unwrap_err()}")
+            return trace(f"failed to read file {self.file_name}\n{r_contents.unwrap_err()}")
 
         # Validate the file
         r_validation = self.validate()
         if r_validation.is_err:
-            return Err(f"{debug()}: failed to validate file {self.file_name}\n{r_validation.unwrap_err()}")
+            return trace(f"failed to validate file {self.file_name}\n{r_validation.unwrap_err()}")
 
         # Assemble the file
         r_instructions = self.assemble()
         if r_instructions.is_err:
-            return Err(f"{debug()}: failed to assemble file '{self.file_name}'\n{r_instructions.unwrap_err()}")
+            return trace(f"failed to assemble file '{self.file_name}'\n{r_instructions.unwrap_err()}")
 
         # Update metadata post assembly
         r_update = self.update()
         if r_update.is_err:
-            return Err(f"{debug()}: failed to update after assembling '{self.file_name}'\n{r_update.unwrap_err()}")
+            return trace(f"failed to update after assembling '{self.file_name}'\n{r_update.unwrap_err()}")
 
         return Ok(True)
 

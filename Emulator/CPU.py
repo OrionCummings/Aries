@@ -7,7 +7,7 @@ from Constants import CONSTANT_REGISTER_MAP, FL_ZERO, PC_INC, PC_OVERRUN, Instru
 from RegisterFile import RegisterFile
 from Memory import Memory
 from CallStack import CallStack
-from Utilities import get_opcode_from_id, p_exit, debug
+from Utilities import get_opcode_from_id, p_exit, debug, trace
 
 class CPU():
     """A CPU that supports the Aires Assembly Language."""
@@ -112,7 +112,7 @@ class CPU():
         # Given an instruction, attempt the decode it
         r_decoded_instruction = decode(current_instruction)
         if r_decoded_instruction.is_err:
-            return Err(f"{debug()}: failed to decode instruction on line {current_line} '0x{format(current_instruction, '08x')}':\n{r_decoded_instruction.unwrap_err()}")
+            return trace(f"failed to decode instruction on line {current_line} '0x{format(current_instruction, '08x')}':\n{r_decoded_instruction.unwrap_err()}")
         decoded_instruction = r_decoded_instruction.unwrap()
 
         decoded_instruction_list = decoded_instruction.split(" ")
@@ -120,13 +120,13 @@ class CPU():
 
         # If it exists, get the instruction function
         if potential_opcode not in CONSTANT_INSTRUCTION_FUNCTIONS.keys():
-            return Err(f"{debug()}: found opcode '{potential_opcode}' without function definition")
+            return trace(f"found opcode '{potential_opcode}' without function definition")
         
         function = CONSTANT_INSTRUCTION_FUNCTIONS[potential_opcode]
 
         r_new_cpu_state = function(self, arguments)
         if r_new_cpu_state.is_err:
-            return Err(f"{debug()}: invalid cpu state\n{r_new_cpu_state.unwrap_err()}")
+            return trace(f"invalid cpu state\n{r_new_cpu_state.unwrap_err()}")
         
         # TODO: Reassigning 'self' is probably bad practice. Should there be an object
         # that contains a CPU that handles CPU state changes?
@@ -207,12 +207,12 @@ def i_ldi(cpu: CPU, arguments: list) -> Result[CPU, str]:
     potential_value = int(value_str)
 
     if potential_reg not in CONSTANT_REGISTER_MAP.keys():
-        return Err(f"{debug()}: invalid register '{potential_reg}' parsed")
+        return trace(f"invalid register '{potential_reg}' parsed")
 
     # 2^16-1 = 65535 is the largest value these instructions can hold,
     # so attempting to load any larger number should fail!
     if potential_value >= 2**16:
-        return Err(f"{debug()}: failed to load immediate '{potential_value}' into register '{potential_reg}' (value is too large for 16 bits!)")
+        return trace(f"failed to load immediate '{potential_value}' into register '{potential_reg}' (value is too large for 16 bits!)")
 
     cpu.register_file.set_reg(potential_reg, potential_value)
 
@@ -271,20 +271,20 @@ def i_ld(cpu: CPU, arguments: list) -> Result[CPU, str]:
     try:
         address = int(potential_address)
     except ValueError:
-        return Err(f"{debug()}: failed to convert address '{potential_address}' to an integer")
+        return trace(f"failed to convert address '{potential_address}' to an integer")
 
     # Get the value at that memory address
     # TODO: Magic numbers!
     r_value_vector_bytes = cpu.data_memory.get_bytes(address, address+3)
     if r_value_vector_bytes.is_err:
-        return Err(f"{debug()}: failed to get bytes\n{r_value_vector_bytes.unwrap_err()}")
+        return trace(f"failed to get bytes\n{r_value_vector_bytes.unwrap_err()}")
     value_vector_bytes = r_value_vector_bytes.unwrap()
     value = int.from_bytes(value_vector_bytes, byteorder='little')
 
     # Get the register
     potential_reg = arguments[1]
     if potential_reg not in CONSTANT_REGISTER_MAP.keys():
-        return Err(f"{debug()}: parsed unknown register '{potential_reg}'")
+        return trace(f"parsed unknown register '{potential_reg}'")
 
     # Set the register value to the value in memory
     cpu.register_file.set_reg(potential_reg, value)
@@ -300,12 +300,12 @@ def i_str(cpu: CPU, arguments: list) -> Result[CPU, str]:
     # Get the register
     potential_reg = arguments[1]
     if potential_reg not in CONSTANT_REGISTER_MAP.keys():
-        return Err(f"{debug()}: parsed unknown register '{potential_reg}'")
+        return trace(f"parsed unknown register '{potential_reg}'")
     
     # Get the value of the register and split it into 4 bytes
     r_reg_value = cpu.register_file.get_reg(potential_reg)
     if r_reg_value.is_err:
-        return Err(f"{debug()}: failed to get register '{potential_reg}'")
+        return trace(f"failed to get register '{potential_reg}'")
     
     # This value may be 1-4 bytes in size, so we need to treat it accordingly!
     reg_value = r_reg_value.unwrap()
@@ -323,20 +323,20 @@ def i_str(cpu: CPU, arguments: list) -> Result[CPU, str]:
     try:
         packed_bytes = struct.pack('>BBBB', *parts)
     except struct.error as _:
-        return Err(f"{debug()}: failed to pack bytes")
+        return trace(f"failed to pack bytes")
 
     # Get the memory address
     potential_address = arguments[0]
     try:
         address = int(potential_address)
     except ValueError:
-        return Err(f"{debug()}: failed to convert address '{potential_address}' to an integer")
+        return trace(f"failed to convert address '{potential_address}' to an integer")
 
     # Set the value in memory to the register value
     # TODO: Magic numbers!
     r_set_bytes = cpu.data_memory.set_bytes(packed_bytes, range(address, address+4))
     if r_set_bytes.is_err:
-        return Err(f"{debug()}: failed to set bytes\n{r_set_bytes.unwrap_err()}")
+        return trace(f"failed to set bytes\n{r_set_bytes.unwrap_err()}")
 
     # Increment the program counter
     cpu.register_file.increment_program_counter()

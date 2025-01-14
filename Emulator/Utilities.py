@@ -4,7 +4,15 @@ from option import Result, Ok, Err
 from Constants import CONSTANT_OPCODE_MAP
 from PrettyPrinting import print_red, yellow
 
-debug = lambda: str(yellow(os.path.split(inspect.stack()[1][1])[1] + ":" + str(inspect.stack()[1][2]) + ":" + str(inspect.stack()[1][3]) + "()"))
+def debug(function_depth: int = 1) -> str:
+    stack = inspect.stack()[function_depth]
+    file_name = os.path.split(stack[1])[1]
+    line_number = str(stack[2])
+    function_name = str(stack[3])
+    return str(yellow(file_name + ":" + line_number + ":" + function_name + "():"))
+
+def trace(message: str, depth: int = 2) -> Err:
+    return Err(f"{debug(depth)} {message}")
 
 def p_exit(s: str, e: int = 0):
     """A function to print an error message and exit."""
@@ -18,4 +26,4 @@ def get_opcode_from_id(id: int) -> Result[str, str]:
         if item_id == id:
             return Ok(item_key)
 
-    return Err(f"{debug()}: no opcode with id {id} found!")
+    return trace(f"parsed opcode with unknown id '{id}'")
