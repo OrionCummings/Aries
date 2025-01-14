@@ -9,6 +9,7 @@ from Utilities import debug, trace
 @dataclass
 class AssemblerSettings:
     file_name       = None
+    file_directory  = None
     print_mode      = PrintMode.NoOutput
 
 class Assembler():
@@ -21,7 +22,7 @@ class Assembler():
         self.settings: AssemblerSettings = settings
         
         # Directory containing all test programs
-        self.program_directory = "Programs"
+        self.program_directory = settings.file_directory
         
         # The name of the Aires assembly file (.aria) 
         self.file_name: str = settings.file_name
@@ -83,7 +84,7 @@ class Assembler():
         info(f"Reading file '{self.file_name}'...")
 
         full_file_name = self.program_directory + "/" + self.file_name
-        
+
         try:
             with open(full_file_name, "r") as file:
                 real_line_number = 1
@@ -139,13 +140,18 @@ class Assembler():
 
         info(f"Validating file '{self.file_name}'...")
 
+        info(f"Resolving labels...")
+
         # Find all labels
         known_labels = {}
         for (line_number, line) in enumerate(self.file_contents):
             line_content = line[2]
-            if ":" in line_content and line_content[0].isalpha():
-                known_labels[line_content.strip()[:-1]] = line_number+1
 
+            # If a line contains a colon, then that line must contain a label
+            if ":" in line_content and line_content[0].isalpha():
+                known_labels[line_content.strip()[:-1]] = line_number
+
+        # Set up counters to ensure we resolved all found labels
         known_labels_count = len(known_labels)
         resolved_labels_count = 0
 

@@ -65,7 +65,7 @@ class InstructionFormat(Enum):
     Register = 1,
     Immediate = 2,
     Jump = 3,
-    Compare = 4,
+    Compare = 4, # TODO: Remove this inconsistent construct!
 
 # All valid opcodes and their information tuple (ID, ARGC, MODE, ALU?)
 # ID is added later! This dict contains (ARGC, MODE, ALU?)
@@ -74,7 +74,7 @@ CONSTANT_OPCODE_MAP = {
     "ret":  (0, InstructionFormat.Simple, False),
     "hlt":  (0, InstructionFormat.Simple, False),
     "add":  (3, InstructionFormat.Register, True),
-    "addi": (3, InstructionFormat.Immediate, True),
+    "addi": (2, InstructionFormat.Immediate, True),
     "ldi":  (2, InstructionFormat.Immediate, True),
     "str":  (2, InstructionFormat.Immediate, True),
     "ld":   (2, InstructionFormat.Immediate, True),

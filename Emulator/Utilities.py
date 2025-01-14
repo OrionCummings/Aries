@@ -4,6 +4,15 @@ from option import Result, Ok, Err
 from Constants import CONSTANT_OPCODE_MAP
 from PrettyPrinting import print_red, yellow
 
+def get_current_filename() -> str:
+    return str(inspect.stack()[1][1])
+
+def get_current_line() -> str:
+    return str(inspect.stack()[1][2])
+
+def get_current_function_name() -> str:
+    return str(inspect.stack()[1][3])
+
 def debug(function_depth: int = 1) -> str:
     stack = inspect.stack()[function_depth]
     file_name = os.path.split(stack[1])[1]

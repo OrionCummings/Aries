@@ -1,0 +1,5 @@
+ldi 1 A
+ldi 1 B
+ldi 1 C
+target:
+hlt

@@ -96,7 +96,7 @@ def encode(line: str) -> Result[int, str]:
     # Check that the number of expected arguments matches the number of actual arguments.
     # The line vector includes the opcode, whereas the num_args constant does not => +1
     if len(line_vector) != num_args+1:
-        return trace(f"expected number of arguments ({num_args}) does not match the actual number of arguments ({len(line_vector)})")
+        return trace(f"expected number of arguments ({num_args+1}) does not match the actual number of arguments ({len(line_vector)})")
 
     instruction: int = 0
     instruction |= opcode << (INS_LENGTH - OP_LENGTH)

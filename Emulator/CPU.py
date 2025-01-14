@@ -95,8 +95,11 @@ class CPU():
     def get_current_instruction(self):
         """Returns the current instruction."""
 
-        # TODO: Make this safer!
-        return self.instruction_memory.get_instruction(self.register_file.get_pc()).unwrap()
+        r_current_instruction = self.instruction_memory.get_instruction(self.register_file.get_pc())
+        if r_current_instruction.is_err:
+            return trace(f"{r_current_instruction.unwrap_err()}")
+
+        return r_current_instruction.unwrap()
     
     def execute_current_instruction(self) -> Result[bool, str]:
         """Executes the current instruction. On success, returns True. On failure, returns an
@@ -141,7 +144,8 @@ class CPU():
 
         # Execute the current instruction
         execution_result = self.execute_current_instruction()
-        if execution_result.is_err: p_exit(f"{debug}: failed to execute current instruction:\n{execution_result.unwrap_err()}")
+        if execution_result.is_err:
+            p_exit(f"{debug()}: failed to execute current instruction:\n{execution_result.unwrap_err()}")
         
         # TODO: Refactor/remove p_exit and use a result type!
         # Check if the current program counter is valid.
