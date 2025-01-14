@@ -176,6 +176,50 @@ class InstructionTests(unittest.TestCase):
             self.fail(r_combo.unwrap_err())
 
         (assembler, cpu) = r_combo.unwrap() # type: ignore
+
+        # Ensure all registers are zero
+        for reg in CONSTANT_REGISTER_MAP.keys():
+            r_reg_value = cpu.register_file.get_reg(reg)
+            if r_reg_value.is_err:
+                self.fail(r_reg_value.unwrap_err())
+            reg_value = r_reg_value.unwrap()
+
+            self.assertEqual(reg_value, 0)
+
+        # Ensure all data memory is zero
+        for (index, b) in enumerate(cpu.data_memory.bytes):
+            self.assertEqual(b, 0, f"Data memory byte {index} is non-zero!")
+
+        # Ensure all instruction memory is zero (except for the program)
+        for (index, b) in enumerate(cpu.instruction_memory.bytes):
+            if index in [0, 1]: # Ignore the first two instructions (nop & hlt)
+                self.assertEqual(b, 0, f"Instruction memory byte {index} is non-zero!")
+
+        # Execute one instruction
+        cpu.clock() # hlt
+
+        # Ensure all registers are still zero (except for the program counter, which must be 4)
+        for reg in CONSTANT_REGISTER_MAP.keys():
+            r_reg_value = cpu.register_file.get_reg(reg)
+            if r_reg_value.is_err:
+                self.fail(r_reg_value.unwrap_err())
+            reg_value = r_reg_value.unwrap()
+
+            if reg == 'PC':
+                self.assertEqual(reg_value, 4, "Unexpected program counter value!")
+            else:
+                self.assertEqual(reg_value, 0, "Unexpected register value!")
+
+        # Ensure all data memory is still zero
+        for (index, b) in enumerate(cpu.data_memory.bytes):
+            self.assertEqual(b, 0, f"Data memory byte {index} is non-zero!")
+
+        # Ensure all instruction memory is still zero (except for the program)
+        for (index, b) in enumerate(cpu.data_memory.bytes):
+            if index in [0, 1]: # Ignore the first two instructions (nop & hlt)
+                self.assertEqual(b, 0, f"Instruction memory byte {index} is non-zero!")
+
+        self.assertTrue(cpu.halted, "CPU not halted on 'hlt' instruction!")
     
     # def test_add(self):
     #     pass
