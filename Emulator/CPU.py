@@ -68,17 +68,17 @@ class CPU():
     def load_program(self, program: list[int], program_name: str, base_address_in_bytes: int = 0) -> Result[bool, str]:
         """Loads a program into memory at the given address."""
         
-        if base_address_in_bytes >= self.instruction_memory.capacity_in_bytes:
-            return Err(f"{debug()} Failed to load program: Base address '{base_address_in_bytes}' exceeds the instruction memory address space of {self.instruction_memory.capacity_in_bytes}!")
+        if base_address_in_bytes > self.instruction_memory.capacity_in_bytes:
+            return trace(f"failed to load program: base address '{base_address_in_bytes}' exceeds the instruction memory address space of {self.instruction_memory.capacity_in_bytes}!")
         
         program_length_in_bytes = len(program) * PC_INC
-        if program_length_in_bytes + base_address_in_bytes >= self.instruction_memory.capacity_in_bytes:
-            return Err(f"{debug()} Failed to load program: program size ({program_length_in_bytes}) exceeds the instruction memory capacity ({self.instruction_memory.capacity_in_bytes})!")
+        if program_length_in_bytes + base_address_in_bytes > self.instruction_memory.capacity_in_bytes:
+            return trace(f"failed to load program: program size ({program_length_in_bytes}) exceeds the instruction memory capacity ({self.instruction_memory.capacity_in_bytes})!")
         
         if program_length_in_bytes == 0: warning("Loading null program")
         
         r_update = self.instruction_memory.load_instructions(program, base_address_in_bytes)
-        if r_update.is_err: return Err(f"{debug()} Failed to load instructions" + r_update.unwrap_err())
+        if r_update.is_err: return trace(f"failed to load instructions: {r_update.unwrap_err()}")
         
         # After loading a program, we can fill the remainder of instruction memory with 'hlt' instructions
         # halt_fill_start_index_in_bytes = base_address_in_bytes + program_length_in_bytes
@@ -97,7 +97,7 @@ class CPU():
 
         r_current_instruction = self.instruction_memory.get_instruction(self.register_file.get_pc())
         if r_current_instruction.is_err:
-            return trace(f"{r_current_instruction.unwrap_err()}")
+            return trace(r_current_instruction.unwrap_err())
 
         return r_current_instruction.unwrap()
     

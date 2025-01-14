@@ -1,7 +1,11 @@
+from typing import Tuple
 import unittest
+
+from option import Err, Ok, Result
 
 from Assembler import Assembler, AssemblerSettings
 from CPU import CPU
+from Constants import CONSTANT_REGISTER_MAP
 from PrettyPrinting import PrintMode
 from Transformations import decode
 from Utilities import get_current_function_name
@@ -11,6 +15,24 @@ class InstructionTests(unittest.TestCase):
     test_file_directory = ""
     file_extension = ".aria"
 
+    def create_assembler_and_cpu(self, file_name: str, instruction_memory_size_in_bytes: int, data_memory_size_in_bytes: int) -> Result[(Assembler, CPU), str]:
+
+        assembler_settings = AssemblerSettings()
+        assembler_settings.file_name = file_name + self.file_extension
+        assembler_settings.print_mode = PrintMode.Hex
+        assembler_settings.file_directory = 'Tests/Test Programs'
+        assembler = Assembler(assembler_settings)
+        r_run = assembler.run()
+        if r_run.is_err:
+            return Err(r_run.unwrap_err())
+
+        cpu = CPU(instruction_memory_size_in_bytes, data_memory_size_in_bytes)
+        r_load = cpu.load_program(assembler.instructions, assembler.file_name)
+        if r_load.is_err:
+            return Err(r_load.unwrap_err())
+        
+        return Ok((assembler, cpu))
+
     def test_label_success(self):
         """Tests if labels work correctly. The expected behavior of this program is to
         jump past any loads to A, B, and C and straight to a halt. If the jump falls short,
@@ -18,19 +40,13 @@ class InstructionTests(unittest.TestCase):
         exceeds the expected address, this test will fail.
         """
 
-        assembler_settings = AssemblerSettings()
-        assembler_settings.file_name = get_current_function_name() + self.file_extension
-        assembler_settings.print_mode = PrintMode.Hex
-        assembler_settings.file_directory = 'Tests/Test Programs'
-        assembler = Assembler(assembler_settings)
-        r_run = assembler.run()
-        if r_run.is_err:
-            self.fail(r_run.unwrap_err())
+        instruction_memory_size_in_bytes = 32
+        data_memory_size_in_bytes = 8
+        r_combo = self.create_assembler_and_cpu(get_current_function_name(), instruction_memory_size_in_bytes, data_memory_size_in_bytes)
+        if r_combo.is_err:
+            self.fail(r_combo.unwrap_err())
 
-        cpu = CPU(32, 32)
-        r_load = cpu.load_program(assembler.instructions, assembler.file_name)
-        if r_load.is_err:
-            self.fail(f"{r_load.unwrap_err()}")
+        (assembler, cpu) = r_combo.unwrap() # type: ignore
 
         # Check if the jump address is correct
         instruction = cpu.get_current_instruction()
@@ -93,11 +109,73 @@ class InstructionTests(unittest.TestCase):
 
         self.assertTrue(r_run.is_err, "Assembly should have failed!")
 
-    # def test_nop(self):
-    #     pass
+    def test_nop(self):
+        """Tests the 'nop' instruction.
+        """
+        
+        instruction_memory_size_in_bytes = 8
+        data_memory_size_in_bytes = 8
+        r_combo = self.create_assembler_and_cpu(get_current_function_name(), instruction_memory_size_in_bytes, data_memory_size_in_bytes)
+        if r_combo.is_err:
+            self.fail(r_combo.unwrap_err())
 
-    # def test_hlt(self):
-    #     pass
+        (assembler, cpu) = r_combo.unwrap() # type: ignore
+
+        # Ensure all registers are zero
+        for reg in CONSTANT_REGISTER_MAP.keys():
+            r_reg_value = cpu.register_file.get_reg(reg)
+            if r_reg_value.is_err:
+                self.fail(r_reg_value.unwrap_err())
+            reg_value = r_reg_value.unwrap()
+
+            self.assertEqual(reg_value, 0)
+
+        # Ensure all data memory is zero
+        for (index, b) in enumerate(cpu.data_memory.bytes):
+            self.assertEqual(b, 0, f"Data memory byte {index} is non-zero!")
+
+        # Ensure all instruction memory is zero (except for the program)
+        for (index, b) in enumerate(cpu.instruction_memory.bytes):
+            if index in [0, 1]: # Ignore the first two instructions (nop & hlt)
+                self.assertEqual(b, 0, f"Instruction memory byte {index} is non-zero!")
+
+        # Execute one instruction
+        cpu.clock() # nop
+
+        # Ensure all registers are still zero (except for the program counter, which must be 4)
+        for reg in CONSTANT_REGISTER_MAP.keys():
+            r_reg_value = cpu.register_file.get_reg(reg)
+            if r_reg_value.is_err:
+                self.fail(r_reg_value.unwrap_err())
+            reg_value = r_reg_value.unwrap()
+
+            if reg == 'PC':
+                self.assertEqual(reg_value, 4, "Unexpected program counter value!")
+            else:
+                self.assertEqual(reg_value, 0, "Unexpected register value!")
+
+        # Ensure all data memory is still zero
+        for (index, b) in enumerate(cpu.data_memory.bytes):
+            self.assertEqual(b, 0, f"Data memory byte {index} is non-zero!")
+
+        # Ensure all instruction memory is still zero (except for the program)
+        for (index, b) in enumerate(cpu.data_memory.bytes):
+            if index in [0, 1]: # Ignore the first two instructions (nop & hlt)
+                self.assertEqual(b, 0, f"Instruction memory byte {index} is non-zero!")
+
+        self.assertFalse(cpu.halted, "CPU halted on 'nop' instruction!")
+
+    def test_hlt(self):
+        """Tests the 'hlt' instruction.
+        """
+        
+        instruction_memory_size_in_bytes = 8
+        data_memory_size_in_bytes = 8
+        r_combo = self.create_assembler_and_cpu(get_current_function_name(), instruction_memory_size_in_bytes, data_memory_size_in_bytes)
+        if r_combo.is_err:
+            self.fail(r_combo.unwrap_err())
+
+        (assembler, cpu) = r_combo.unwrap() # type: ignore
     
     # def test_add(self):
     #     pass
