@@ -1,12 +1,13 @@
 from functools import partial
 from pynput.keyboard import Key, Listener
 from CPU import CPU
-from Assembler import Assembler, AssemblerSettings, PrintMode
+from Assembler import Assembler, AssemblerSettings, AssemblerSettingsSource, PrintMode
 from PrettyPrinting import error, info, red_bold
 
 # Create assembler settings 
 settings = AssemblerSettings()
 settings.print_mode = PrintMode.Hex
+settings.source = AssemblerSettingsSource.File
 settings.file_name = "while_loop.aria"
 settings.file_directory = "Programs"
 
@@ -34,7 +35,7 @@ def press(key) -> bool:
     if key == Key.space:
         
         # Clear the screen
-        # print("\033c", end="")
+        print("\033c", end="")
         
         # Run one clock cycle of the CPU
         clock = cpu.clock()

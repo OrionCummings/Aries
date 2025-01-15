@@ -1,14 +1,20 @@
 ;; This is broken rn
 
-ldi 8 I         ; [I = 8] Load the value 8 into I
+ldi 64 I         ; [I = 64] Load the value 64 into I
 
 loop:
 
 ; Do whatever in the loop
-addi 1 A        ; [A++] Increment A by 1
 
-cmp A I         ; Compare A and I
-bne loop        ; [while A != I] If A and I are equal, hlt
+; Store the value of A at memory address 0
+str 0 A
+
+; Increment A by 1
+addi 1 A        ; [A++]
+
+; Compare A and I. If A and I are equal, hlt
+cmp A I         ; [while A != I] 
+bne loop        ; 
 
 
 hlt             ; Halt the program

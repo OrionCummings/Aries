@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum
 from typing import List, Optional
 from option import Err, Ok, Result
 from Constants import ASM_COMMENT_CHARACTER, ASM_TEST_PREFIX_CHARACTER, InstructionFormat
@@ -6,11 +7,17 @@ from Transformations import decode, encode, get_instruction_mode, instruction_st
 from PrettyPrinting import PrintMode, error, info, print_red, print_green, print_blue, print_yellow, red_bold, success, warning
 from Utilities import debug, trace
 
+class AssemblerSettingsSource(Enum):
+    NoSource = 0,
+    File = 1,
+    String = 2,
+
 @dataclass
 class AssemblerSettings:
     file_name       = None
     file_directory  = None
     print_mode      = PrintMode.NoOutput
+    source          = AssemblerSettingsSource.NoSource
 
 class Assembler():
     
@@ -76,6 +83,11 @@ class Assembler():
         
         # TODO: Make this better with generators/yields
 
+        # If the source of this program is not a file, then don't try to 
+        # find and parse the file (because it doesn't exist!)
+        if self.settings.source != AssemblerSettingsSource.File:
+            return Ok(True)
+
         # If the file name doesn't end with '.aria', then append it
         if not self.file_name.endswith(".aria"):
             warning(f"File name provided ('{self.file_name}') does not end with '.aria'. Appending file extension.")
@@ -85,6 +97,7 @@ class Assembler():
 
         full_file_name = self.program_directory + "/" + self.file_name
 
+        # TODO: Make this a function that is called in `read()` and `parse()`
         try:
             with open(full_file_name, "r") as file:
                 real_line_number = 1
@@ -130,6 +143,55 @@ class Assembler():
             return trace(f"unable to parse program: file '{full_file_name}' not found!")
         
         success(f"Read file '{self.file_name}' into assembler buffer.")
+
+        return Ok(True)
+
+    def parse(self, string_program: str) -> Result[bool, str]:
+
+        info(f"Reading program '{self.file_name}'...")
+
+        string_program_vector = string_program.split("\n")
+        real_line_number = 1
+        filtered_line_number = 1
+
+        for line in string_program_vector:
+            
+            # BUG: Stripping out comments is good! But we lose
+            # line number information using this method!!!!!
+            # Error messages will never be good!!!!!!!!!!
+            # Idea: just stop adding to the FileContents
+            # if a comment character is found! Then, the index
+            # into the FileContents list will map to the line
+            # number of the source file!!!!!!!!!!!
+
+            # Partition the line into three parts:
+            # 1) before 'ASM_COMMENT_CHARACTER'
+            # 2 'ASM_COMMENT_CHARACTER'
+            # 3) after 'ASM_COMMENT_CHARACTER'
+            partition = line.partition(ASM_COMMENT_CHARACTER)
+
+            # Only take the first part to allow comments to
+            # appear on the same line as code
+            content = partition[0]
+
+            # Remove any bordering whitespace
+            stripped_content = content.strip()
+
+            # If the stripped content is empty, then this line is not code: ignore it.
+            # Otherwise, save it.
+            if stripped_content != "":
+
+                # Increment the 'filtered' line number. Filtered meaning "just code" 
+                # and no comments or other non-essential parts of a program.
+                filtered_line_number += 1
+                
+                # Save this information
+                self.file_contents.append((real_line_number, filtered_line_number, stripped_content))
+
+            # Regardless of if this line was code or not, increment the line number
+            real_line_number += 1
+
+        success(f"Read program '{self.file_name}' into assembler buffer.")
 
         return Ok(True)
 
@@ -272,12 +334,27 @@ class Assembler():
 
         return Ok(True)
 
-    def run(self) -> Result[bool, str]:
+    def run(self, string_program = None) -> Result[bool, str]:
 
-        # Read the file
-        r_contents = self.read()
-        if r_contents.is_err:
-            return trace(f"failed to read file {self.file_name}\n{r_contents.unwrap_err()}")
+        match self.settings.source:
+
+            case AssemblerSettingsSource.File:
+                r_contents = self.read()
+                if r_contents.is_err:
+                    return trace(f"failed to read file {self.file_name}\n{r_contents.unwrap_err()}")
+            
+            case AssemblerSettingsSource.String:
+
+                # If the source is a string, there must be a string program provided
+                if string_program is None:
+                    return trace("no program provided")
+
+                r_contents = self.parse(string_program)
+                if r_contents.is_err:
+                    return trace(f"failed to parse program {self.file_name}\n{r_contents.unwrap_err()}")
+            
+            case _:
+                return trace(f"unknown source '{self.settings.source}'")
 
         # Validate the file
         r_validation = self.validate()

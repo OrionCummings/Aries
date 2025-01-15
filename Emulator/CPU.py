@@ -1,8 +1,9 @@
 import struct
 from typing import Optional
 from option import Err, Ok, Result
+from Assembler import Assembler, AssemblerSettings, AssemblerSettingsSource
 from Transformations import encode, decode, get_opcode
-from PrettyPrinting import PrintMode, bold, green_bold, info, print_yellow, red_bold, warning
+from PrettyPrinting import PrintMode, bold, green_bold, info, print_green, print_yellow, red_bold, warning
 from Constants import CONSTANT_REGISTER_MAP, FL_ZERO, PC_INC, PC_OVERRUN, InstructionFormat, TextRenderTarget
 from RegisterFile import RegisterFile
 from Memory import Memory
@@ -65,9 +66,28 @@ class CPU():
         
         return builder
 
-    def load_program(self, program: list[int], program_name: str, base_address_in_bytes: int = 0) -> Result[bool, str]:
-        """Loads a program into memory at the given address."""
+    def load_program(self, program: list[int] | str, program_name: str, base_address_in_bytes: int = 0) -> Result[bool, str]:
+        """Loads a program into memory at the given address.
+        Can accept a list of instructions or a string as a program.
+        """
         
+        # If the input is a string, then assemble that string and reassign `program`
+        if isinstance(program, str):
+
+            settings = AssemblerSettings()
+            settings.file_directory = None
+            settings.file_name = program_name
+            settings.print_mode = PrintMode.NoOutput
+            settings.source = AssemblerSettingsSource.String
+
+            assembler = Assembler(settings)
+
+            r_run = assembler.run(program)
+            if r_run.is_err:
+                return trace(f"failed to run assembler:\n{r_run.unwrap_err()}")
+
+            program = assembler.instructions
+
         if base_address_in_bytes > self.instruction_memory.capacity_in_bytes:
             return trace(f"failed to load program: base address '{base_address_in_bytes}' exceeds the instruction memory address space of {self.instruction_memory.capacity_in_bytes}!")
         
@@ -79,15 +99,6 @@ class CPU():
         
         r_update = self.instruction_memory.load_instructions(program, base_address_in_bytes)
         if r_update.is_err: return trace(f"failed to load instructions: {r_update.unwrap_err()}")
-        
-        # After loading a program, we can fill the remainder of instruction memory with 'hlt' instructions
-        # halt_fill_start_index_in_bytes = base_address_in_bytes + program_length_in_bytes
-        # num_halts = int((self.data_memory.capacity_in_bytes - program_length_in_bytes) / PC_INC)
-        # halt_instructions = [encode('hlt').unwrap()] * num_halts
-
-        # r_halt_load = self.instruction_memory.load_instructions(halt_instructions, halt_fill_start_index_in_bytes)
-        # if r_halt_load.is_err:
-        #     return Err(f"{debug()} Failed to load trailing halt instructions in instruction memory!\n{r_halt_load.unwrap_err()}")
 
         info(f"Loaded '{program_name}' starting at address {base_address_in_bytes} ({base_address_in_bytes:0X})")
         return Ok(True)
@@ -391,8 +402,6 @@ def i_call(cpu: CPU, arguments: list) -> Result[CPU, str]:
     address = int(address_str)
     address_in_bytes = address * PC_INC
 
-    pass
-
     # Increment the program counter and save the CPU context to the top of the call stack
     cpu.register_file.increment_program_counter()
     r_save = cpu.save_context()
@@ -435,6 +444,9 @@ CONSTANT_INSTRUCTION_FUNCTIONS = {
 
 if __name__ == '__main__':
     c = CPU(8,8)
-    r_b = c.save_context()
-    print(c.call_stack)
-    pass
+    program = ";test\nldi 255 A    ;   test    \nhlt\n"
+
+    c.load_program(program, "Test String Program")
+
+    c.clock()
+    print(c)
