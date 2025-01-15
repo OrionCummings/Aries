@@ -8,7 +8,7 @@ from PrettyPrinting import error, info, red_bold
 settings = AssemblerSettings()
 settings.print_mode = PrintMode.Hex
 settings.file_name = "while_loop.aria"
-settings.file_directory = "Programs/"
+settings.file_directory = "Programs"
 
 # Create the assembler
 assembler = Assembler(settings)

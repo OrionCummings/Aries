@@ -46,14 +46,38 @@ def decode_simple_instruction_as_list(binary_instruction: str) -> list:
     opcode  = binary_instruction[:OP_LENGTH]
     return [opcode]
 
-def decode_register_instruction_as_list(binary_instruction: str) -> list:
+# TODO: Refactor this function
+def decode_register_instruction_as_list(binary_instruction: str, num_args: int) -> list | None:
     opcode = binary_instruction[:OP_LENGTH]
-    reg_a  = binary_instruction[OP_LENGTH : OP_LENGTH + (1 * REG_LENGTH)]
-    reg_b  = binary_instruction[OP_LENGTH + (1 * REG_LENGTH) : OP_LENGTH + (2 * REG_LENGTH)]
-    reg_c  = binary_instruction[OP_LENGTH + (2 * REG_LENGTH) : OP_LENGTH + (3 * REG_LENGTH)]
-    shamt  = binary_instruction[OP_LENGTH + (3 * REG_LENGTH) : OP_LENGTH + (3 * REG_LENGTH) + SHAMT_LENGTH]
-    func   = binary_instruction[-FUNC_LENGTH:]
-    return [opcode, reg_a, reg_b, reg_c, shamt, func]
+
+    match num_args:
+        case 1:
+            reg_a  = binary_instruction[OP_LENGTH                    : OP_LENGTH + (1 * REG_LENGTH)]
+
+            shamt  = binary_instruction[OP_LENGTH + (3 * REG_LENGTH) : OP_LENGTH + (3 * REG_LENGTH) + SHAMT_LENGTH]
+            func   = binary_instruction[-FUNC_LENGTH:]
+            return [opcode, reg_a, shamt, func]
+
+        case 2:
+            reg_a  = binary_instruction[OP_LENGTH                    : OP_LENGTH + (1 * REG_LENGTH)]
+            reg_b  = binary_instruction[OP_LENGTH + (1 * REG_LENGTH) : OP_LENGTH + (2 * REG_LENGTH)]
+
+            shamt  = binary_instruction[OP_LENGTH + (3 * REG_LENGTH) : OP_LENGTH + (3 * REG_LENGTH) + SHAMT_LENGTH]
+            func   = binary_instruction[-FUNC_LENGTH:]
+            return [opcode, reg_a, reg_b, shamt, func]
+
+        case 3:
+            reg_a  = binary_instruction[OP_LENGTH                    : OP_LENGTH + (1 * REG_LENGTH)]
+            reg_b  = binary_instruction[OP_LENGTH + (1 * REG_LENGTH) : OP_LENGTH + (2 * REG_LENGTH)]
+            reg_c  = binary_instruction[OP_LENGTH + (2 * REG_LENGTH) : OP_LENGTH + (3 * REG_LENGTH)]
+            
+            shamt  = binary_instruction[OP_LENGTH + (3 * REG_LENGTH) : OP_LENGTH + (3 * REG_LENGTH) + SHAMT_LENGTH]
+            func   = binary_instruction[-FUNC_LENGTH:]
+            return [opcode, reg_a, reg_b, reg_c, shamt, func]
+        
+        case _:
+            # TODO: This is an inconsistent design decision.
+            return None
 
 def decode_immediate_instruction_as_list(binary_instruction: str) -> list:
     opcode = binary_instruction[:OP_LENGTH]
@@ -110,21 +134,36 @@ def encode(line: str) -> Result[int, str]:
 
         case InstructionFormat.Register:
             
-            # Try to unpack the line vector. If this fails on a ValueError,
-            # then we are likely trying to unpack something with the 
-            # incorrect number of arguments, so return an error!
-            try:
-                _, reg_a_str, reg_b_str, reg_c_str = line_vector
-            except ValueError:
-                return trace(f"unexpected number of arguments in line '{line}'")
-                
-            reg_a = CONSTANT_REGISTER_MAP[reg_a_str]
-            reg_b = CONSTANT_REGISTER_MAP[reg_b_str]
-            reg_c = CONSTANT_REGISTER_MAP[reg_c_str]
-            
-            instruction |= reg_a << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 1))
-            instruction |= reg_b << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 2))
-            instruction |= reg_c << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 3))
+            # Get the number of arguments; subtract 1 because `line_vector`
+            # contains the opcode.
+            num_args = len(line_vector) - 1
+            match num_args:
+                case 1:
+                    _, reg_a_str = line_vector
+                    reg_a = CONSTANT_REGISTER_MAP[reg_a_str]
+
+                    instruction |= reg_a << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 1))
+
+                case 2:
+                    _, reg_a_str, reg_b_str = line_vector
+                    reg_a = CONSTANT_REGISTER_MAP[reg_a_str]
+                    reg_b = CONSTANT_REGISTER_MAP[reg_b_str]
+                    
+                    instruction |= reg_a << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 1))
+                    instruction |= reg_b << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 2))
+
+                case 3:
+                    _, reg_a_str, reg_b_str, reg_c_str = line_vector
+                    reg_a = CONSTANT_REGISTER_MAP[reg_a_str]
+                    reg_b = CONSTANT_REGISTER_MAP[reg_b_str]
+                    reg_c = CONSTANT_REGISTER_MAP[reg_c_str]
+
+                    instruction |= reg_a << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 1))
+                    instruction |= reg_b << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 2))
+                    instruction |= reg_c << (INS_LENGTH - OP_LENGTH - (REG_LENGTH * 3))
+
+                case _:
+                    return trace(f"unexpected number of arguments in line '{line}'")
             
             # TODO: SHAMT and FUNC are not implemented yet
             
@@ -202,11 +241,12 @@ def decode(encoded_instruction: int) -> Result[str, str]:
 
     # Use the opcode to look up in the dictionary of opcodes for
     # the relavent information
-    (_, argc, instruction_mode, *_) = CONSTANT_OPCODE_MAP[opcode]
+    (_, num_args, instruction_mode, *_) = CONSTANT_OPCODE_MAP[opcode]
     
     builder = ""
     builder += opcode
 
+    # TODO: Refactor this section!
     match instruction_mode:
         case InstructionFormat.Simple:
 
@@ -214,22 +254,53 @@ def decode(encoded_instruction: int) -> Result[str, str]:
             pass
 
         case InstructionFormat.Register:
-            ret_list = decode_register_instruction_as_list(binary_instruction)
-            (_, bin_reg1, bin_reg2, bin_reg3, bin_shamt, bin_func) = ret_list
-            reg1 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg1, 2)]
-            reg2 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg2, 2)]
-            reg3 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg3, 2)]
+            ret_list = decode_register_instruction_as_list(binary_instruction, num_args)
+
+            num_ret_list = len(ret_list)
+            match num_ret_list:
+                case 4:
+                    (_, bin_reg1, bin_shamt, bin_func) = ret_list
+
+                case 5:
+                    (_, bin_reg1, bin_reg2, bin_shamt, bin_func) = ret_list
+
+                case 6:
+                    (_, bin_reg1, bin_reg2, bin_reg3, bin_shamt, bin_func) = ret_list
+
+                case _:
+                    return trace(f"unknown number of arguments ('{num_ret_list}')")
+
+            match num_args:
+                case 1:
+                    reg1 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg1, 2)]
+                    builder += " "
+                    builder += reg1
+
+                case 2:
+                    reg1 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg1, 2)]
+                    reg2 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg2, 2)]
+                    builder += " "
+                    builder += reg1
+                    builder += " "
+                    builder += reg2
+
+                case 3:
+                    reg1 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg1, 2)]
+                    reg2 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg2, 2)]
+                    reg3 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg3, 2)]
+                    builder += " "
+                    builder += reg1
+                    builder += " "
+                    builder += reg2
+                    builder += " "
+                    builder += reg3
+
+                case _:
+                    return trace(f"unexpected number of arguments ('{num_args}')")
             
             # TODO: Implement shift amount and function
             # shamt = int(bin_shamt, 2)
             # func = int(bin_func, 2)
-            
-            builder += " "
-            builder += reg1
-            builder += " "
-            builder += reg2
-            builder += " "
-            builder += reg3
             
         case InstructionFormat.Immediate:
             ret_list = decode_immediate_instruction_as_list(binary_instruction)
@@ -244,7 +315,7 @@ def decode(encoded_instruction: int) -> Result[str, str]:
             builder += src_reg
             
             # If this is an immediate operator instruction, it has 3 arguments
-            if argc == 3:
+            if num_args == 3:
                 dest_reg_id = int(bin_dest_reg, 2)
                 dest_reg = CONSTANT_REGISTER_MAP.inverse[dest_reg_id]
                 builder += " "
@@ -257,16 +328,16 @@ def decode(encoded_instruction: int) -> Result[str, str]:
             builder += " "
             builder += address
 
-        case InstructionFormat.Compare:
-            ret_list = decode_compare_instruction_as_list(binary_instruction)
-            (_, bin_reg1, bin_reg2) = ret_list
-            reg1 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg1, 2)]
-            reg2 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg2, 2)]
+        # case InstructionFormat.Compare:
+        #     ret_list = decode_compare_instruction_as_list(binary_instruction)
+        #     (_, bin_reg1, bin_reg2) = ret_list
+        #     reg1 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg1, 2)]
+        #     reg2 = CONSTANT_REGISTER_MAP.inverse[int(bin_reg2, 2)]
 
-            builder += " "
-            builder += reg1
-            builder += " "
-            builder += reg2
+        #     builder += " "
+        #     builder += reg1
+        #     builder += " "
+        #     builder += reg2
 
     return Ok(builder)
 

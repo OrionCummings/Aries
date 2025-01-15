@@ -210,11 +210,18 @@ def i_add(cpu: CPU, arguments: list) -> Result[CPU, str]:
 def i_addi(cpu: CPU, arguments: list) -> Result[CPU, str]:
     """Executes a 'Addition Immediate' instruction."""
     
-    (value_str, src_reg, dest_reg) = arguments
-    value = int(value_str)
-    src_value = cpu.register_file.get_reg(src_reg).unwrap()
-    dest_value = value + src_value
-    cpu.register_file.set_reg(dest_reg, dest_value)
+    (value_str, reg) = arguments
+    try:
+        value = int(value_str)
+    except ValueError:
+        return trace(f"failed to convert '{value_str}' to an integer")
+
+    r_reg_value = cpu.register_file.get_reg(reg)
+    if r_reg_value.is_err:
+        return trace(f"failed to get value of register '{reg}'")
+    
+    dest_value = value + r_reg_value.unwrap()
+    cpu.register_file.set_reg(reg, dest_value)
 
     # Update the flags register
     if dest_value == 0:
@@ -284,10 +291,14 @@ def i_bne(cpu: CPU, arguments: list) -> Result[CPU, str]:
 
     zero_flag_set = cpu.register_file.get_flag(FL_ZERO)
 
+    # If the zero flag is set (the value ARE equal), then inc and reset
     if zero_flag_set:
-        cpu.register_file.set_reg("PC", address_in_bytes)
-    else:
         cpu.register_file.increment_program_counter()
+        cpu.register_file.reset_flag(FL_ZERO)
+
+    # If the zero flag is not set (the value ARE NOT equal), then jump
+    else:
+        cpu.register_file.set_reg("PC", address_in_bytes)
     
     return Ok(cpu)
 

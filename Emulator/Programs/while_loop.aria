@@ -1,8 +1,14 @@
+;; This is broken rn
 
-ldi 8 I         ; Load the value 8 into I
+ldi 8 I         ; [I = 8] Load the value 8 into I
+
+loop:
+
+; Do whatever in the loop
+addi 1 A        ; [A++] Increment A by 1
+
 cmp A I         ; Compare A and I
-bne HALT        ; If A and I are equal, hlt
-addi 1 A        ; Increment A by 1
+bne loop        ; [while A != I] If A and I are equal, hlt
 
-HALT:
+
 hlt             ; Halt the program

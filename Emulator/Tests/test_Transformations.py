@@ -41,10 +41,9 @@ class TransformationTests(unittest.TestCase):
         self.assertEqual(expected_encoded_line, actual_encoded_line)
 
     def test_encode_cmp(self):
-        self.fail("cmp is not implemented consistently; fix that first!")
         line = "cmp H D"
         actual_encoded_line = encode(line).unwrap_or_else(lambda e: self.fail(e))
-        expected_encoded_line = int("001010 00000000000101110010111110".replace(" ", ""), 2)
+        expected_encoded_line = int("001100 0111 0011 00 0000000000000000".replace(" ", ""), 2)
         self.assertEqual(expected_encoded_line, actual_encoded_line)
 
     # Decode tests

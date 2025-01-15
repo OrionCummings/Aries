@@ -65,7 +65,6 @@ class InstructionFormat(Enum):
     Register = 1,
     Immediate = 2,
     Jump = 3,
-    Compare = 4, # TODO: Remove this inconsistent construct!
 
 # All valid opcodes and their information tuple (ID, ARGC, FORMAT, ALU?)
 # NOTE: ID is added later! This dict contains (ARGC, FORMAT, ALU?)
@@ -81,7 +80,7 @@ CONSTANT_OPCODE_MAP = {
     "bne":  (1, InstructionFormat.Jump, False),
     "j":    (1, InstructionFormat.Jump, False),
     "call": (1, InstructionFormat.Jump, False),
-    "cmp":  (2, InstructionFormat.Compare, False),
+    "cmp":  (2, InstructionFormat.Register, False),
 }
 
 # Starting at 1, assign sequential IDs to each opcode in the order
@@ -89,6 +88,8 @@ CONSTANT_OPCODE_MAP = {
 for index in range(0, len(CONSTANT_OPCODE_MAP)):
     (argc, mode, alu) = list(CONSTANT_OPCODE_MAP.values())[index]
     key = list(CONSTANT_OPCODE_MAP.keys())[index]
+
+    # Add 1 to the index to avoid the zero opcode
     CONSTANT_OPCODE_MAP[key] = (index+1, argc, mode, alu)
 
 # This is a dictionary containing all 16 registers.
