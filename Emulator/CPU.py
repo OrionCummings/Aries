@@ -164,6 +164,14 @@ class CPU():
 
         return not self.halted
 
+    def run(self) -> Result[bool, str]:
+
+        halted = False
+        while not halted:
+            halted = not self.clock()
+
+        return Ok(True)
+
     def save_context(self) -> Result[bool, str]:
         """Saves the current CPU context to the Call Stack."""
 

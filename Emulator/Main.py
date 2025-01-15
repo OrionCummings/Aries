@@ -8,7 +8,7 @@ from PrettyPrinting import error, info, red_bold
 settings = AssemblerSettings()
 settings.print_mode = PrintMode.Hex
 settings.source = AssemblerSettingsSource.File
-settings.file_name = "while_loop.aria"
+settings.file_name = "nested_calls.aria"
 settings.file_directory = "Programs"
 
 # Create the assembler
@@ -19,7 +19,7 @@ if r_run.is_err:
     exit(2)
 
 # Create the CPU
-cpu = CPU(instruction_memory_size_in_bytes=64, data_memory_size_in_bytes=64)
+cpu = CPU(instruction_memory_size_in_bytes=128, data_memory_size_in_bytes=16)
 
 # Load the assembler's program into the CPU
 r_load = cpu.load_program(assembler.instructions, assembler.file_name, 0)
@@ -49,13 +49,16 @@ def press(key) -> bool:
 
 def main():
 
-    info("Press space to execute one clock cycle")
-    print(cpu) 
-    l = Listener(on_press=press)
-    l.start()
-    l.join()
+    cpu.run()
+    print(cpu)
 
-    print(red_bold("CPU halted"))
+    # info("Press space to execute one clock cycle")
+    # print(cpu) 
+    # l = Listener(on_press=press)
+    # l.start()
+    # l.join()
+
+    # print(red_bold("CPU halted"))
 
 if __name__ == "__main__":
     main()
