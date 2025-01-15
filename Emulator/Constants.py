@@ -67,8 +67,8 @@ class InstructionFormat(Enum):
     Jump = 3,
     Compare = 4, # TODO: Remove this inconsistent construct!
 
-# All valid opcodes and their information tuple (ID, ARGC, MODE, ALU?)
-# ID is added later! This dict contains (ARGC, MODE, ALU?)
+# All valid opcodes and their information tuple (ID, ARGC, FORMAT, ALU?)
+# NOTE: ID is added later! This dict contains (ARGC, FORMAT, ALU?)
 CONSTANT_OPCODE_MAP = {
     "nop":  (0, InstructionFormat.Simple, False),
     "ret":  (0, InstructionFormat.Simple, False),
