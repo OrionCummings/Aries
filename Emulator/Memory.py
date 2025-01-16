@@ -64,7 +64,7 @@ class Memory():
 
         return builder
     
-    def to_string(self, target: TextRenderTarget = TextRenderTarget.Terminal, pc: int = None) -> str:
+    def to_string(self, target: TextRenderTarget = TextRenderTarget.Terminal, pc: int = -4) -> str:
         """A function to convert a Memory instance into a string, similar to the string overload. Accepts an additional
         parameter to determine the target display.
 
@@ -85,7 +85,7 @@ class Memory():
                 if index != 0 and index % WIDGET_MEMORY_DISPLAY_LENGTH == 0:
                     builder += "\n"
                 
-                if pc is not None and index in [pc, pc+1, pc+2, pc+3]:
+                if index in [pc, pc+1, pc+2, pc+3]:
                     builder += red_bold("{:02X}".format(self.bytes[index]))
                 else:
                     builder += "{:02X}".format(self.bytes[index])

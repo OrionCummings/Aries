@@ -2,7 +2,7 @@ import inspect
 import os
 from option import Result, Ok, Err
 from Constants import CONSTANT_OPCODE_MAP
-from PrettyPrinting import print_red, yellow
+from PrettyPrinting import bold, print_red, yellow
 
 def get_current_filename() -> str:
     return str(inspect.stack()[1][1])
@@ -23,9 +23,9 @@ def debug(function_depth: int = 1) -> str:
 def trace(message: str, depth: int = 2) -> Err:
     return Err(f"{debug(depth)} {message}")
 
-def p_exit(s: str, e: int = 0):
+def panic(s: str, e: int = 0):
     """A function to print an error message and exit."""
-    print_red(s)
+    print_red(bold(s))
     exit(e)
 
 def get_opcode_from_id(id: int) -> Result[str, str]:

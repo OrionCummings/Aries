@@ -1,31 +1,114 @@
+from dataclasses import dataclass
+from enum import Enum
 import struct
 from typing import Optional
 from option import Err, Ok, Result
 from Assembler import Assembler, AssemblerSettings, AssemblerSettingsSource
+from Stack import Stack
 from Transformations import encode, decode, get_opcode
 from PrettyPrinting import PrintMode, bold, green_bold, info, print_green, print_yellow, red_bold, warning
 from Constants import CONSTANT_REGISTER_MAP, FL_ZERO, PC_INC, PC_OVERRUN, InstructionFormat, TextRenderTarget
 from RegisterFile import RegisterFile
 from Memory import Memory
-from CallStack import CallStack
-from Utilities import get_opcode_from_id, p_exit, debug, trace
+from Stack import Stack
+from Utilities import get_opcode_from_id, panic, debug, trace
+
+class CPUArchitecture(Enum):
+    """An enum for different types of CPU architectures."""
+
+    # Harvard contains seperate memory banks for each type 
+    # of stored data. Traditionally, this divides instruction
+    # memory (your program) and data memory (RAM). In this 
+    # project, the call stack, stack, and video memory are
+    # also seperate memory banks to ease any conflicts.
+    Harvard = 0
+
+    # von Neumann has a single memory bank for (traditionally)
+    # instruction and data. Regions of memory can be mapped to
+    # perform a specific purpose (like a stack or video memory),
+    # but that is not an architecture decision.
+    VonNeumann = 1
+
+@dataclass
+class CPUSettings():
+    architecture                    = CPUArchitecture.Harvard
+
+    #                                 (size, base)
+    instruction_memory_information  = (None, None)
+    data_memory_information         = (None, None)
+    video_memory_information        = (None, None)
+    stack_information               = (None, None)
+
+    memory_size_in_bytes            = None
+
+    def calculate_memory_size(self) -> Result[int, str] | int:
+        
+        # If we've already calcualted the size, then just return it
+        if self.memory_size_in_bytes is not None:
+            return self.memory_size_in_bytes
+
+        (instruction_memory_size, instruction_memory_base)  = self.instruction_memory_information
+        (data_memory_size, data_memory_base)                = self.data_memory_information
+        (video_memory_size, video_memory_base)              = self.video_memory_information
+        (stack_size, stack_base)                            = self.stack_information
+
+        if instruction_memory_size is None: return trace("instruction memory size was never set")
+        if instruction_memory_base is None: return trace("instruction memory base was never set")
+        if data_memory_size is None: return trace("data memory size was never set")
+        if data_memory_base is None: return trace("data memory base was never set")
+        if video_memory_size is None: return trace("video memory size was never set")
+        if video_memory_base is None: return trace("video memory base was never set")
+        if stack_size is None: return trace("stack size was never set")
+        if stack_base is None: return trace("stack base was never set")
+
+        self.memory_size_in_bytes = sum([instruction_memory_size, data_memory_size, video_memory_size, stack_size])
+
+        return Ok(self.memory_size_in_bytes)
+
 
 class CPU():
     """A CPU that supports the Aires Assembly Language."""
     
-    def __init__(self, instruction_memory_size_in_bytes: int = 4096, data_memory_size_in_bytes: int = 4096) -> None:
-        """Initializes a CPU instance with a given memory size in bytes."""
+    def __init__(self, settings: CPUSettings) -> None:
+        """Initializes a CPU instance with a the given settings."""
         
-        # The essential parts a Harvard CPU
-        self.register_file            = RegisterFile()
-        self.instruction_memory       = Memory(instruction_memory_size_in_bytes)
-        self.data_memory              = Memory(data_memory_size_in_bytes)
-        self.call_stack               = CallStack()
+        # Save the cpu settings for later use
+        self.settings = settings
+
+        # Both Harvard and von Neumann CPUs will have registers* and be able to halt*
+        self.register_file = RegisterFile()
+        self.halted: bool = False
+
+        (instruction_memory_size, instruction_memory_base)  = self.settings.instruction_memory_information
+        (data_memory_size, data_memory_base)                = self.settings.data_memory_information
+        (video_memory_size, video_memory_base)              = self.settings.video_memory_information
+        (stack_size, stack_base)                            = self.settings.stack_information
+        memory_size_in_bytes = self.settings.calculate_memory_size()
+
+        if instruction_memory_size == 0: warning("instruction memory size set to zero")
+        if data_memory_size == 0: warning("data memory size set to zero")
+        if video_memory_size == 0: warning("video memory size set to zero")
+        if stack_size == 0: warning("stack size set to zero")
+
+        match self.settings.architecture:
+            case CPUArchitecture.Harvard:
+
+                # Create seperate memory banks for each type of memory
+                self.instruction_memory = Memory(instruction_memory_size)
+                self.data_memory = Memory(data_memory_size)
+                self.video_memory = Memory(video_memory_size)
+                self.stack = Stack(stack_size)
+
+            case CPUArchitecture.VonNeumann:
+
+                # Create one memory bank
+                self.memory = Memory(memory_size_in_bytes)
+
+            case _:
+                panic(f"unknown architecture '{self.settings.architecture}'")
 
         # Auxilary metadata
-        self.halted: bool                        = False
-        # self.last_updated_address: Optional[int] = None
-        # self.hpc_bus: int                        = 0
+        # TODO: Add some stuff
 
     def __eq__(self, other):
         
@@ -35,16 +118,17 @@ class CPU():
         register_file_equal        = self.register_file == other.register_file
         instruction_memory_equal   = self.instruction_memory == other.instruction_memory
         data_memory_equal          = self.data_memory == other.data_memory
-        call_stack                 = self.call_stack == other.call_stack
+        stack                      = self.stack == other.stack
         
         halt_equal                 = self.halted == other.halted
-        last_updated_address_equal = self.last_updated_address == other.last_updated_address
-        hpc_bus_equal              = self.hpc_bus == other.hpc_bus
         
-        return (register_file_equal and instruction_memory_equal and data_memory_equal and call_stack and halt_equal and last_updated_address_equal and hpc_bus_equal)
+        return (register_file_equal and instruction_memory_equal and data_memory_equal and stack and halt_equal)
 
     def __str__(self) -> str:
         
+        # Set the render target
+        render_target = TextRenderTarget.Widget
+
         # Get the program counter
         program_counter = self.register_file.get_pc()
         
@@ -53,16 +137,23 @@ class CPU():
         
         # Append the register file
         # builder += str(self.register_file)
-        builder += self.register_file.to_string(TextRenderTarget.Widget)
+        builder += self.register_file.to_string(render_target)
 
         # Append the instruction memory
         builder += "Instruction Memory\n"
-        builder += self.instruction_memory.to_string(TextRenderTarget.Terminal, self.register_file.get_pc())
-        builder += "\n\n"
+        builder += self.instruction_memory.to_string(render_target, self.register_file.get_pc())
 
         # Append the data memory
-        builder += "Data Memory\n"
-        builder += self.data_memory.to_string(TextRenderTarget.Terminal, -4)
+        builder += "\n\nData Memory\n"
+        builder += self.data_memory.to_string(render_target)
+
+        # Append the video memory
+        builder += "\n\nVideo Memory\n"
+        builder += self.video_memory.to_string(render_target)
+
+        # Append the stack
+        builder += "\n\nStack\n"
+        builder += self.video_memory.to_string(render_target)
         
         return builder
 
@@ -148,6 +239,16 @@ class CPU():
         
         print(green_bold(f"Executed '{decoded_instruction}'"))
 
+        # TODO: How is the next instruction being fed to the user?
+        # # Get the next instruction and line
+        # next_instruction = self.get_current_instruction()
+
+        # r_next_decoded_instruction = decode(next_instruction)
+        # if r_next_decoded_instruction.is_err:
+        #     return trace(f"failed to decode instruction on line {current_line} '0x{format(next_instruction, '08x')}':\n{r_next_decoded_instruction.unwrap_err()}")
+        # next_decoded_instruction = r_next_decoded_instruction.unwrap()
+        # print(green_bold(f"Next up: '{next_decoded_instruction}'"))
+
         return Ok(True)
         
     def clock(self) -> bool:
@@ -156,11 +257,11 @@ class CPU():
         # Execute the current instruction
         execution_result = self.execute_current_instruction()
         if execution_result.is_err:
-            p_exit(f"{debug()}: failed to execute current instruction:\n{execution_result.unwrap_err()}")
+            panic(f"{debug()}: failed to execute current instruction:\n{execution_result.unwrap_err()}")
         
-        # TODO: Refactor/remove p_exit and use a result type!
+        # TODO: Refactor/remove panic and use a result type!
         # Check if the current program counter is valid.
-        if self.register_file.get_pc() >= self.instruction_memory.capacity_in_bytes - 1: p_exit("Program counter overrun!", PC_OVERRUN)
+        if self.register_file.get_pc() >= self.instruction_memory.capacity_in_bytes - 1: panic("Program counter overrun!", PC_OVERRUN)
 
         return not self.halted
 
@@ -451,10 +552,24 @@ CONSTANT_INSTRUCTION_FUNCTIONS = {
 }
 
 if __name__ == '__main__':
-    c = CPU(8,8)
-    program = ";test\nldi 255 A    ;   test    \nhlt\n"
 
-    c.load_program(program, "Test String Program")
+    settings = CPUSettings()
+    settings.architecture = CPUArchitecture.Harvard
+    settings.data_memory = (16, 0)
+    settings.instruction_memory = (16, 0)
+    settings.video_memory = (16, 0)
+    settings.stack = (16, 0)
+    r_memory_size_in_bytes = settings.calculate_memory_size()
+
+    if r_memory_size_in_bytes.is_err:
+        panic(f"{debug()}: failed to calculate total memory size:\n{r_memory_size_in_bytes.unwrap_err()}")
+    settings.memory_size_in_bytes
+
+    c = CPU(settings)
+
+    program = "ldi 255 A\nhlt\n"
+
+    c.load_program(program, "test_program")
 
     c.clock()
     print(c)

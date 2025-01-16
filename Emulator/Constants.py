@@ -137,15 +137,15 @@ PC_INC = 4
 BP_INC = 1
 SP_INC = 1
 
-# Max call stack depth
-MAX_CALL_STACK_DEPTH = 256
+# Stack parameters
+MAX_STACK_SIZE_IN_BYTES = 1024
 
 # Error codes
 PC_OVERRUN = 0x30
 
 
 
-
+# TODO: Tidy this idea up!
 class TextRenderTarget(Enum):
     Terminal = 0,
     Widget = 1,
