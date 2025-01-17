@@ -255,10 +255,14 @@ class Assembler():
 
                 else:
 
+                    # If this is an int, then it's already an address
+                    # if isinstance(parsed_label, int):
+                    #     continue
+
                     # BUG: This does not account for TRUE numeric address arguments to jump instructions.
                     # Add a check for str[0].alpha() to determine if this is a number (address) or
                     # a string (label).
-                    return trace(f"{self.file_name}:{real_line_number} Undefined label '{parsed_label}'!")
+                    return trace(f"undefined label '{parsed_label}' in file {self.file_name} on line {real_line_number}")
 
         if known_labels_count != resolved_labels_count:
             label_diff = known_labels_count - resolved_labels_count

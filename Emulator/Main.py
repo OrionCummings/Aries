@@ -9,8 +9,9 @@ from Utilities import debug, panic
 assmbler_settings = AssemblerSettings()
 assmbler_settings.print_mode = PrintMode.Hex
 assmbler_settings.source = AssemblerSettingsSource.File
-assmbler_settings.file_name = "example.aria"
-assmbler_settings.file_directory = "Programs"
+assmbler_settings.file_name = "j2.aria"
+# assmbler_settings.file_directory = "Programs"
+assmbler_settings.file_directory = "Programs/Instructions/"
 
 # Create the assembler
 assembler = Assembler(assmbler_settings)
@@ -23,7 +24,7 @@ if r_run.is_err:
 cpu_settings = CPUSettings()
 cpu_settings.architecture = CPUArchitecture.Harvard
 cpu_settings.data_memory_information = (16, 0)
-cpu_settings.instruction_memory_information = (32, 0)
+cpu_settings.instruction_memory_information = (128, 0)
 cpu_settings.video_memory_information = (16, 0)
 cpu_settings.stack_information = (16, 0)
 r_memory_size_in_bytes = cpu_settings.calculate_memory_size()

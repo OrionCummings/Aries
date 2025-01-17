@@ -280,7 +280,7 @@ class CPU():
         pc = self.register_file.get_pc()
 
         # Save the program counter on the call stack
-        r_push = self.call_stack.push(pc)
+        r_push = self.stack.push(pc)
         if r_push.is_err:
             return trace(f"failed to push program counter '{pc}' to call stack:\n{r_push.unwrap_err()}")
 
@@ -290,7 +290,7 @@ class CPU():
         """Restores the previous CPU context from the Call Stack."""
 
         # Save the program counter on the call stack
-        r_pop = self.call_stack.pop()
+        r_pop = self.stack.pop()
         if r_pop.is_err:
             return trace(f"failed to pop program counter from call stack:\n{r_pop.unwrap_err()}")
 

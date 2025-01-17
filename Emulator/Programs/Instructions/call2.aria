@@ -1,0 +1,13 @@
+; This program does not work!
+
+ldi 255 A
+call g
+j end
+
+g:
+ldi 255 B
+ret
+
+end:
+ldi 255 C
+hlt

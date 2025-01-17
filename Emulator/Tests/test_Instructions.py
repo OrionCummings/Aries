@@ -3,8 +3,8 @@ import unittest
 
 from option import Err, Ok, Result
 
-from Assembler import Assembler, AssemblerSettings
-from CPU import CPU
+from Assembler import Assembler, AssemblerSettings, AssemblerSettingsSource
+from CPU import CPU, CPUArchitecture, CPUSettings
 from Constants import CONSTANT_REGISTER_MAP
 from PrettyPrinting import PrintMode
 from Transformations import decode
@@ -15,19 +15,35 @@ class InstructionTests(unittest.TestCase):
     test_file_directory = ""
     file_extension = ".aria"
 
-    def create_assembler_and_cpu(self, file_name: str, instruction_memory_size_in_bytes: int, data_memory_size_in_bytes: int) -> Result[(Assembler, CPU), str]:
+    def create_assembler_and_cpu(self, file_name: str, instruction_memory_size_in_bytes: int, data_memory_size_in_bytes: int, program: str = None) -> Result[(Assembler, CPU), str]:
 
         assembler_settings = AssemblerSettings()
-        assembler_settings.file_name = file_name + self.file_extension
+
+        if program is None:
+            assembler_settings.source = AssemblerSettingsSource.File
+        else:
+            assembler_settings.source = AssemblerSettingsSource.String
+
+        assembler_settings.file_name = file_name
         assembler_settings.print_mode = PrintMode.Hex
-        assembler_settings.file_directory = 'Tests/Test Programs'
         assembler = Assembler(assembler_settings)
-        r_run = assembler.run()
+        r_run = assembler.run(program)
         if r_run.is_err:
             return Err(r_run.unwrap_err())
 
-        cpu = CPU(instruction_memory_size_in_bytes, data_memory_size_in_bytes)
-        r_load = cpu.load_program(assembler.instructions, assembler.file_name)
+        cpu_settings = CPUSettings()
+        cpu_settings.architecture = CPUArchitecture.Harvard
+        cpu_settings.data_memory_information = (data_memory_size_in_bytes, 0)
+        cpu_settings.instruction_memory_information = (instruction_memory_size_in_bytes, 0)
+        cpu_settings.video_memory_information = (16, 0)
+        cpu_settings.stack_information = (16, 0)
+        cpu = CPU(cpu_settings)
+
+        if program is None:
+            r_load = cpu.load_program(assembler.file_contents, assembler.file_name)
+        else:
+            r_load = cpu.load_program(program, assembler.file_name)
+
         if r_load.is_err:
             return Err(r_load.unwrap_err())
         
@@ -40,9 +56,17 @@ class InstructionTests(unittest.TestCase):
         exceeds the expected address, this test will fail.
         """
 
+        program = """
+            j test
+            ldi 255 A
+            hlt
+            test:
+            hlt
+        """
+
         instruction_memory_size_in_bytes = 32
         data_memory_size_in_bytes = 8
-        r_combo = self.create_assembler_and_cpu(get_current_function_name(), instruction_memory_size_in_bytes, data_memory_size_in_bytes)
+        r_combo = self.create_assembler_and_cpu(get_current_function_name(), instruction_memory_size_in_bytes, data_memory_size_in_bytes, program)
         if r_combo.is_err:
             self.fail(r_combo.unwrap_err())
 
@@ -59,10 +83,10 @@ class InstructionTests(unittest.TestCase):
         # There should be two elements in this vector: ['j', '4']
         self.assertEqual(len(decoded_instruction_vector), 2)
 
-        # The second element should be '4'
-        self.assertEqual(decoded_instruction_vector[1], '4')
+        # The second element should be '3'
+        self.assertEqual(decoded_instruction_vector[1], '3')
 
-        clock = cpu.clock() # j target
+        clock = cpu.clock() # j test
         self.assertTrue(clock, "CPU stopped prematurely")
 
         clock = cpu.clock() # hlt
@@ -76,8 +100,8 @@ class InstructionTests(unittest.TestCase):
         # The CPU should be halted
         self.assertTrue(cpu.halted, "CPU not halted!")
 
-        # The PC should be 4 * 4 = 16 + an extra 4 because hlt also increments the pc
-        self.assertEqual(cpu.register_file.get_pc(), 20, "Incorrect program counter!")
+        # The PC should be 4 * 3 = 12 + an extra 4 because hlt also increments the pc
+        self.assertEqual(cpu.register_file.get_pc(), 16, "Incorrect program counter!")
 
     def test_label_failure_no_destination_label(self):
         """Tests if label resolution will throw an error if there is a label that is
@@ -113,9 +137,13 @@ class InstructionTests(unittest.TestCase):
         """Tests the 'nop' instruction.
         """
         
+        program = """
+        nop
+        hlt
+        """
         instruction_memory_size_in_bytes = 8
         data_memory_size_in_bytes = 8
-        r_combo = self.create_assembler_and_cpu(get_current_function_name(), instruction_memory_size_in_bytes, data_memory_size_in_bytes)
+        r_combo = self.create_assembler_and_cpu(get_current_function_name(), instruction_memory_size_in_bytes, data_memory_size_in_bytes, program)
         if r_combo.is_err:
             self.fail(r_combo.unwrap_err())
 
@@ -169,9 +197,12 @@ class InstructionTests(unittest.TestCase):
         """Tests the 'hlt' instruction.
         """
         
+        program = """
+        hlt
+        """
         instruction_memory_size_in_bytes = 8
         data_memory_size_in_bytes = 8
-        r_combo = self.create_assembler_and_cpu(get_current_function_name(), instruction_memory_size_in_bytes, data_memory_size_in_bytes)
+        r_combo = self.create_assembler_and_cpu(get_current_function_name(), instruction_memory_size_in_bytes, data_memory_size_in_bytes, program)
         if r_combo.is_err:
             self.fail(r_combo.unwrap_err())
 

@@ -1,7 +1,8 @@
-j 5
+j test
 ldi 255 B
 ldi 255 C
 ldi 255 D
 hlt
+test:
 ldi 255 A
 hlt
