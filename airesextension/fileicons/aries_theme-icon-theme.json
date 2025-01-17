@@ -1,0 +1,18 @@
+{
+  "iconDefinitions": {
+    "_ari": {
+      "iconPath": "./aries-file-icon.svg"
+    },
+    "_aria": {
+      "iconPath": "./aries-asm-file-icon.svg"
+    }
+  },
+  "fileExtensions": {
+    "ari": "_ari",
+    "aria": "_aria",
+  },
+  "languageIds": {
+    "aires": "_aries",
+    "aires-asm": "_aries-asm",
+  }
+}
