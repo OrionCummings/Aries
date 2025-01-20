@@ -4,78 +4,129 @@ from Constants import MAX_STACK_SIZE_IN_BYTES
 
 class StackTests(unittest.TestCase):
 
+    @staticmethod
+    def list_to_little_endian_bytearray(l: list[int]) -> bytearray:
+        pass
+
     def test_constructor(self):
 
-        stack = Stack()
+        stack = Stack(0)
+        a = bytearray(0)
 
-        self.assertEqual(stack.bytes, [])
+        self.assertEqual(stack.bytes, a)
 
     def test_equality_success(self):
 
         stack1 = Stack()
         stack2 = Stack()
 
-        stack1.bytes = [1,2,3,4,5,6,7,8]
-        stack2.bytes = [1,2,3,4,5,6,7,8]
+        l = [1,2,3,4]
+
+        stack1.capacity = len(l) * 4
+        stack2.capacity = len(l) * 4
+
+        stack1.bytes = StackTests.list_to_little_endian_bytes(l)
+        stack2.bytes = StackTests.list_to_little_endian_bytes(l)
 
         self.assertEqual(stack1, stack2)
 
-    def test_equality_failure(self):
+    def test_equality_failure_capacity(self):
 
         stack1 = Stack()
         stack2 = Stack()
 
-        stack1.bytes = [1,2,3,4,5,6,7,8]
-        stack2.bytes = [1,2,3,4,5,6,7]
+        l = [1,2,3,4]
+
+        stack1.capacity = len(l) * 4
+        stack2.capacity = (len(l) * 4) - 1
+
+        stack1.bytes = StackTests.list_to_little_endian_bytes(l)
+        stack2.bytes = StackTests.list_to_little_endian_bytes(l)
+
+        self.assertNotEqual(stack1, stack2)
+
+    def test_equality_failure_content(self):
+
+        stack1 = Stack()
+        stack2 = Stack()
+
+        l1 = [1,2,3,4]
+        l2 = [1,2,3]
+
+        stack1.capacity = len(l1) * 4
+        stack2.capacity = len(l2) * 4
+
+        stack1.bytes = StackTests.list_to_little_endian_bytes(l1)
+        stack2.bytes = StackTests.list_to_little_endian_bytes(l2)
+
+        self.assertNotEqual(stack1, stack2)
+
+    def test_equality_failure_stack_pointer(self):
+
+        stack1 = Stack()
+        stack2 = Stack()
+
+        l = [1,2,3,4]
+
+        stack1.capacity = len(l) * 4
+        stack2.capacity = len(l) * 4
+
+        stack1.bytes = StackTests.list_to_little_endian_bytes(l)
+        stack2.bytes = StackTests.list_to_little_endian_bytes(l)
+
+        stack1.stack_pointer = 0
+        stack2.stack_pointer = 1
 
         self.assertNotEqual(stack1, stack2)
 
     def test_to_string(self):
 
-        stack = Stack()
-        stack.bytes = [1,2,3,4,5,6,7,8]
+        l = [1,2,3,4]
+        stack = Stack(len(l) * 4)
+        for n in l:
+            stack.push(n)
 
-        expected_str = "1,2,3,4,5,6,7,8"
-        actual_str = str(stack)
+        expected_str = "00 00 00 01 00 00 00 02 00 00 00 03 00 00 00 04"
+        actual_str = str(stack).replace('\n', "") # Remove newlines to make this render-target-independent
 
         self.assertEqual(expected_str, actual_str)
 
     def test_is_empty_success(self):
 
-        stack = Stack()
+        stack = Stack(1)
 
         self.assertTrue(stack.is_empty())
 
     def test_is_empty_failure(self):
 
-        stack = Stack()
-        stack.bytes = [1,2,3,4,5,6,7,8]
+        stack = Stack(1)
+        stack.bytes = StackTests.list_to_little_endian_bytes([1,2,3,4])
 
         self.assertFalse(stack.is_empty())
 
     def test_size(self):
 
-        stack = Stack()
-        stack.bytes = [1,2,3,4,5,6,7,8]
+        stack = Stack(16)
+        stack.bytes = StackTests.list_to_little_endian_bytes([1,2,3,4])
 
         self.assertEqual(stack.size(), 8)
 
     def test_push(self):
 
-        stack = Stack(8)
-        stack.push(1)
-        stack.push(2)
-        stack.push(3)
-        stack.push(4)
+        l = [1]
+        stack = Stack(len(l) * 4)
 
-        expected_bytes = [n.to_bytes(4, byteorder='little', signed=False) for n in [1,2,3,4]]
-        actual_bytes = stack.bytes
+        for n in l:
+            stack.push(n)
+
+        actual_bytes = stack.bytes 
+        expected_bytes = bytearray(l)
 
         self.assertEqual(expected_bytes, actual_bytes)
 
     def test_pop(self):
 
-        stack = Stack()
+        stack = Stack(16)
         stack.push(1)
         stack.push(2)
         stack.push(3)
@@ -90,7 +141,7 @@ class StackTests(unittest.TestCase):
 
     def test_peek(self):
 
-        stack = Stack()
+        stack = Stack(16)
         stack.push(1)
         stack.push(2)
         stack.push(3)
@@ -105,7 +156,7 @@ class StackTests(unittest.TestCase):
 
     def test_push_to_full_stack(self):
 
-        stack = Stack()
+        stack = Stack(MAX_STACK_SIZE_IN_BYTES)
         for x in range(0, MAX_STACK_SIZE_IN_BYTES):
             stack.push(x)
 

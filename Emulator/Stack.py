@@ -6,16 +6,16 @@ from Utilities import trace
 
 class Stack():
 
-    def __init__(self, capacity_in_bytes: int):
+    def __init__(self, capacity_in_bytes: int = 0):
         self.capacity = capacity_in_bytes
         self.bytes = bytearray(capacity_in_bytes)
 
         # TODO: Sync this with cpu stack pointer!!!!!!!!!!!!!!!!!!
         self.stack_pointer: int = 0
-    
+
     def __eq__(self, other: Stack):
-        return self.bytes == other.bytes
-    
+        return (self.capacity == other.capacity and self.bytes == other.bytes and self.stack_pointer == other.stack_pointer)
+
     def __str__(self):
 
         builder: str = ""
@@ -46,8 +46,8 @@ class Stack():
         # TODO: Magic number!
         # Insert each byte into the stack
         for index in range(0, 4):
+            self.bytes[self.stack_pointer] = value_bytes[index]
             self.stack_pointer += 1
-            self.bytes.insert(self.stack_pointer, value_bytes[index])
 
         # TODO: Fix this inconsistency; maybe convert all
         # Result[bool, str] to Result[None, str] because
