@@ -1,37 +1,26 @@
 from __future__ import annotations
-from dataclasses import dataclass
 from typing import SupportsIndex
 from option import Ok, Result
-
 from Utilities import trace
-
-@dataclass
-class ByteBankSettings():
-
-    def __eq__(self, other: ByteBankSettings) -> bool:
-        return \
-            self.capacity == other.capacity and \
-            self.print_num_rows == other.print_num_rows
-
-    capacity: int = 64
-    print_num_rows: int = 16
 
 class ByteBank():
 
-    def __init__(self, settings: ByteBankSettings):
-        self.settings = settings
-        self.capacity = self.settings.capacity
-        self.content = bytearray(self.settings.capacity)
+    def __init__(self, capacity_in_bytes: int, print_num_rows: int = 16):
+        self.print_num_rows = print_num_rows
+        self.capacity = capacity_in_bytes
+        self.content = bytearray(capacity_in_bytes)
 
     def __eq__(self, other: ByteBank) -> bool:
-        return (self.settings == other.settings and self.content == other.content)
+        return \
+            self.capacity == other.capacity and \
+            self.content == other.content
 
     def __str__(self) -> str:
 
         builder = ""
         for index in range(0, self.capacity):
 
-            if index % self.settings.print_num_rows == 0 and index != 0:
+            if index % self.print_num_rows == 0 and index != 0:
                 builder += '\n'
 
             builder += "{:02X}".format(self.content[index])
@@ -90,10 +79,9 @@ class ByteBank():
 
         return Ok(None)
     
-
 # if __name__ == '__main__':
 
-#     bank = ByteBank(ByteBankSettings())
+#     bank = ByteBank(64)
 
 #     bank.set_bytes(range(0, 17), 255)
 

@@ -1,86 +1,42 @@
 import unittest
-from ByteBank import ByteBank, ByteBankSettings
+from ByteBank import ByteBank
 
 class ByteBankTests(unittest.TestCase):
 
-    def test_byte_bank_settings_equality_success(self):
-
-        settings1 = ByteBankSettings()
-        settings2 = ByteBankSettings()
-
-        self.assertEqual(settings1, settings2)
-
-    def test_byte_bank_settings_equality_failure_capacity(self):
-
-        settings1 = ByteBankSettings()
-        settings2 = ByteBankSettings()
-        settings2.capacity = settings1.capacity + 1
-
-        self.assertNotEqual(settings1, settings2)
-
-    def test_byte_bank_settings_equality_failure_print_num_rows(self):
-
-        settings1 = ByteBankSettings()
-        settings2 = ByteBankSettings()
-        settings2.print_num_rows = settings1.print_num_rows + 1
-
-        self.assertNotEqual(settings1, settings2)
-
-    def test_byte_bank_settings_equality_failure_capacity_and_print_num_rows(self):
-
-        settings1 = ByteBankSettings()
-        settings2 = ByteBankSettings()
-        settings2.capacity = settings1.capacity + 1
-        settings2.print_num_rows = settings1.print_num_rows + 1
-
-        self.assertNotEqual(settings1, settings2)
-
     def test_byte_bank_constructor(self):
 
-        bank = ByteBank(ByteBankSettings())
+        bank = ByteBank(64)
 
         self.assertIsInstance(bank, ByteBank)
 
     def test_byte_bank_equality_success(self):
         
-        bank1 = ByteBank(ByteBankSettings())
-        bank2 = ByteBank(ByteBankSettings())
+        bank1 = ByteBank(64)
+        bank2 = ByteBank(64)
 
         self.assertEqual(bank1, bank2)
 
     def test_byte_bank_equality_failure_capacity(self):
         
-        settings1 = ByteBankSettings()
-        settings2 = ByteBankSettings()
-        settings2.capacity = settings1.capacity+1
+        capacity1 = 16
+        capacity2 = 17
 
-        bank1 = ByteBank(settings1)
-        bank2 = ByteBank(settings2)
-
-        self.assertNotEqual(bank1, bank2)
-
-    def test_byte_bank_equality_failure_print_num_rows(self):
-        
-        settings1 = ByteBankSettings()
-        settings2 = ByteBankSettings()
-        settings2.print_num_rows = settings1.print_num_rows+1
-
-        bank1 = ByteBank(settings1)
-        bank2 = ByteBank(settings2)
+        bank1 = ByteBank(capacity1)
+        bank2 = ByteBank(capacity2)
 
         self.assertNotEqual(bank1, bank2)
 
     def test_byte_bank_equality_failure_content(self):
         
-        bank1 = ByteBank(ByteBankSettings())
-        bank2 = ByteBank(ByteBankSettings())
+        bank1 = ByteBank(64)
+        bank2 = ByteBank(64)
         bank2.content[0] = 255
 
         self.assertNotEqual(bank1, bank2)
 
     def test_byte_bank_str(self):
 
-        bank = ByteBank(ByteBankSettings())
+        bank = ByteBank(64)
 
         s = str(bank)
 
@@ -88,7 +44,7 @@ class ByteBankTests(unittest.TestCase):
 
     def test_byte_bank_get_byte_success(self):
 
-        bank = ByteBank(ByteBankSettings())
+        bank = ByteBank(64)
 
         r_get_byte = bank.get_byte(0)
 
@@ -102,7 +58,7 @@ class ByteBankTests(unittest.TestCase):
 
     def test_byte_bank_get_byte_failure_index_too_small(self):
 
-        bank = ByteBank(ByteBankSettings())
+        bank = ByteBank(64)
 
         r_get_byte = bank.get_byte(-1)
 
@@ -111,7 +67,7 @@ class ByteBankTests(unittest.TestCase):
 
     def test_byte_bank_get_byte_failure_index_too_large(self):
 
-        bank = ByteBank(ByteBankSettings())
+        bank = ByteBank(64)
         index = bank.capacity
 
         r_get_byte = bank.get_byte(index)
@@ -121,7 +77,7 @@ class ByteBankTests(unittest.TestCase):
 
     def test_byte_bank_get_bytes_success_range(self):
 
-        bank = ByteBank(ByteBankSettings())
+        bank = ByteBank(64)
         r = range(0,2)
 
         r_get_bytes = bank.get_bytes(r)
@@ -135,7 +91,7 @@ class ByteBankTests(unittest.TestCase):
 
     def test_byte_bank_get_bytes_success_list(self):
 
-        bank = ByteBank(ByteBankSettings())
+        bank = ByteBank(64)
         r = [0, 1, 2]
 
         r_get_bytes = bank.get_bytes(r)
@@ -149,7 +105,7 @@ class ByteBankTests(unittest.TestCase):
 
     def test_byte_bank_get_bytes_failure_failed_to_get_bytes(self):
 
-        bank = ByteBank(ByteBankSettings())
+        bank = ByteBank(64)
         r = [0, 1, -1]
 
         r_get_bytes = bank.get_bytes(r)
@@ -158,7 +114,7 @@ class ByteBankTests(unittest.TestCase):
 
     def test_byte_bank_set_byte_success(self):
 
-        bank = ByteBank(ByteBankSettings())
+        bank = ByteBank(64)
         index = 0
         value = 255
 
@@ -174,7 +130,7 @@ class ByteBankTests(unittest.TestCase):
 
     def test_byte_bank_set_byte_failure_index_too_small(self):
 
-        bank = ByteBank(ByteBankSettings())
+        bank = ByteBank(64)
         index = -1
         value = 255
 
@@ -185,7 +141,7 @@ class ByteBankTests(unittest.TestCase):
 
     def test_byte_bank_set_byte_failure_index_too_large(self):
 
-        bank = ByteBank(ByteBankSettings())
+        bank = ByteBank(64)
         index = bank.capacity
         value = 255
 
@@ -196,7 +152,7 @@ class ByteBankTests(unittest.TestCase):
 
     def test_byte_bank_set_byte_failure_value_too_small(self):
 
-        bank = ByteBank(ByteBankSettings())
+        bank = ByteBank(64)
         index = 0
         value = -1
 
@@ -207,7 +163,7 @@ class ByteBankTests(unittest.TestCase):
 
     def test_byte_bank_set_byte_failure_value_too_large(self):
 
-        bank = ByteBank(ByteBankSettings())
+        bank = ByteBank(64)
         index = 0
         value = 256
 
@@ -218,7 +174,7 @@ class ByteBankTests(unittest.TestCase):
 
     def test_byte_bank_set_bytes_success_range(self):
 
-        bank = ByteBank(ByteBankSettings())
+        bank = ByteBank(64)
         indices = range(4,6)
         values = [255, 255]
 
@@ -235,7 +191,7 @@ class ByteBankTests(unittest.TestCase):
 
     def test_byte_bank_set_bytes_success_list(self):
 
-        bank = ByteBank(ByteBankSettings())
+        bank = ByteBank(64)
         indices = [3, 4, 5]
         values = [255, 255, 255]
 
@@ -252,7 +208,7 @@ class ByteBankTests(unittest.TestCase):
 
     def test_byte_bank_set_bytes_success_single_value(self):
 
-        bank = ByteBank(ByteBankSettings())
+        bank = ByteBank(64)
         indices = [3, 4, 5]
         values = 255
 
@@ -269,7 +225,7 @@ class ByteBankTests(unittest.TestCase):
 
     def test_byte_bank_set_bytes_failure_range_and_value_length_differ(self):
 
-        bank = ByteBank(ByteBankSettings())
+        bank = ByteBank(64)
         indices = [3, 4, 5]
         values = [255, 255]
 
@@ -280,7 +236,7 @@ class ByteBankTests(unittest.TestCase):
 
     def test_byte_bank_set_bytes_failure_failed_to_set_byte(self):
 
-        bank = ByteBank(ByteBankSettings())
+        bank = ByteBank(64)
         indices = [3, 4, bank.capacity]
         values = [255, 255, 0]
 

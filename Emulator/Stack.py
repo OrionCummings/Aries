@@ -1,98 +1,99 @@
 from __future__ import annotations
 import struct
+from typing import SupportsIndex
 from option import Result, Ok
+from ByteBank import ByteBank
 from Constants import MAX_STACK_SIZE_IN_BYTES
 from Utilities import trace
 
-class Stack():
+class Stack(ByteBank):
 
-    def __init__(self, capacity_in_bytes: int = 0):
-        self.capacity = capacity_in_bytes
-        self.bytes = bytearray(capacity_in_bytes)
+    def __init__(self, capacity_in_bytes: int):
+        super().__init__(capacity_in_bytes)
 
         # TODO: Sync this with cpu stack pointer!!!!!!!!!!!!!!!!!!
         self.stack_pointer: int = 0
 
     def __eq__(self, other: Stack):
-        return (self.capacity == other.capacity and self.bytes == other.bytes and self.stack_pointer == other.stack_pointer)
+        return \
+            (type(self), self.capacity, self.stack_pointer, self.content) == (type(other), other.capacity, other.stack_pointer, other.content)
 
-    def __str__(self):
-
-        builder: str = ""
-        for index in range(0, self.capacity):
-            
-            # TODO: Magic number!
-            if index != 0 and index % 16 == 0:
-                builder += "\n"
-            
-            builder += "{:02X}".format(self.bytes[index])
-            builder += " "
-
-        builder += '\n'
-        return builder
+    def __str__(self) -> str:
+        return super().__str__()
 
     def is_empty(self) -> bool:
         return self.size() == 0
     
     def size(self) -> int:
-        return len(self.bytes)
+        return self.stack_pointer
 
-    def set_bytes(self, values: bytearray, indices_in_bytes: list[int] | range):
+    def push_byte(self, value: int) -> Result[None, str]:
+        if value not in range(0, 256):
+            return trace(f"value '{value}' is out of range")
+        
+        r_set_byte = super().set_byte(self.stack_pointer, value)
+        if r_set_byte.is_err:
+            return trace(r_set_byte.unwrap_err())
 
-        if len(values) == 0: return trace("no values to set")
-        if len(values) != len(indices_in_bytes) and len(values) == 1:
-            values = values * len(indices_in_bytes)
+        self.stack_pointer += 1
+
+        return Ok(None)
+
+    def pop_byte(self) -> Result[int, str]:
+        if self.size() == 0:
+            return trace("cannot pop byte from empty stack")
         
-        if isinstance(indices_in_bytes, range):
-            indices_in_bytes = list(indices_in_bytes)
+        r_get_byte = super().get_byte(self.stack_pointer-1)
+        if r_get_byte.is_err:
+            return trace(r_get_byte.unwrap_err())
         
-        for (i, index_in_bytes) in enumerate(indices_in_bytes):
-            if index_in_bytes < 0: return trace("memory location out of bounds: {} < 0!".format(index_in_bytes))
-            if index_in_bytes >= self.capacity / 4: return trace("memory location out of bounds: {} > {}!".format(index_in_bytes, self.capacity))
-            self.bytes[index_in_bytes] = values[i]
+        self.stack_pointer -= 1
+        
+        super().set_byte(self.stack_pointer, 0)
+
+        return Ok(r_get_byte.unwrap())
+
+    def peek_byte(self) -> Result[int, str]:
+        if self.size() == 0:
+            return trace("cannot peek from empty stack")
+        
+        r_get_byte = super().get_byte(self.stack_pointer)
+        if r_get_byte.is_err:
+            return trace(r_get_byte.unwrap_err())
+
+        return Ok(r_get_byte.unwrap())
 
     def push(self, value: int) -> Result[None, str]:
-        if self.size() >= MAX_STACK_SIZE_IN_BYTES:
-            return trace(f"failed to push '{value}' (full stack)")
+        if self.stack_pointer >= self.capacity:
+            return trace("cannot push onto full stack")
         
+        # Split `value` into four bytes
         value_bytes = value.to_bytes(4, byteorder='little', signed=False)
 
-        # TODO: Magic number!
-        # Insert each byte into the stack
-        for index in range(0, len(value_bytes)):
-            self.bytes[self.stack_pointer + index] = value_bytes[index]
-        self.stack_pointer += 4
-        
-        # self.set_bytes(value_bytes, range(0, 4))
-        # self.stack_pointer += 4
+        for byt in value_bytes:
+            self.push_byte(byt)
 
-        # TODO: Fix this inconsistency; maybe convert all
-        # Result[bool, str] to Result[None, str] because
-        # I rarely care about the value of the bool!
         return Ok(None)
 
     def pop(self) -> Result[int, str]:
-        if self.size() == 0:
-            return trace("failed to pop (empty stack)")
         
-        byte1 = self.bytes[self.stack_pointer-1]
-        byte2 = self.bytes[self.stack_pointer-2]
-        byte3 = self.bytes[self.stack_pointer-3]
-        byte4 = self.bytes[self.stack_pointer-4]
-        parts = [byte1, byte2, byte3, byte4]
-
-        self.bytes[self.stack_pointer-4] = bytes([0])
-        self.bytes[self.stack_pointer-3] = bytes([0])
-        self.bytes[self.stack_pointer-2] = bytes([0])
-        self.bytes[self.stack_pointer-1] = bytes([0])
-
-        try:
-            packed_bytes = struct.pack('>BBBB', *parts)
-        except struct.error as _:
-            return trace(f"failed to pack bytes")
+        if self.size() <= 0:
+            return trace("cannot pop from empty stack")
         
-        value = int.from_bytes(packed_bytes, byteorder='little', signed=False)
+        r_value = self.peek()
+        if r_value.is_err:
+            return trace(f"failed to peek value:\n{r_value.unwrap_err()}")
 
+        value = r_value.unwrap()
+
+        # Reduce the stack pointer because we just popped off a value
+        self.stack_pointer -= 4
+
+        # Push a zero in the old value's place
+        self.push(0)
+
+        # Reduce the stack pointer again because the previous zero push
+        # increased it
         self.stack_pointer -= 4
 
         return Ok(value)
@@ -101,18 +102,46 @@ class Stack():
         if self.size() == 0:
             return trace("failed to peek (empty stack)")
         
-        value = self.bytes[self.stack_pointer]
+        r_byte1 = self.pop_byte()
+        r_byte2 = self.pop_byte()
+        r_byte3 = self.pop_byte()
+        r_byte4 = self.pop_byte()
+
+        if r_byte1.is_err: return trace(f"failed to pop byte:\n{r_byte1.unwrap_err()}")
+        if r_byte2.is_err: return trace(f"failed to pop byte:\n{r_byte2.unwrap_err()}")
+        if r_byte3.is_err: return trace(f"failed to pop byte:\n{r_byte3.unwrap_err()}")
+        if r_byte4.is_err: return trace(f"failed to pop byte:\n{r_byte4.unwrap_err()}")
+
+        byte1 = r_byte1.unwrap()
+        byte2 = r_byte2.unwrap()
+        byte3 = r_byte3.unwrap()
+        byte4 = r_byte4.unwrap()
+
+        little_endian_bytes = [byte4, byte3, byte2, byte1]
+        value = int.from_bytes(little_endian_bytes, byteorder='little', signed=False)
 
         return Ok(value)
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
 
-    #TODO: Fix push and pop! THey don't play nicely with the byte conversion!
+#     #TODO: Fix push and pop! They don't play nicely with the byte conversion!
 
-    stack = Stack(16)
-    print(stack)
-    stack.push(255)
-    print(stack)
-    stack.pop()
-    print(stack)
+#     stack = Stack(64)
+#     stack.push(4294967295)
+#     stack.push(4008636142)
+#     stack.push(3722304989)
+#     stack.push(3435973836)
+#     stack.push(3149642683)
+#     stack.push(2863311530)
+#     stack.push(2576980377)
+#     stack.push(2290649224)
+#     stack.push(2004318071)
+#     stack.push(1717986918)
+#     stack.push(1431655765)
+#     stack.push(1145324612)
+#     stack.push(858993459)
+#     stack.push(572662306)
+#     stack.push(286331153)
+#     stack.push(0)
+#     print(stack)
 

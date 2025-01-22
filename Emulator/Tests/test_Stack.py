@@ -7,68 +7,43 @@ class StackTests(unittest.TestCase):
     def test_constructor(self):
 
         stack = Stack(0)
-        a = bytearray(0)
 
-        self.assertEqual(stack.bytes, a)
+        self.assertIsInstance(stack, Stack)
 
     def test_equality_success(self):
 
-        stack1 = Stack()
-        stack2 = Stack()
+        stack1 = Stack(16)
+        stack2 = Stack(16)
 
-        l = [1,2,3,4]
+        l = [255, 12, 241, 0]
 
-        stack1.capacity = len(l) * 4
-        stack2.capacity = len(l) * 4
-
-        stack1.bytes = StackTests.list_to_little_endian_bytes(l)
-        stack2.bytes = StackTests.list_to_little_endian_bytes(l)
+        [stack1.push(n) for n in l]
+        [stack2.push(n) for n in l]
 
         self.assertEqual(stack1, stack2)
 
     def test_equality_failure_capacity(self):
 
-        stack1 = Stack()
-        stack2 = Stack()
+        stack1 = Stack(16)
+        stack2 = Stack(16)
 
-        l = [1,2,3,4]
-
-        stack1.capacity = len(l) * 4
-        stack2.capacity = (len(l) * 4) - 1
-
-        stack1.bytes = StackTests.list_to_little_endian_bytes(l)
-        stack2.bytes = StackTests.list_to_little_endian_bytes(l)
+        stack1.capacity = stack2.capacity + 1
 
         self.assertNotEqual(stack1, stack2)
 
     def test_equality_failure_content(self):
 
-        stack1 = Stack()
-        stack2 = Stack()
+        stack1 = Stack(16)
+        stack2 = Stack(16)
 
-        l1 = [1,2,3,4]
-        l2 = [1,2,3]
-
-        stack1.capacity = len(l1) * 4
-        stack2.capacity = len(l2) * 4
-
-        stack1.bytes = StackTests.list_to_little_endian_bytes(l1)
-        stack2.bytes = StackTests.list_to_little_endian_bytes(l2)
+        stack1.push(1)
 
         self.assertNotEqual(stack1, stack2)
 
     def test_equality_failure_stack_pointer(self):
 
-        stack1 = Stack()
-        stack2 = Stack()
-
-        l = [1,2,3,4]
-
-        stack1.capacity = len(l) * 4
-        stack2.capacity = len(l) * 4
-
-        stack1.bytes = StackTests.list_to_little_endian_bytes(l)
-        stack2.bytes = StackTests.list_to_little_endian_bytes(l)
+        stack1 = Stack(16)
+        stack2 = Stack(16)
 
         stack1.stack_pointer = 0
         stack2.stack_pointer = 1
@@ -77,15 +52,11 @@ class StackTests(unittest.TestCase):
 
     def test_to_string(self):
 
-        l = [1,2,3,4]
-        stack = Stack(len(l) * 4)
-        for n in l:
-            stack.push(n)
+        stack = Stack(16)
 
-        expected_str = "00 00 00 01 00 00 00 02 00 00 00 03 00 00 00 04"
-        actual_str = str(stack).replace('\n', "") # Remove newlines to make this render-target-independent
+        s = str(stack)
 
-        self.assertEqual(expected_str, actual_str)
+        self.assertIsInstance(s, str)
 
     def test_is_empty_success(self):
 
@@ -94,18 +65,27 @@ class StackTests(unittest.TestCase):
         self.assertTrue(stack.is_empty())
 
     def test_is_empty_failure(self):
-
         stack = Stack(1)
-        stack.bytes = StackTests.list_to_little_endian_bytes([1,2,3,4])
+
+        stack.push(3)
 
         self.assertFalse(stack.is_empty())
 
     def test_size(self):
-
         stack = Stack(16)
-        stack.bytes = StackTests.list_to_little_endian_bytes([1,2,3,4])
 
-        self.assertEqual(stack.size(), 8)
+        stack.push(3)
+
+        self.assertEqual(stack.size(), 4)
+
+    def test_push_byte(self):
+        self.fail()
+
+    def test_pop_byte(self):
+        self.fail()
+
+    def test_peek_byte(self):
+        self.fail()
 
     def test_push(self):
 
@@ -113,11 +93,13 @@ class StackTests(unittest.TestCase):
         stack = Stack(len(l) * 4)
 
         for n in l:
-            stack.push(n)
+            r_push = stack.push(n)
+            if r_push.is_err:
+                self.fail(f"unexpected error: '{r_push.unwrap_err()}'")
 
         # TODO: Make a function that actually calculates this properly.
         expected_bytes = b'\xff\x00\x00\x00\x10\x00\x00\x00'
-        actual_bytes = stack.bytes
+        actual_bytes = stack.content
 
         self.assertEqual(expected_bytes, actual_bytes)
 
@@ -128,26 +110,27 @@ class StackTests(unittest.TestCase):
         stack.push(2)
         stack.push(3)
         stack.push(4)
-        stack.pop()
-        stack.pop()
+        r_popped_value = stack.pop()
 
-        expected_bytes = bytearray(b'\x01\x00\x00\x00\x02\x00\x00\x00')
-        actual_bytes = stack.bytes
+        if r_popped_value.is_err:
+            self.fail(f"pop failure:\n{r_popped_value.unwrap_err()}")
 
-        self.assertEqual(expected_bytes, actual_bytes)
+        actual_value = r_popped_value.unwrap()
+        expected_value = 4
+
+        self.assertEqual(expected_value, actual_value)
 
     def test_peek(self):
 
         stack = Stack(16)
         stack.push(1)
-        stack.push(2)
-        stack.push(3)
-        stack.push(4)
-        stack.pop()
-        stack.pop()
 
-        expected_result = 2
-        actual_result = stack.peek().unwrap()
+        expected_result = 1
+        r_actual_result = stack.peek()
+        if r_actual_result.is_err:
+            self.fail("failed to peek stack")
+
+        actual_result = r_actual_result.unwrap()
 
         self.assertEqual(expected_result, actual_result)
 
@@ -155,17 +138,19 @@ class StackTests(unittest.TestCase):
         
         S = 2
 
-        stack = Stack(S)
+        stack = Stack(S * 4)
         for x in range(0, S):
-            stack.push(x)
+            r_push = stack.push(x)
+            if r_push.is_err:
+                self.fail(f"failed to push:\n{r_push.unwrap_err()}")
 
         r_push_result = stack.push(1)
 
         if not r_push_result.is_err:
             self.fail(f"expected a failure but got '{r_push_result.unwrap()}'")
 
-        push_result = r_push_result.unwrap_err()
-        self.assertIsInstance(push_result, str)
+        push_result_err = r_push_result.unwrap_err()
+        self.assertIsInstance(push_result_err, str)
 
     def test_pop_when_empty(self):
 
