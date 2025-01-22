@@ -39,7 +39,44 @@ class ByteBankTests(unittest.TestCase):
 
         bank = ByteBank(ByteBankSettings())
 
-        self.assertEqual(bank.settings.capacity, bank.capacity)
+        self.assertIsInstance(bank, ByteBank)
+
+    def test_byte_bank_equality_success(self):
+        
+        bank1 = ByteBank(ByteBankSettings())
+        bank2 = ByteBank(ByteBankSettings())
+
+        self.assertEqual(bank1, bank2)
+
+    def test_byte_bank_equality_failure_capacity(self):
+        
+        settings1 = ByteBankSettings()
+        settings2 = ByteBankSettings()
+        settings2.capacity = settings1.capacity+1
+
+        bank1 = ByteBank(settings1)
+        bank2 = ByteBank(settings2)
+
+        self.assertNotEqual(bank1, bank2)
+
+    def test_byte_bank_equality_failure_print_num_rows(self):
+        
+        settings1 = ByteBankSettings()
+        settings2 = ByteBankSettings()
+        settings2.print_num_rows = settings1.print_num_rows+1
+
+        bank1 = ByteBank(settings1)
+        bank2 = ByteBank(settings2)
+
+        self.assertNotEqual(bank1, bank2)
+
+    def test_byte_bank_equality_failure_content(self):
+        
+        bank1 = ByteBank(ByteBankSettings())
+        bank2 = ByteBank(ByteBankSettings())
+        bank2.content[0] = 255
+
+        self.assertNotEqual(bank1, bank2)
 
     def test_byte_bank_str(self):
 

@@ -91,11 +91,11 @@ class ByteBank():
         return Ok(None)
     
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
 
-    bank = ByteBank(ByteBankSettings())
+#     bank = ByteBank(ByteBankSettings())
 
-    bank.set_bytes(range(0, 17), 255)
+#     bank.set_bytes(range(0, 17), 255)
 
-    print(bank)
+#     print(bank)
 
