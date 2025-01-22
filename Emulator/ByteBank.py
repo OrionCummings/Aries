@@ -1,12 +1,18 @@
+from __future__ import annotations
 from dataclasses import dataclass
 from typing import SupportsIndex
-
 from option import Ok, Result
 
 from Utilities import trace
 
 @dataclass
 class ByteBankSettings():
+
+    def __eq__(self, other: ByteBankSettings) -> bool:
+        return \
+            self.capacity == other.capacity and \
+            self.print_num_rows == other.print_num_rows
+
     capacity: int = 64
     print_num_rows: int = 16
 
@@ -16,6 +22,9 @@ class ByteBank():
         self.settings = settings
         self.capacity = self.settings.capacity
         self.content = bytearray(self.settings.capacity)
+
+    def __eq__(self, other: ByteBank) -> bool:
+        return (self.settings == other.settings and self.content == other.content)
 
     def __str__(self) -> str:
 
@@ -59,13 +68,18 @@ class ByteBank():
         
         return Ok(None)
 
-    def set_bytes(self, dest_range: range | list[SupportsIndex], values: list[int]) -> Result[None, str]:
+    def set_bytes(self, dest_range: range | list[SupportsIndex], values: list[int] | int) -> Result[None, str]:
 
         if isinstance(dest_range, range):
             dest_range = list(dest_range)
 
         len_dest_range = len(dest_range)
+
+        if isinstance(values, int):
+            values = [values] * len_dest_range
+
         len_values = len(values)
+
         if len_dest_range != len_values:
             return trace(f"size of range ({len_dest_range}) and size of values ({len_values}) differ")
 
@@ -75,3 +89,13 @@ class ByteBank():
                 return trace(f"failed to set byte:\n{r_set_byte.unwrap_err()}")
 
         return Ok(None)
+    
+
+if __name__ == '__main__':
+
+    bank = ByteBank(ByteBankSettings())
+
+    bank.set_bytes(range(0, 17), 255)
+
+    print(bank)
+

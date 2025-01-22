@@ -3,6 +3,38 @@ from ByteBank import ByteBank, ByteBankSettings
 
 class ByteBankTests(unittest.TestCase):
 
+    def test_byte_bank_settings_equality_success(self):
+
+        settings1 = ByteBankSettings()
+        settings2 = ByteBankSettings()
+
+        self.assertEqual(settings1, settings2)
+
+    def test_byte_bank_settings_equality_failure_capacity(self):
+
+        settings1 = ByteBankSettings()
+        settings2 = ByteBankSettings()
+        settings2.capacity = settings1.capacity + 1
+
+        self.assertNotEqual(settings1, settings2)
+
+    def test_byte_bank_settings_equality_failure_print_num_rows(self):
+
+        settings1 = ByteBankSettings()
+        settings2 = ByteBankSettings()
+        settings2.print_num_rows = settings1.print_num_rows + 1
+
+        self.assertNotEqual(settings1, settings2)
+
+    def test_byte_bank_settings_equality_failure_capacity_and_print_num_rows(self):
+
+        settings1 = ByteBankSettings()
+        settings2 = ByteBankSettings()
+        settings2.capacity = settings1.capacity + 1
+        settings2.print_num_rows = settings1.print_num_rows + 1
+
+        self.assertNotEqual(settings1, settings2)
+
     def test_byte_bank_constructor(self):
 
         bank = ByteBank(ByteBankSettings())
@@ -178,6 +210,23 @@ class ByteBankTests(unittest.TestCase):
         for (vindex, cindex) in enumerate(indices):
             actual_value = bank.content[cindex]
             expected_value = values[vindex]
+
+            self.assertEqual(expected_value, actual_value)
+
+    def test_byte_bank_set_bytes_success_single_value(self):
+
+        bank = ByteBank(ByteBankSettings())
+        indices = [3, 4, 5]
+        values = 255
+
+        r_set_bytes = bank.set_bytes(indices, values)
+        
+        if r_set_bytes.is_err:
+            self.fail(r_set_bytes.unwrap_err())
+
+        for (vindex, cindex) in enumerate(indices):
+            actual_value = bank.content[cindex]
+            expected_value = 255
 
             self.assertEqual(expected_value, actual_value)
 
