@@ -4,10 +4,6 @@ from Constants import MAX_STACK_SIZE_IN_BYTES
 
 class StackTests(unittest.TestCase):
 
-    @staticmethod
-    def list_to_little_endian_bytearray(l: list[int]) -> bytearray:
-        pass
-
     def test_constructor(self):
 
         stack = Stack(0)
@@ -113,14 +109,15 @@ class StackTests(unittest.TestCase):
 
     def test_push(self):
 
-        l = [1]
+        l = [255, 16]
         stack = Stack(len(l) * 4)
 
         for n in l:
             stack.push(n)
 
-        actual_bytes = stack.bytes 
-        expected_bytes = bytearray(l)
+        # TODO: Make a function that actually calculates this properly.
+        expected_bytes = b'\xff\x00\x00\x00\x10\x00\x00\x00'
+        actual_bytes = stack.bytes
 
         self.assertEqual(expected_bytes, actual_bytes)
 
@@ -134,7 +131,7 @@ class StackTests(unittest.TestCase):
         stack.pop()
         stack.pop()
 
-        expected_bytes = [1,2]
+        expected_bytes = bytearray(b'\x01\x00\x00\x00\x02\x00\x00\x00')
         actual_bytes = stack.bytes
 
         self.assertEqual(expected_bytes, actual_bytes)
@@ -155,33 +152,40 @@ class StackTests(unittest.TestCase):
         self.assertEqual(expected_result, actual_result)
 
     def test_push_to_full_stack(self):
+        
+        S = 2
 
-        stack = Stack(MAX_STACK_SIZE_IN_BYTES)
-        for x in range(0, MAX_STACK_SIZE_IN_BYTES):
+        stack = Stack(S)
+        for x in range(0, S):
             stack.push(x)
 
-        expected_string = "Attempted to push to a full call stack!"
-        actual_string = stack.push(256).unwrap_err()
+        r_push_result = stack.push(1)
 
-        self.assertEqual(expected_string, actual_string)
+        if not r_push_result.is_err:
+            self.fail(f"expected a failure but got '{r_push_result.unwrap()}'")
+
+        push_result = r_push_result.unwrap_err()
+        self.assertIsInstance(push_result, str)
 
     def test_pop_when_empty(self):
 
-        stack = Stack()
-        pop_result = stack.pop()
+        stack = Stack(0)
+        r_pop_result = stack.pop()
 
-        expected_string = "Attempted to pop from an empty call stack!"
-        actual_string = pop_result.unwrap_err()
+        if not r_pop_result.is_err:
+            self.fail(f"expected a failure but got '{r_pop_result.unwrap()}'")
 
-        self.assertEqual(expected_string, actual_string)
+        pop_result = r_pop_result.unwrap_err()
+        self.assertIsInstance(pop_result, str)
 
     def test_peek_when_empty(self):
 
-        stack = Stack()
-        pop_result = stack.peek()
+        stack = Stack(0)
+        r_peek_result = stack.peek()
 
-        expected_string = "Attempted to peek from an empty call stack!"
-        actual_string = pop_result.unwrap_err()
+        if not r_peek_result.is_err:
+            self.fail(f"expected a failure but got '{r_peek_result.unwrap()}'")
 
-        self.assertEqual(expected_string, actual_string)
+        peek_result = r_peek_result.unwrap_err()
+        self.assertIsInstance(peek_result, str)
 

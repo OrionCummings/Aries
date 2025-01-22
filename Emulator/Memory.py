@@ -142,7 +142,7 @@ class Memory():
             Result[bool, str]: A result type containing a boolean True on success or a string error message on failure.
         """
         
-        if len(values) == 0: return Err("No values to write!")
+        if len(values) == 0: return trace("no values to write!")
         if len(values) != len(indices_in_bytes) and len(values) == 1:
             values = values * len(indices_in_bytes)
         
@@ -150,8 +150,8 @@ class Memory():
             indices_in_bytes = list(indices_in_bytes)
         
         for (i, index_in_bytes) in enumerate(indices_in_bytes):
-            if index_in_bytes < 0: return Err("Memory location out of bounds: {} < 0!".format(index_in_bytes))
-            if index_in_bytes >= self.capacity_in_bytes: return Err("Memory location out of bounds: {} > {}!".format(index_in_bytes, self.capacity_in_bytes))
+            if index_in_bytes < 0: return trace("memory location out of bounds: {} < 0!".format(index_in_bytes))
+            if index_in_bytes >= self.capacity_in_bytes: return trace("memory location out of bounds: {} > {}!".format(index_in_bytes, self.capacity_in_bytes))
             self.bytes[index_in_bytes] = values[i]
 
         return Ok(True)
@@ -176,7 +176,7 @@ class Memory():
         
         deconstructed_instruction = instruction.to_bytes(4, endianness)
         set_bytes_result = self.set_bytes(deconstructed_instruction, list(range(index_in_bytes, index_in_bytes + PC_INC)))
-        if set_bytes_result.is_err: return Err(set_bytes_result.unwrap_err())
+        if set_bytes_result.is_err: return trace(f"failed to set bytes\n{set_bytes_result.unwrap_err()}")
         
         return Ok(True)
     
@@ -184,7 +184,7 @@ class Memory():
         
         for (i, instruction) in enumerate(instructions):
             load_result = self.load_instruction(instruction, index + (i * 4), endianness)
-            if load_result.is_err: return Err(load_result.unwrap_err())
+            if load_result.is_err: return trace(f"failed to load instruction\n{load_result.unwrap_err()}")
         
         return Ok(True)
 
