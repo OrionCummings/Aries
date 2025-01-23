@@ -9,9 +9,9 @@ from Utilities import debug, panic
 assmbler_settings = AssemblerSettings()
 assmbler_settings.print_mode = PrintMode.Hex
 assmbler_settings.source = AssemblerSettingsSource.File
-assmbler_settings.file_name = "j2.aria"
-# assmbler_settings.file_directory = "Programs"
-assmbler_settings.file_directory = "Programs/Instructions/"
+assmbler_settings.file_name = "example.aria"
+assmbler_settings.file_directory = "Programs"
+# assmbler_settings.file_directory = "Programs/Instructions/"
 
 # Create the assembler
 assembler = Assembler(assmbler_settings)

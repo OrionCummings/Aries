@@ -17,7 +17,7 @@ def get_opcode(instruction: str | int) -> Result[int, str]:
         opcode = (instruction & mask) >> start_index
         return Ok(opcode)
     else:
-        return trace(f"unknown type")
+        return trace("unknown type")
 
 def get_instruction_mode(instruction: str | int) -> Result[InstructionFormat, str]:
     if isinstance(instruction, str):

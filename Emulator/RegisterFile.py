@@ -68,7 +68,7 @@ class RegisterFile():
     def get_reg(self, reg: str) -> Result[int, str]:
         if reg in self.registers:
             return Ok(self.registers[reg])
-        return trace(f"No register with key '{reg}'!")
+        return trace(f"No register with key '{reg}'")
     
     def get_pc(self) -> int:
         return self.registers["PC"]

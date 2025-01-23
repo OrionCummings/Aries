@@ -42,7 +42,7 @@ class ByteBank():
             r_byt = self.get_byte(index)
 
             if r_byt.is_err:
-                return trace(f"failed to get byte:\n{r_byt.unwrap_err()}")
+                return trace("failed to get byte", r_byt.unwrap_err())
 
             byt = r_byt.unwrap()
             array.append(byt)
@@ -75,7 +75,7 @@ class ByteBank():
         for (vindex, index) in enumerate(dest_range):
             r_set_byte = self.set_byte(index, values[vindex])
             if r_set_byte.is_err:
-                return trace(f"failed to set byte:\n{r_set_byte.unwrap_err()}")
+                return trace("failed to set byte", r_set_byte.unwrap_err())
 
         return Ok(None)
     

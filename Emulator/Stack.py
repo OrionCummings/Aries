@@ -45,7 +45,7 @@ class Stack(ByteBank):
         
         r_get_byte = super().get_byte(self.stack_pointer-1)
         if r_get_byte.is_err:
-            return trace(r_get_byte.unwrap_err())
+            return trace("failed to get byte", r_get_byte.unwrap_err())
         
         self.stack_pointer -= 1
         
@@ -59,7 +59,7 @@ class Stack(ByteBank):
         
         r_get_byte = super().get_byte(self.stack_pointer)
         if r_get_byte.is_err:
-            return trace(r_get_byte.unwrap_err())
+            return trace("failed to get byte", r_get_byte.unwrap_err())
 
         return Ok(r_get_byte.unwrap())
 
@@ -82,7 +82,7 @@ class Stack(ByteBank):
         
         r_value = self.peek()
         if r_value.is_err:
-            return trace(f"failed to peek value:\n{r_value.unwrap_err()}")
+            return trace("failed to peek value", r_value.unwrap_err())
 
         value = r_value.unwrap()
 
@@ -106,11 +106,12 @@ class Stack(ByteBank):
         r_byte2 = self.pop_byte()
         r_byte3 = self.pop_byte()
         r_byte4 = self.pop_byte()
-
-        if r_byte1.is_err: return trace(f"failed to pop byte:\n{r_byte1.unwrap_err()}")
-        if r_byte2.is_err: return trace(f"failed to pop byte:\n{r_byte2.unwrap_err()}")
-        if r_byte3.is_err: return trace(f"failed to pop byte:\n{r_byte3.unwrap_err()}")
-        if r_byte4.is_err: return trace(f"failed to pop byte:\n{r_byte4.unwrap_err()}")
+        
+        error_message = "failed to pop byte" # Linter wanted it; fine
+        if r_byte1.is_err: return trace(error_message, r_byte1.unwrap_err())
+        if r_byte2.is_err: return trace(error_message, r_byte2.unwrap_err())
+        if r_byte3.is_err: return trace(error_message, r_byte3.unwrap_err())
+        if r_byte4.is_err: return trace(error_message, r_byte4.unwrap_err())
 
         byte1 = r_byte1.unwrap()
         byte2 = r_byte2.unwrap()

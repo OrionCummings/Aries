@@ -227,7 +227,7 @@ class Assembler():
             # If this a jump instruction, then it COULD use a label
             r_mode = get_instruction_mode(line)
             if r_mode.is_err:
-                return trace(f"failed to get instruction mode:\n{r_mode.unwrap_err()}")
+                return trace("failed to get instruction mode", r_mode.unwrap_err())
             mode = r_mode.unwrap()
 
             if mode == InstructionFormat.Jump:
@@ -317,7 +317,7 @@ class Assembler():
 
                 # If parsing fails, propagate the error
                 if r_instruction.is_err:
-                    return trace(f"failed to encode instruction:\n{r_instruction.unwrap_err()}")
+                    return trace("failed to encode instruction", r_instruction.unwrap_err())
                 
                 # Append the machine code instruction to the program
                 self.instructions.append(r_instruction.unwrap())
@@ -355,7 +355,7 @@ class Assembler():
 
                 r_contents = self.parse(string_program)
                 if r_contents.is_err:
-                    return trace(f"failed to parse program {self.file_name}\n{r_contents.unwrap_err()}")
+                    return trace(f"failed to parse program {self.file_name}", r_contents.unwrap_err())
             
             case _:
                 return trace(f"unknown source '{self.settings.source}'")
@@ -363,17 +363,17 @@ class Assembler():
         # Validate the file
         r_validation = self.validate()
         if r_validation.is_err:
-            return trace(f"failed to validate file {self.file_name}\n{r_validation.unwrap_err()}")
+            return trace(f"failed to validate file {self.file_name}", r_validation.unwrap_err())
 
         # Assemble the file
         r_instructions = self.assemble()
         if r_instructions.is_err:
-            return trace(f"failed to assemble file '{self.file_name}'\n{r_instructions.unwrap_err()}")
+            return trace(f"failed to assemble file '{self.file_name}'", r_instructions.unwrap_err())
 
         # Update metadata post assembly
         r_update = self.update()
         if r_update.is_err:
-            return trace(f"failed to update after assembling '{self.file_name}'\n{r_update.unwrap_err()}")
+            return trace(f"failed to update after assembling '{self.file_name}'", r_update.unwrap_err())
 
         return Ok(True)
 

@@ -175,7 +175,7 @@ class CPU():
 
             r_run = assembler.run(program)
             if r_run.is_err:
-                return trace(f"failed to run assembler:\n{r_run.unwrap_err()}")
+                return trace("failed to run assembler", r_run.unwrap_err())
 
             program = assembler.instructions
 
@@ -189,7 +189,7 @@ class CPU():
         if program_length_in_bytes == 0: warning("Loading null program")
         
         r_update = self.instruction_memory.load_instructions(program, base_address_in_bytes)
-        if r_update.is_err: return trace(f"failed to load instructions: {r_update.unwrap_err()}")
+        if r_update.is_err: return trace("failed to load instructions", r_update.unwrap_err())
 
         info(f"Loaded '{program_name}' starting at address {base_address_in_bytes} ({base_address_in_bytes:0X})")
         return Ok(True)
@@ -199,7 +199,7 @@ class CPU():
 
         r_current_instruction = self.instruction_memory.get_instruction(self.register_file.get_pc())
         if r_current_instruction.is_err:
-            return trace(r_current_instruction.unwrap_err())
+            return trace("failed to get instruction", r_current_instruction.unwrap_err())
 
         return r_current_instruction.unwrap()
     
@@ -217,7 +217,7 @@ class CPU():
         # Given an instruction, attempt the decode it
         r_decoded_instruction = decode(current_instruction)
         if r_decoded_instruction.is_err:
-            return trace(f"failed to decode instruction on line {current_line} '0x{format(current_instruction, '08x')}':\n{r_decoded_instruction.unwrap_err()}")
+            return trace(f"failed to decode instruction on line {current_line} '0x{format(current_instruction, '08x')}'", r_decoded_instruction.unwrap_err())
         decoded_instruction = r_decoded_instruction.unwrap()
 
         decoded_instruction_list = decoded_instruction.split(" ")
@@ -231,23 +231,13 @@ class CPU():
 
         r_new_cpu_state = function(self, arguments)
         if r_new_cpu_state.is_err:
-            return trace(f"invalid cpu state\n{r_new_cpu_state.unwrap_err()}")
+            return trace("invalid cpu state", r_new_cpu_state.unwrap_err())
         
         # TODO: Reassigning 'self' is probably bad practice. Should there be an object
         # that contains a CPU that handles CPU state changes?
         self = r_new_cpu_state.unwrap()
         
         print(green_bold(f"Executed '{decoded_instruction}'"))
-
-        # TODO: How is the next instruction being fed to the user?
-        # # Get the next instruction and line
-        # next_instruction = self.get_current_instruction()
-
-        # r_next_decoded_instruction = decode(next_instruction)
-        # if r_next_decoded_instruction.is_err:
-        #     return trace(f"failed to decode instruction on line {current_line} '0x{format(next_instruction, '08x')}':\n{r_next_decoded_instruction.unwrap_err()}")
-        # next_decoded_instruction = r_next_decoded_instruction.unwrap()
-        # print(green_bold(f"Next up: '{next_decoded_instruction}'"))
 
         return Ok(True)
         
@@ -282,7 +272,7 @@ class CPU():
         # Save the program counter on the call stack
         r_push = self.stack.push(pc)
         if r_push.is_err:
-            return trace(f"failed to push program counter '{pc}' to call stack:\n{r_push.unwrap_err()}")
+            return trace(f"failed to push program counter '{pc}' to call stack", r_push.unwrap_err())
 
         return Ok(r_push.unwrap())
 
@@ -292,7 +282,7 @@ class CPU():
         # Save the program counter on the call stack
         r_pop = self.stack.pop()
         if r_pop.is_err:
-            return trace(f"failed to pop program counter from call stack:\n{r_pop.unwrap_err()}")
+            return trace("failed to pop program counter from call stack", r_pop.unwrap_err())
 
         return Ok(r_pop.unwrap())
 
@@ -436,7 +426,7 @@ def i_ld(cpu: CPU, arguments: list) -> Result[CPU, str]:
     # TODO: Magic numbers!
     r_value_vector_bytes = cpu.data_memory.get_bytes(address, address+3)
     if r_value_vector_bytes.is_err:
-        return trace(f"failed to get bytes\n{r_value_vector_bytes.unwrap_err()}")
+        return trace("failed to get bytes", r_value_vector_bytes.unwrap_err())
     value_vector_bytes = r_value_vector_bytes.unwrap()
     value = int.from_bytes(value_vector_bytes, byteorder='little')
 
@@ -482,7 +472,7 @@ def i_str(cpu: CPU, arguments: list) -> Result[CPU, str]:
     try:
         packed_bytes = struct.pack('>BBBB', *parts)
     except struct.error as _:
-        return trace(f"failed to pack bytes")
+        return trace("failed to pack bytes")
 
     # Get the memory address
     potential_address = arguments[0]
@@ -495,7 +485,7 @@ def i_str(cpu: CPU, arguments: list) -> Result[CPU, str]:
     # TODO: Magic numbers!
     r_set_bytes = cpu.data_memory.set_bytes(packed_bytes, range(address, address+4))
     if r_set_bytes.is_err:
-        return trace(f"failed to set bytes\n{r_set_bytes.unwrap_err()}")
+        return trace("failed to set bytes", r_set_bytes.unwrap_err())
 
     # Increment the program counter
     cpu.register_file.increment_program_counter()
@@ -515,7 +505,7 @@ def i_call(cpu: CPU, arguments: list) -> Result[CPU, str]:
     cpu.register_file.increment_program_counter()
     r_save = cpu.save_context()
     if r_save.is_err:
-        return trace(f"failed to save cpu context:\n{r_save.unwrap_err()}")
+        return trace("failed to save cpu context", r_save.unwrap_err())
 
     # Set the program counter
     cpu.register_file.set_reg("PC", address_in_bytes)
@@ -528,7 +518,7 @@ def i_ret(cpu: CPU, arguments: list) -> Result[CPU, str]:
     # Restore the CPU context that is on the top of the call stack
     r_restore_address = cpu.restore_context()
     if r_restore_address.is_err:
-        return trace(f"failed to restore cpu context:\n{r_restore_address.unwrap_err()}")
+        return trace("failed to restore cpu context", r_restore_address.unwrap_err())
 
     restore_address = r_restore_address.unwrap()
     cpu.register_file.set_reg("PC", restore_address)
