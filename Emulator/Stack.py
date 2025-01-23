@@ -1,9 +1,6 @@
 from __future__ import annotations
-import struct
-from typing import SupportsIndex
 from option import Result, Ok
 from ByteBank import ByteBank
-from Constants import MAX_STACK_SIZE_IN_BYTES
 from Utilities import trace
 
 class Stack(ByteBank):
@@ -57,7 +54,7 @@ class Stack(ByteBank):
         if self.size() == 0:
             return trace("cannot peek from empty stack")
         
-        r_get_byte = super().get_byte(self.stack_pointer)
+        r_get_byte = super().get_byte(self.stack_pointer-1)
         if r_get_byte.is_err:
             return trace("failed to get byte", r_get_byte.unwrap_err())
 

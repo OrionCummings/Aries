@@ -78,14 +78,43 @@ class StackTests(unittest.TestCase):
 
         self.assertEqual(stack.size(), 4)
 
-    def test_push_byte(self):
-        self.fail()
+    def test_push_byte_success(self):
+        
+        stack = Stack(16)
+
+        r_push_byte = stack.push_byte(255)
+        if r_push_byte.is_err:
+            self.fail(r_push_byte.unwrap_err())
 
     def test_pop_byte(self):
-        self.fail()
+        
+        expected_pop = 255
+        stack = Stack(16)
+        stack.push_byte(expected_pop)
+        stack_pointer_before = stack.stack_pointer
+
+        r_pop_byte = stack.pop_byte()
+        if r_pop_byte.is_err:
+            self.fail(r_pop_byte.unwrap_err())
+
+        stack_pointer_after = stack.stack_pointer
+        actual_popped = r_pop_byte.unwrap()
+
+        self.assertEqual(expected_pop, actual_popped)
+        self.assertTrue(stack_pointer_before + 4, stack_pointer_after)
 
     def test_peek_byte(self):
-        self.fail()
+
+        expected_peek = 255
+        stack = Stack(16)
+        stack.push_byte(expected_peek)
+
+        r_peek_byte = stack.peek_byte()
+        if r_peek_byte.is_err:
+            self.fail(r_peek_byte.unwrap_err())
+
+        actual_peeked = r_peek_byte.unwrap()
+        self.assertEqual(expected_peek, actual_peeked)
 
     def test_push(self):
 
