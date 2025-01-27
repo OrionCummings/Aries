@@ -137,13 +137,31 @@ PC_INC = 4
 BP_INC = 1
 SP_INC = 1
 
+# The total CPU memory size
+CPU_MEMORY_SIZE_IN_BYTES = 2 ** INS_LENGTH
+
+# Instruction memory parameters
+# None
+
+# Data memory parameters
+# None
+
+# Video memory parameters
+# None
+
 # Stack parameters
 MAX_STACK_SIZE_IN_BYTES = 1024
 
+# Default memory base addresses
+INSTRUCTION_MEMORY_DEFAULT_BASE_ADDRESS = 0x0000000000000010
+DATA_MEMORY_DEFAULT_BASE_ADDRESS        = 0x000000000000A000
+VIDEO_MEMORY_DEFAULT_BASE_ADDRESS       = 0x000000000000F000
+
+# Put it at the end of memory
+STACK_MEMORY_DEFAULT_BASE_ADDRESS       = CPU_MEMORY_SIZE_IN_BYTES - MAX_STACK_SIZE_IN_BYTES
+
 # Error codes
 PC_OVERRUN = 0x30
-
-
 
 # TODO: Tidy this idea up!
 class TextRenderTarget(Enum):

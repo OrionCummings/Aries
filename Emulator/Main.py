@@ -10,7 +10,8 @@ assmbler_settings = AssemblerSettings()
 assmbler_settings.print_mode = PrintMode.Hex
 assmbler_settings.source = AssemblerSettingsSource.File
 assmbler_settings.file_name = "example.aria"
-assmbler_settings.file_directory = "Programs"
+assmbler_settings.file_directory = "Emulator/Programs"
+# assmbler_settings.file_directory = "Programs"
 # assmbler_settings.file_directory = "Programs/Instructions/"
 
 # Create the assembler

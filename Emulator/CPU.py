@@ -7,7 +7,7 @@ from Assembler import Assembler, AssemblerSettings, AssemblerSettingsSource
 from Stack import Stack
 from Transformations import encode, decode, get_opcode
 from PrettyPrinting import PrintMode, bold, green_bold, info, print_green, print_yellow, red_bold, warning
-from Constants import CONSTANT_REGISTER_MAP, FL_ZERO, PC_INC, PC_OVERRUN, InstructionFormat, TextRenderTarget
+from Constants import CONSTANT_REGISTER_MAP, DATA_MEMORY_DEFAULT_BASE_ADDRESS, FL_ZERO, INSTRUCTION_MEMORY_DEFAULT_BASE_ADDRESS, PC_INC, PC_OVERRUN, STACK_MEMORY_DEFAULT_BASE_ADDRESS, VIDEO_MEMORY_DEFAULT_BASE_ADDRESS, InstructionFormat, TextRenderTarget
 from RegisterFile import RegisterFile
 from Memory import Memory
 from Stack import Stack
@@ -46,6 +46,10 @@ class CPUSettings():
         # If we've already calcualted the size, then just return it
         if self.memory_size_in_bytes is not None:
             return self.memory_size_in_bytes
+        
+        r_valid = self.memory_layout_is_valid()
+        if r_valid.is_err:
+            return trace("invalid cpu memory layout", r_valid.unwrap_err())
 
         (instruction_memory_size, instruction_memory_base)  = self.instruction_memory_information
         (data_memory_size, data_memory_base)                = self.data_memory_information
@@ -69,12 +73,30 @@ class CPUSettings():
         """Checks if the current layout of memory has any overlapping regions. 
         Returns True if there is a layout issue and False if not.
         """
+
+        instruction_memory_base = self.instruction_memory_information[1]
+        data_memory_base = self.data_memory_information[1]
+        video_memory_base = self.video_memory_information[1]
+        stack_base = self.stack_information[1]
+
+        # If base is not set, then set to a default
+        if instruction_memory_base is None:
+            instruction_memory_base = INSTRUCTION_MEMORY_DEFAULT_BASE_ADDRESS
+
+        if data_memory_base is None:
+            data_memory_base = DATA_MEMORY_DEFAULT_BASE_ADDRESS
+
+        if video_memory_base is None:
+            video_memory_base = VIDEO_MEMORY_DEFAULT_BASE_ADDRESS
+
+        if stack_base is None:
+            stack_base = STACK_MEMORY_DEFAULT_BASE_ADDRESS
         
         # Get the base pointers and the size of each region to determine the ranges
-        range_instruction_memory = range(self.instruction_memory_information[0], self.instruction_memory_information[0] + self.instruction_memory_information[1])
-        range_data_memory = range(self.data_memory_base, self.data_memory_base + self.data_memory_size)
-        range_video_memory = range(self.video_memory_base, self.video_memory_base + self.video_memory_size)
-        range_stack = range(self.stack_base, self.stack_base + self.stack_size)
+        range_instruction_memory = range(self.instruction_memory_information[0], self.instruction_memory_information[0] + instruction_memory_base)
+        range_data_memory = range(self.data_memory_information[0], self.data_memory_information[0] + data_memory_base)
+        range_video_memory = range(self.video_memory_information[0], self.video_memory_information[0] + video_memory_base)
+        range_stack = range(self.stack_information[0], self.stack_information[0] + stack_base)
         
         # I understand that there are cleaner ways to do this,
         # but I wan't to have unique outputs for each case. (4 C 2 = 6)
@@ -106,11 +128,6 @@ class CPUSettings():
         # TODO: Add more checks as memory complexity grows
         
         return Ok(None)
-
-        r_valid = self.memory_layout_is_valid()
-        if r_valid.is_err:
-            panic(f"{debug()} invalid cpu memory layout\n{r_valid.unwrap_err()}")
-
 
 class CPU():
     """A CPU that supports the Aires Assembly Language."""
