@@ -23,15 +23,11 @@ if r_run.is_err:
 # Create the CPU
 cpu_settings = CPUSettings()
 cpu_settings.architecture = CPUArchitecture.Harvard
-cpu_settings.data_memory_information = (16, 0)
-cpu_settings.instruction_memory_information = (128, 0)
-cpu_settings.video_memory_information = (16, 0)
-cpu_settings.stack_information = (16, 0)
+cpu_settings.data_memory_information = (16, None)
+cpu_settings.instruction_memory_information = (128, None)
+cpu_settings.video_memory_information = (16, None)
+cpu_settings.stack_information = (16, None)
 r_memory_size_in_bytes = cpu_settings.calculate_memory_size()
-
-if r_memory_size_in_bytes.is_err:
-    panic(f"{debug()}: failed to calculate total memory size\n{r_memory_size_in_bytes.unwrap_err()}")
-cpu_settings.memory_size_in_bytes = r_memory_size_in_bytes.unwrap()
 
 cpu = CPU(cpu_settings)
 

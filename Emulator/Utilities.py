@@ -22,7 +22,7 @@ def debug(function_depth: int = 1) -> str:
 
 def trace(new_message: str, old_messages: str = None, depth: int = 2) -> Err:
     if old_messages is None:
-        return Err(f"{debug(depth)} {new_message}:")
+        return Err(f"{debug(depth)} {new_message}")
     else:
         return Err(f"{debug(depth)} {new_message}:\n{old_messages}")
 

@@ -65,6 +65,52 @@ class CPUSettings():
 
         return Ok(self.memory_size_in_bytes)
 
+    def memory_layout_is_valid(self) -> Result[None, str]:
+        """Checks if the current layout of memory has any overlapping regions. 
+        Returns True if there is a layout issue and False if not.
+        """
+        
+        # Get the base pointers and the size of each region to determine the ranges
+        range_instruction_memory = range(self.instruction_memory_information[0], self.instruction_memory_information[0] + self.instruction_memory_information[1])
+        range_data_memory = range(self.data_memory_base, self.data_memory_base + self.data_memory_size)
+        range_video_memory = range(self.video_memory_base, self.video_memory_base + self.video_memory_size)
+        range_stack = range(self.stack_base, self.stack_base + self.stack_size)
+        
+        # I understand that there are cleaner ways to do this,
+        # but I wan't to have unique outputs for each case. (4 C 2 = 6)
+        
+        # Check if instruction memory and data memory overlap
+        if range_instruction_memory.stop > range_data_memory.start:
+            return trace(f"instruction memory ({range_instruction_memory.start}, {range_instruction_memory.stop}) and data memory ({range_data_memory.start}, {range_data_memory.stop}) overlap")
+        
+        # Check if data memory and video memory overlap
+        if range_data_memory.stop > range_video_memory.start:
+            return trace(f"data memory ({range_data_memory.start}, {range_data_memory.stop}) and video memory ({range_video_memory.start}, {range_video_memory.stop}) overlap")
+        
+        # Check if video memory and the stack overlap
+        if range_data_memory.stop > range_stack.start:
+            return trace(f"video memory ({range_video_memory.start}, {range_video_memory.stop}) and stack memory ({range_stack.start}, {range_stack.stop}) overlap")
+        
+        # Check if instruction memory and the stack overlap
+        if range_instruction_memory.stop > range_stack.start:
+            return trace(f"instruction memory ({range_instruction_memory.start}, {range_instruction_memory.stop}) and stack memory ({range_stack.start}, {range_stack.stop}) overlap")
+        
+        # Check if instruction memory and video memory overlap
+        if range_instruction_memory.stop > range_video_memory.start:
+            return trace(f"instruction memory ({range_instruction_memory.start}, {range_instruction_memory.stop}) and video memory ({range_video_memory.start}, {range_video_memory.stop}) overlap")
+        
+        # Check if data memory and stack memory overlap
+        if range_data_memory.stop > range_stack.start:
+            return trace(f"data memory ({range_data_memory.start}, {range_data_memory.stop}) and stack memory ({range_stack.start}, {range_stack.stop}) overlap")
+        
+        # TODO: Add more checks as memory complexity grows
+        
+        return Ok(None)
+
+        r_valid = self.memory_layout_is_valid()
+        if r_valid.is_err:
+            panic(f"{debug()} invalid cpu memory layout\n{r_valid.unwrap_err()}")
+
 
 class CPU():
     """A CPU that supports the Aires Assembly Language."""
@@ -79,30 +125,35 @@ class CPU():
         self.register_file = RegisterFile()
         self.halted: bool = False
 
-        (instruction_memory_size, instruction_memory_base)  = self.settings.instruction_memory_information
-        (data_memory_size, data_memory_base)                = self.settings.data_memory_information
-        (video_memory_size, video_memory_base)              = self.settings.video_memory_information
-        (stack_size, stack_base)                            = self.settings.stack_information
-        memory_size_in_bytes = self.settings.calculate_memory_size()
+        (self.instruction_memory_size, self.instruction_memory_base)  = self.settings.instruction_memory_information
+        (self.data_memory_size, self.data_memory_base)                = self.settings.data_memory_information
+        (self.video_memory_size, self.video_memory_base)              = self.settings.video_memory_information
+        (self.stack_size, self.stack_base)                            = self.settings.stack_information
+        
+        r_memory_size_in_bytes = self.settings.calculate_memory_size()
+        if r_memory_size_in_bytes.is_err:
+            panic(f"{debug()} failed to calculate total memory size\n{r_memory_size_in_bytes.unwrap_err()}")
+            
+        self.memory_size_in_bytes = r_memory_size_in_bytes.unwrap()
 
-        if instruction_memory_size == 0: warning("instruction memory size set to zero")
-        if data_memory_size == 0: warning("data memory size set to zero")
-        if video_memory_size == 0: warning("video memory size set to zero")
-        if stack_size == 0: warning("stack size set to zero")
+        if self.instruction_memory_size == 0: warning("instruction memory size set to zero")
+        if self.data_memory_size == 0: warning("data memory size set to zero")
+        if self.video_memory_size == 0: warning("video memory size set to zero")
+        if self.stack_size == 0: warning("stack size set to zero")
 
         match self.settings.architecture:
             case CPUArchitecture.Harvard:
 
                 # Create seperate memory banks for each type of memory
-                self.instruction_memory = Memory(instruction_memory_size)
-                self.data_memory = Memory(data_memory_size)
-                self.video_memory = Memory(video_memory_size)
-                self.stack = Stack(stack_size)
+                self.instruction_memory = Memory(self.instruction_memory_size)
+                self.data_memory = Memory(self.data_memory_size)
+                self.video_memory = Memory(self.video_memory_size)
+                self.stack = Stack(self.stack_size)
 
             case CPUArchitecture.VonNeumann:
 
                 # Create one memory bank
-                self.memory = Memory(memory_size_in_bytes)
+                self.memory = Memory(self.memory_size_in_bytes)
 
             case _:
                 panic(f"unknown architecture '{self.settings.architecture}'")
@@ -156,7 +207,7 @@ class CPU():
         builder += self.video_memory.to_string(render_target)
         
         return builder
-
+    
     def load_program(self, program: list[int] | str, program_name: str, base_address_in_bytes: int = 0) -> Result[bool, str]:
         """Loads a program into memory at the given address.
         Can accept a list of instructions or a string as a program.
@@ -179,12 +230,12 @@ class CPU():
 
             program = assembler.instructions
 
-        if base_address_in_bytes > self.instruction_memory.capacity_in_bytes:
-            return trace(f"failed to load program: base address '{base_address_in_bytes}' exceeds the instruction memory address space of {self.instruction_memory.capacity_in_bytes}!")
+        if base_address_in_bytes > self.instruction_memory.capacity:
+            return trace(f"failed to load program: base address '{base_address_in_bytes}' exceeds the instruction memory address space of {self.instruction_memory.capacity}!")
         
         program_length_in_bytes = len(program) * PC_INC
-        if program_length_in_bytes + base_address_in_bytes > self.instruction_memory.capacity_in_bytes:
-            return trace(f"failed to load program: program size ({program_length_in_bytes}) exceeds the instruction memory capacity ({self.instruction_memory.capacity_in_bytes})!")
+        if program_length_in_bytes + base_address_in_bytes > self.instruction_memory.capacity:
+            return trace(f"failed to load program: program size ({program_length_in_bytes}) exceeds the instruction memory capacity ({self.instruction_memory.capacity})!")
         
         if program_length_in_bytes == 0: warning("Loading null program")
         
