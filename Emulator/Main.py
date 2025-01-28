@@ -9,7 +9,6 @@ from Utilities import panic
 # Create assembler settings 
 assmbler_settings = (AssemblerSettings()
     .set_file_name("example")
-    .set_file_directory_search(True)
     .set_print_mode(PrintMode.Hex)
     .set_source(AssemblerSettingsSource.File)
 )

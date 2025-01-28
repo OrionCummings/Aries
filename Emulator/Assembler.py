@@ -14,23 +14,13 @@ class AssemblerSettingsSource(Enum):
 
 class AssemblerSettings:
     file_name               = None
-    file_directory          = None
-    file_directory_search   = None
     print_mode              = PrintMode.NoOutput
     source                  = AssemblerSettingsSource.NoSource
 
     def set_file_name(self, file_name: str) -> AssemblerSettings:
         self.file_name = file_name
         return self
-    
-    def set_file_directory(self, file_directory: str) -> AssemblerSettings:
-        self.file_directory = file_directory
-        return self
-
-    def set_file_directory_search(self, file_directory_search: str) -> AssemblerSettings:
-        self.file_directory_search = file_directory_search
-        return self
-
+ 
     def set_print_mode(self, print_mode: str) -> AssemblerSettings:
         self.print_mode = print_mode
         return self
@@ -47,9 +37,6 @@ class Assembler():
         
         # Assembler settings
         self.settings: AssemblerSettings = settings
-        
-        # Directory containing all test programs
-        self.program_directory = settings.file_directory
         
         # The name of the Aires assembly file (.aria) 
         self.file_name: str = settings.file_name
