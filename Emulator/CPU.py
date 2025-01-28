@@ -11,6 +11,9 @@ from PrettyPrinting import PrintMode, green_bold, info, warning
 from Utilities import panic, debug, trace
 from Constants import CONSTANT_REGISTER_MAP, DEFAULT_DATA_MEMORY_BASE_ADDRESS, DEFAULT_DATA_MEMORY_SIZE_IN_BYTES, DEFAULT_INSTRUCTION_MEMORY_BASE_ADDRESS, DEFAULT_INSTRUCTION_MEMORY_SIZE_IN_BYTES, DEFAULT_STACK_MEMORY_BASE_ADDRESS, DEFAULT_STACK_MEMORY_SIZE_IN_BYTES, DEFAULT_VIDEO_MEMORY_BASE_ADDRESS, DEFAULT_VIDEO_MEMORY_SIZE_IN_BYTES, FL_ZERO, PC_INC, EC_PC_OVERRUN, TextRenderTarget
 
+# TODO: Implement these as subclasses of CPU! Otherwise every function
+# will be an if statement that changes behavior between the two types:
+# it's stupid!
 class CPUArchitecture(Enum):
     """An enum for different types of CPU architectures."""
 
@@ -169,7 +172,7 @@ class CPU():
                 self.instruction_memory = Memory(self.settings.instruction_memory_size)
                 self.data_memory = Memory(self.settings.data_memory_size)
                 self.video_memory = Memory(self.settings.video_memory_size)
-                self.stack = Stack(self.settings.stack_memory_size)
+                self.stack_memory = Stack(self.settings.stack_memory_size)
 
                 # Set the highlight range to properly display for instruction memory
                 self.instruction_memory.set_highlight_range(range(0, 4))
@@ -224,11 +227,11 @@ class CPU():
 
         # Append the stack
         builder += "\n\nStack\n"
-        builder += str(self.video_memory)
+        builder += str(self.stack_memory)
         
         return builder
     
-    def load_program(self, program: list[int] | str, program_name: str, base_address_in_bytes: int = 0) -> Result[bool, str]:
+    def load_program(self, program: list[int] | str, program_name: str, instruction_base_address_in_bytes: int = 0) -> Result[bool, str]:
         """Loads a program into memory at the given address.
         Can accept a list of instructions or a string as a program.
         """
@@ -236,13 +239,13 @@ class CPU():
         # If the input is a string, then assemble that string and reassign `program`
         if isinstance(program, str):
 
-            settings = AssemblerSettings()
-            settings.file_directory = None
-            settings.file_name = program_name
-            settings.print_mode = PrintMode.NoOutput
-            settings.source = AssemblerSettingsSource.String
+            assmbler_settings = (AssemblerSettings()
+                .set_file_name(program_name)
+                .set_print_mode(PrintMode.NoOutput)
+                .set_source(AssemblerSettingsSource.String)
+            )
 
-            assembler = Assembler(settings)
+            assembler = Assembler(assmbler_settings)
 
             r_run = assembler.run(program)
             if r_run.is_err:
@@ -250,19 +253,37 @@ class CPU():
 
             program = assembler.instructions
         
-        if base_address_in_bytes > self.instruction_memory.capacity:
-            return trace(f"failed to load program: base address '{base_address_in_bytes}' exceeds the instruction memory address space of {self.instruction_memory.capacity}!")
-        
-        program_length_in_bytes = len(program) * PC_INC
-        if program_length_in_bytes + base_address_in_bytes > self.instruction_memory.capacity:
-            return trace(f"failed to load program: program size ({program_length_in_bytes}) exceeds the instruction memory capacity ({self.instruction_memory.capacity})!")
-        
-        if program_length_in_bytes == 0: warning("Loading null program")
-        
-        r_update = self.instruction_memory.load_instructions(program, base_address_in_bytes)
-        if r_update.is_err: return trace("failed to load instructions", r_update.unwrap_err())
+        if self.settings.architecture == CPUArchitecture.Harvard:
 
-        info(f"Loaded '{program_name}' starting at address {base_address_in_bytes} ({base_address_in_bytes:0X})")
+            # If the instruction base address is higher than the instruction memory capacity,
+            # then there is no way for this program to be loaded successfully; error
+            if instruction_base_address_in_bytes > self.instruction_memory.capacity:
+                return trace(f"program begins outside of memory address space")
+            
+            # If the length of the program overruns the instruction memory capacity,
+            # then there is no way for this program to be loaded successfully; error
+            program_length_in_bytes = len(program) * PC_INC
+            if program_length_in_bytes + instruction_base_address_in_bytes > self.instruction_memory.capacity:
+                return trace(f"program size ({program_length_in_bytes}) exceeds the instruction memory capacity ({self.instruction_memory.capacity})!")
+            
+            # If the program is empty, this is probably an issue
+            if program_length_in_bytes == 0: warning("loading null program")
+            
+            # Load the instructions into instruction memory starting at the instruction base address
+            r_update = self.instruction_memory.load_instructions(program, instruction_base_address_in_bytes)
+            if r_update.is_err: return trace("failed to load instructions", r_update.unwrap_err())
+
+        elif self.settings.architecture == CPUArchitecture.VonNeumann:
+            
+            r_load = self.memory.load_instructions(program, instruction_base_address_in_bytes, endianness='little')
+            if r_load.is_err:
+                return trace("failed to load instructions", r_load.unwrap_err())
+
+        else:
+            return trace(f"unknown architecture '{self.settings.architecture}'")
+
+        info(f"Loaded '{program_name}' starting at address {instruction_base_address_in_bytes} ({instruction_base_address_in_bytes:0X})")
+
         return Ok(True)
     
     def get_current_instruction(self):

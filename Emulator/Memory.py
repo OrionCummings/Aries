@@ -6,10 +6,6 @@ from Constants import PC_INC, TextRenderTarget
 from PrettyPrinting import bold, red_bold
 from Utilities import trace
 
-# The number of memory entries to show per line when printed
-TERMINAL_MEMORY_DISPLAY_LENGTH = 16
-WIDGET_MEMORY_DISPLAY_LENGTH = 16
-
 class Memory(ByteBank):
     """A byte-addressable block of memory.
     """
@@ -59,7 +55,7 @@ class Memory(ByteBank):
 
         return Ok(instruction)
 
-    def load_instruction(self, instruction: int, index_in_bytes: int, endianness: str = 'little') -> Result[bool, str]:
+    def load_instruction(self, instruction: int, index_in_bytes: int, endianness: str = 'little') -> Result[None, str]:
         """Loads the given instruction into the Memory instance in the specified endian order and beginning at the start
         index. All instructions are 32-bit, so this function will update `index` and the following three indices after `index`.
 
@@ -81,13 +77,13 @@ class Memory(ByteBank):
         r_set_bytes = self.set_bytes(range(index_in_bytes, index_in_bytes + PC_INC), instruction_as_bytes)
         if r_set_bytes.is_err: return trace("failed to set bytes", r_set_bytes.unwrap_err())
         
-        return Ok(True)
+        return Ok(None)
     
-    def load_instructions(self, instructions: list[int], index: int, endianness: str = 'little') -> Result[bool, str]:
+    def load_instructions(self, instructions: list[int], index: int, endianness: str = 'little') -> Result[None, str]:
         
         for (i, instruction) in enumerate(instructions):
             load_result = self.load_instruction(instruction, index + (i * 4), endianness)
             if load_result.is_err: return trace("failed to load instruction", load_result.unwrap_err())
         
-        return Ok(True)
+        return Ok(None)
 
