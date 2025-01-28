@@ -2,40 +2,44 @@ from functools import partial
 from pynput.keyboard import Key, Listener
 from CPU import CPU, CPUArchitecture, CPUSettings
 from Assembler import Assembler, AssemblerSettings, AssemblerSettingsSource, PrintMode
-from PrettyPrinting import error, info, red_bold
-from Utilities import debug, panic
+from Constants import EC_ASSEMBLER_FAILURE
+from PrettyPrinting import info, red_bold
+from Utilities import panic
 
 # Create assembler settings 
-assmbler_settings = AssemblerSettings()
-assmbler_settings.print_mode = PrintMode.Hex
-assmbler_settings.source = AssemblerSettingsSource.File
-assmbler_settings.file_name = "example.aria"
-assmbler_settings.file_directory = "Emulator/Programs"
-# assmbler_settings.file_directory = "Programs"
-# assmbler_settings.file_directory = "Programs/Instructions/"
+assmbler_settings = (AssemblerSettings()
+    .set_file_name("example")
+    .set_file_directory_search(True)
+    .set_print_mode(PrintMode.Hex)
+    .set_source(AssemblerSettingsSource.File)
+)
 
-# Create the assembler
+# Create and run the assembler
 assembler = Assembler(assmbler_settings)
 r_run = assembler.run()
 if r_run.is_err:
-    print(r_run.unwrap_err())
-    exit(2)
+    panic("failed to run assembler", r_run.unwrap_err(), error_code=EC_ASSEMBLER_FAILURE)
 
 # Create the CPU
-cpu_settings = CPUSettings()
-cpu_settings.architecture = CPUArchitecture.Harvard
-cpu_settings.data_memory_information = (16, None)
-cpu_settings.instruction_memory_information = (128, None)
-cpu_settings.video_memory_information = (16, None)
-cpu_settings.stack_information = (16, None)
-r_memory_size_in_bytes = cpu_settings.calculate_memory_size()
+r_cpu_settings = (CPUSettings()
+    .set_architecture(CPUArchitecture.Harvard)
+    .set_instruction_memory_size(64)
+    .set_data_memory_size(64)
+    .set_video_memory_size(0)
+    .set_stack_memory_size(64)
+    .pack()
+)
+
+if r_cpu_settings.is_err:
+    panic("invalid cpu settings", r_cpu_settings.unwrap_err())
+cpu_settings = r_cpu_settings.unwrap()
 
 cpu = CPU(cpu_settings)
 
 # Load the assembler's program into the CPU
 r_load = cpu.load_program(assembler.instructions, assembler.file_name, 0)
 if r_load.is_err:
-    panic(f"{debug()}: failed to load program\n{r_load.unwrap_err()}")
+    panic("failed to load program", r_load.unwrap_err())
 
 def press(key) -> bool:
     """Runs one clock cycle if the space bar is pressed.

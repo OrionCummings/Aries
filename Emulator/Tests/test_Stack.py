@@ -1,6 +1,5 @@
 import unittest
 from Stack import Stack
-from Constants import MAX_STACK_SIZE_IN_BYTES
 
 class StackTests(unittest.TestCase):
 

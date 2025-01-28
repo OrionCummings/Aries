@@ -20,16 +20,16 @@ def debug(function_depth: int = 1) -> str:
     function_name = str(stack[3])
     return str(yellow(file_name + ":" + line_number + ":" + function_name + "():"))
 
-def trace(new_message: str, old_messages: str = None, depth: int = 2) -> Err:
+def trace(new_message: str, old_messages: str = None, depth: int = 2) -> Result.Err:
     if old_messages is None:
         return Err(f"{debug(depth)} {new_message}")
     else:
         return Err(f"{debug(depth)} {new_message}\n{old_messages}")
 
-def panic(s: str, e: int = 0):
-    """A function to print an error message and exit."""
-    print_red(bold(s))
-    exit(e)
+def panic(new_message: str, old_messages: str = None, depth: int = 3, error_code: int = 0):
+    result: Result = trace(new_message, old_messages, depth)
+    print_red(bold(result.unwrap_err()))
+    exit(error_code)
 
 def get_opcode_from_id(id: int) -> Result[str, str]:
     for item in CONSTANT_OPCODE_MAP.items():
@@ -39,3 +39,8 @@ def get_opcode_from_id(id: int) -> Result[str, str]:
             return Ok(item_key)
 
     return trace(f"parsed opcode with unknown id '{id}'")
+
+def find_file(name, path):
+    for root, dirs, files in os.walk(path):
+        if name in files:
+            return os.path.join(root, name)

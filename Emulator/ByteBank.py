@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import SupportsIndex
 from option import Ok, Result
+from PrettyPrinting import bold, red
 from Utilities import trace
 
 class ByteBank():
@@ -9,6 +10,7 @@ class ByteBank():
         self.print_num_rows = print_num_rows
         self.capacity = capacity_in_bytes
         self.content = bytearray(capacity_in_bytes)
+        self.highlight_range = None
 
     def __eq__(self, other: ByteBank) -> bool:
         return \
@@ -22,11 +24,18 @@ class ByteBank():
 
             if index % self.print_num_rows == 0 and index != 0:
                 builder += '\n'
+            
+            if self.highlight_range is not None and index in self.highlight_range:
+                builder += red(bold("{:02X}".format(self.content[index])))
+            else:
+                builder += "{:02X}".format(self.content[index])
 
-            builder += "{:02X}".format(self.content[index])
             builder += " "
 
         return builder
+
+    def set_highlight_range(self, highlight_range: range):
+        self.highlight_range = highlight_range
 
     def get_byte(self, index: SupportsIndex) -> Result[bytearray, str]:
         if index not in range(0, self.capacity): return trace("index out of range")
@@ -81,9 +90,14 @@ class ByteBank():
     
 # if __name__ == '__main__':
 
+#     highlight_index = 4
+#     highlight_length = 7
+#     highlight_range = range(highlight_index, highlight_index + highlight_length)
+
 #     bank = ByteBank(64)
 
 #     bank.set_bytes(range(0, 17), 255)
+#     bank.set_highlight_range(highlight_range)
 
 #     print(bank)
 

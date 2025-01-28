@@ -1,17 +1,15 @@
-from dataclasses import dataclass
-from enum import Enum
+from __future__ import annotations
 import struct
-from typing import Optional
-from option import Err, Ok, Result
+from enum import Enum
+from option import Ok, Result
 from Assembler import Assembler, AssemblerSettings, AssemblerSettingsSource
 from Stack import Stack
-from Transformations import encode, decode, get_opcode
-from PrettyPrinting import PrintMode, bold, green_bold, info, print_green, print_yellow, red_bold, warning
-from Constants import CONSTANT_REGISTER_MAP, DATA_MEMORY_DEFAULT_BASE_ADDRESS, FL_ZERO, INSTRUCTION_MEMORY_DEFAULT_BASE_ADDRESS, PC_INC, PC_OVERRUN, STACK_MEMORY_DEFAULT_BASE_ADDRESS, VIDEO_MEMORY_DEFAULT_BASE_ADDRESS, InstructionFormat, TextRenderTarget
-from RegisterFile import RegisterFile
 from Memory import Memory
-from Stack import Stack
-from Utilities import get_opcode_from_id, panic, debug, trace
+from RegisterFile import RegisterFile
+from Transformations import decode
+from PrettyPrinting import PrintMode, green_bold, info, warning
+from Utilities import panic, debug, trace
+from Constants import CONSTANT_REGISTER_MAP, DEFAULT_DATA_MEMORY_BASE_ADDRESS, DEFAULT_DATA_MEMORY_SIZE_IN_BYTES, DEFAULT_INSTRUCTION_MEMORY_BASE_ADDRESS, DEFAULT_INSTRUCTION_MEMORY_SIZE_IN_BYTES, DEFAULT_STACK_MEMORY_BASE_ADDRESS, DEFAULT_STACK_MEMORY_SIZE_IN_BYTES, DEFAULT_VIDEO_MEMORY_BASE_ADDRESS, DEFAULT_VIDEO_MEMORY_SIZE_IN_BYTES, FL_ZERO, PC_INC, EC_PC_OVERRUN, TextRenderTarget
 
 class CPUArchitecture(Enum):
     """An enum for different types of CPU architectures."""
@@ -29,74 +27,96 @@ class CPUArchitecture(Enum):
     # but that is not an architecture decision.
     VonNeumann = 1
 
-@dataclass
 class CPUSettings():
-    architecture                    = CPUArchitecture.Harvard
 
-    #                                 (size, base)
-    instruction_memory_information  = (None, None)
-    data_memory_information         = (None, None)
-    video_memory_information        = (None, None)
-    stack_information               = (None, None)
+    def __init__(self):
+        self.architecture = None
+        self.memory_size = None
+        self.instruction_memory_base = None
+        self.instruction_memory_size = None
+        self.data_memory_base = None
+        self.data_memory_size = None
+        self.video_memory_base = None
+        self.video_memory_size = None
+        self.stack_memory_base = None
+        self.stack_memory_size = None
 
-    memory_size_in_bytes            = None
+    def set_architecture(self, architecture: CPUArchitecture) -> CPUSettings:
+        self.architecture = architecture
+        return self
 
-    def calculate_memory_size(self) -> Result[int, str] | int:
+    def set_instruction_memory_base(self, base_address: int) -> CPUSettings:
+        self.instruction_memory_base = base_address
+        return self
+
+    def set_instruction_memory_size(self, size: int) -> CPUSettings:
+        self.instruction_memory_size = size
+        return self
+
+    def set_data_memory_base(self, base_address: int) -> CPUSettings:
+        self.data_memory_base = base_address
+        return self
+
+    def set_data_memory_size(self, size: int) -> CPUSettings:
+        self.data_memory_size = size
+        return self
+
+    def set_video_memory_base(self, base_address: int) -> CPUSettings:
+        self.video_memory_base = base_address
+        return self
+    
+    def set_video_memory_size(self, size: int) -> CPUSettings:
+        self.video_memory_size = size
+        return self
+
+    def set_stack_memory_base(self, base_address: int) -> CPUSettings:
+        self.stack_memory_base = base_address
+        return self
+
+    def set_stack_memory_size(self, size: int) -> CPUSettings:
+        self.stack_memory_size = size
+        return self
+
+    def pack(self) -> Result[CPU, str]:
         
-        # If we've already calcualted the size, then just return it
-        if self.memory_size_in_bytes is not None:
-            return self.memory_size_in_bytes
-        
+        self.set_default_values()
+
         r_valid = self.memory_layout_is_valid()
         if r_valid.is_err:
-            return trace("invalid cpu memory layout", r_valid.unwrap_err())
+            return trace("memory layout is not valid", r_valid.unwrap_err())
 
-        (instruction_memory_size, instruction_memory_base)  = self.instruction_memory_information
-        (data_memory_size, data_memory_base)                = self.data_memory_information
-        (video_memory_size, video_memory_base)              = self.video_memory_information
-        (stack_size, stack_base)                            = self.stack_information
+        r_total_memory_size = self.calculate_total_memory_size()
+        if r_total_memory_size.is_err:
+            return trace("failed to calculate total memory size", r_total_memory_size.unwrap_err())
+        self.memory_size = r_total_memory_size.unwrap()
 
-        if instruction_memory_size is None: return trace("instruction memory size was never set")
-        if instruction_memory_base is None: return trace("instruction memory base was never set")
-        if data_memory_size is None: return trace("data memory size was never set")
-        if data_memory_base is None: return trace("data memory base was never set")
-        if video_memory_size is None: return trace("video memory size was never set")
-        if video_memory_base is None: return trace("video memory base was never set")
-        if stack_size is None: return trace("stack size was never set")
-        if stack_base is None: return trace("stack base was never set")
+        return Ok(self)
 
-        self.memory_size_in_bytes = sum([instruction_memory_size, data_memory_size, video_memory_size, stack_size])
+    def set_default_values(self):
 
-        return Ok(self.memory_size_in_bytes)
+        unset_set = [0, None]
+        if self.instruction_memory_base in unset_set: self.instruction_memory_base = DEFAULT_INSTRUCTION_MEMORY_BASE_ADDRESS
+        if self.instruction_memory_size in unset_set: self.instruction_memory_size = DEFAULT_INSTRUCTION_MEMORY_SIZE_IN_BYTES
+        if self.data_memory_base in unset_set: self.data_memory_base = DEFAULT_DATA_MEMORY_BASE_ADDRESS
+        if self.data_memory_size in unset_set: self.data_memory_size = DEFAULT_DATA_MEMORY_SIZE_IN_BYTES
+        if self.video_memory_base in unset_set: self.video_memory_base = DEFAULT_VIDEO_MEMORY_BASE_ADDRESS
+        if self.video_memory_size in unset_set: self.video_memory_size = DEFAULT_VIDEO_MEMORY_SIZE_IN_BYTES
+        if self.stack_memory_base in unset_set: self.stack_memory_base = DEFAULT_STACK_MEMORY_BASE_ADDRESS
+        if self.stack_memory_size in unset_set: self.stack_memory_size = DEFAULT_STACK_MEMORY_SIZE_IN_BYTES
+
+    def calculate_total_memory_size(self) -> Result[int, str] | int:
+        return Ok(sum([self.instruction_memory_size, self.data_memory_size, self.video_memory_size, self.stack_memory_size]))
 
     def memory_layout_is_valid(self) -> Result[None, str]:
         """Checks if the current layout of memory has any overlapping regions. 
         Returns True if there is a layout issue and False if not.
         """
-
-        instruction_memory_base = self.instruction_memory_information[1]
-        data_memory_base = self.data_memory_information[1]
-        video_memory_base = self.video_memory_information[1]
-        stack_base = self.stack_information[1]
-
-        # If base is not set, then set to a default
-        if instruction_memory_base is None:
-            instruction_memory_base = INSTRUCTION_MEMORY_DEFAULT_BASE_ADDRESS
-
-        if data_memory_base is None:
-            data_memory_base = DATA_MEMORY_DEFAULT_BASE_ADDRESS
-
-        if video_memory_base is None:
-            video_memory_base = VIDEO_MEMORY_DEFAULT_BASE_ADDRESS
-
-        if stack_base is None:
-            stack_base = STACK_MEMORY_DEFAULT_BASE_ADDRESS
         
         # Get the base pointers and the size of each region to determine the ranges
-        range_instruction_memory = range(self.instruction_memory_information[0], self.instruction_memory_information[0] + instruction_memory_base)
-        range_data_memory = range(self.data_memory_information[0], self.data_memory_information[0] + data_memory_base)
-        range_video_memory = range(self.video_memory_information[0], self.video_memory_information[0] + video_memory_base)
-        range_stack = range(self.stack_information[0], self.stack_information[0] + stack_base)
+        range_instruction_memory = range(self.instruction_memory_base, self.instruction_memory_base + self.instruction_memory_size)
+        range_data_memory = range(self.data_memory_base, self.data_memory_base + self.data_memory_size)
+        range_video_memory = range(self.video_memory_base, self.video_memory_base + self.video_memory_size)
+        range_stack = range(self.stack_memory_base, self.stack_memory_base + self.stack_memory_size)
         
         # I understand that there are cleaner ways to do this,
         # but I wan't to have unique outputs for each case. (4 C 2 = 6)
@@ -142,35 +162,22 @@ class CPU():
         self.register_file = RegisterFile()
         self.halted: bool = False
 
-        (self.instruction_memory_size, self.instruction_memory_base)  = self.settings.instruction_memory_information
-        (self.data_memory_size, self.data_memory_base)                = self.settings.data_memory_information
-        (self.video_memory_size, self.video_memory_base)              = self.settings.video_memory_information
-        (self.stack_size, self.stack_base)                            = self.settings.stack_information
-        
-        r_memory_size_in_bytes = self.settings.calculate_memory_size()
-        if r_memory_size_in_bytes.is_err:
-            panic(f"{debug()} failed to calculate total memory size\n{r_memory_size_in_bytes.unwrap_err()}")
-            
-        self.memory_size_in_bytes = r_memory_size_in_bytes.unwrap()
-
-        if self.instruction_memory_size == 0: warning("instruction memory size set to zero")
-        if self.data_memory_size == 0: warning("data memory size set to zero")
-        if self.video_memory_size == 0: warning("video memory size set to zero")
-        if self.stack_size == 0: warning("stack size set to zero")
-
         match self.settings.architecture:
             case CPUArchitecture.Harvard:
 
                 # Create seperate memory banks for each type of memory
-                self.instruction_memory = Memory(self.instruction_memory_size)
-                self.data_memory = Memory(self.data_memory_size)
-                self.video_memory = Memory(self.video_memory_size)
-                self.stack = Stack(self.stack_size)
+                self.instruction_memory = Memory(self.settings.instruction_memory_size)
+                self.data_memory = Memory(self.settings.data_memory_size)
+                self.video_memory = Memory(self.settings.video_memory_size)
+                self.stack = Stack(self.settings.stack_memory_size)
+
+                # Set the highlight range to properly display for instruction memory
+                self.instruction_memory.set_highlight_range(range(0, 4))
 
             case CPUArchitecture.VonNeumann:
 
                 # Create one memory bank
-                self.memory = Memory(self.memory_size_in_bytes)
+                self.memory = Memory(self.settings.memory_size)
 
             case _:
                 panic(f"unknown architecture '{self.settings.architecture}'")
@@ -194,9 +201,6 @@ class CPU():
 
     def __str__(self) -> str:
         
-        # Set the render target
-        render_target = TextRenderTarget.Widget
-
         # Get the program counter
         program_counter = self.register_file.get_pc()
         
@@ -204,24 +208,23 @@ class CPU():
         builder: str = "PC: " + str(program_counter) + "\n"
         
         # Append the register file
-        # builder += str(self.register_file)
-        builder += self.register_file.to_string(render_target)
+        builder += str(self.register_file)
 
         # Append the instruction memory
         builder += "Instruction Memory\n"
-        builder += self.instruction_memory.to_string(render_target, self.register_file.get_pc())
+        builder += str(self.instruction_memory)
 
         # Append the data memory
         builder += "\n\nData Memory\n"
-        builder += self.data_memory.to_string(render_target)
+        builder += str(self.data_memory)
 
         # Append the video memory
         builder += "\n\nVideo Memory\n"
-        builder += self.video_memory.to_string(render_target)
+        builder += str(self.video_memory)
 
         # Append the stack
         builder += "\n\nStack\n"
-        builder += self.video_memory.to_string(render_target)
+        builder += str(self.video_memory)
         
         return builder
     
@@ -246,7 +249,7 @@ class CPU():
                 return trace("failed to run assembler", r_run.unwrap_err())
 
             program = assembler.instructions
-
+        
         if base_address_in_bytes > self.instruction_memory.capacity:
             return trace(f"failed to load program: base address '{base_address_in_bytes}' exceeds the instruction memory address space of {self.instruction_memory.capacity}!")
         
@@ -315,11 +318,15 @@ class CPU():
         # Execute the current instruction
         execution_result = self.execute_current_instruction()
         if execution_result.is_err:
-            panic(f"{debug()}: failed to execute current instruction:\n{execution_result.unwrap_err()}")
+            panic("failed to execute current instruction", execution_result.unwrap_err())
         
         # TODO: Refactor/remove panic and use a result type!
         # Check if the current program counter is valid.
-        if self.register_file.get_pc() >= self.instruction_memory.capacity_in_bytes - 1: panic("Program counter overrun!", PC_OVERRUN)
+        pc = self.register_file.get_pc()
+        if pc >= self.instruction_memory.capacity - 1: panic("program counter overrun!", error_code=EC_PC_OVERRUN)
+
+        # Update the instruction memory range
+        self.instruction_memory.set_highlight_range(range(pc, pc + PC_INC))
 
         return not self.halted
 
@@ -617,11 +624,11 @@ if __name__ == '__main__':
     settings.instruction_memory = (16, 0)
     settings.video_memory = (16, 0)
     settings.stack = (16, 0)
-    r_memory_size_in_bytes = settings.calculate_memory_size()
+    r_memory_size = settings.calculate_memory_size()
 
-    if r_memory_size_in_bytes.is_err:
-        panic(f"{debug()}: failed to calculate total memory size:\n{r_memory_size_in_bytes.unwrap_err()}")
-    settings.memory_size_in_bytes
+    if r_memory_size.is_err:
+        panic(f"{debug()}: failed to calculate total memory size:\n{r_memory_size.unwrap_err()}")
+    settings.memory_size
 
     c = CPU(settings)
 

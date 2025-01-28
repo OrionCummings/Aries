@@ -34,7 +34,6 @@ class Memory(ByteBank):
 
         return \
             (self.capacity, self.content) == (other.capacity, other.content)
-
     
     def __str__(self) -> str:
         """Converts a Memory instance into a string representation. Ideal for printing.
@@ -78,9 +77,9 @@ class Memory(ByteBank):
         if endianness not in ['little', 'big']: return trace(f"Invalid endianness '{endianness}'!")
         if len(self.content) < index_in_bytes: return trace(f"Memory location '{index_in_bytes}' out of bounds!")
         
-        deconstructed_instruction = instruction.to_bytes(4, endianness)
-        set_bytes_result = self.set_bytes(deconstructed_instruction, list(range(index_in_bytes, index_in_bytes + PC_INC)))
-        if set_bytes_result.is_err: return trace("failed to set bytes", set_bytes_result.unwrap_err())
+        instruction_as_bytes = instruction.to_bytes(4, endianness)
+        r_set_bytes = self.set_bytes(range(index_in_bytes, index_in_bytes + PC_INC), instruction_as_bytes)
+        if r_set_bytes.is_err: return trace("failed to set bytes", r_set_bytes.unwrap_err())
         
         return Ok(True)
     

@@ -1,23 +1,43 @@
-from dataclasses import dataclass
+from __future__ import annotations
 from enum import Enum
 from typing import List, Optional
 from option import Err, Ok, Result
 from Constants import ASM_COMMENT_CHARACTER, ASM_TEST_PREFIX_CHARACTER, InstructionFormat
 from Transformations import decode, encode, get_instruction_mode, instruction_string
 from PrettyPrinting import PrintMode, error, info, print_red, print_green, print_blue, print_yellow, red_bold, success, warning
-from Utilities import debug, trace
+from Utilities import debug, find_file, trace
 
 class AssemblerSettingsSource(Enum):
     NoSource = 0,
     File = 1,
     String = 2,
 
-@dataclass
 class AssemblerSettings:
-    file_name       = None
-    file_directory  = None
-    print_mode      = PrintMode.NoOutput
-    source          = AssemblerSettingsSource.NoSource
+    file_name               = None
+    file_directory          = None
+    file_directory_search   = None
+    print_mode              = PrintMode.NoOutput
+    source                  = AssemblerSettingsSource.NoSource
+
+    def set_file_name(self, file_name: str) -> AssemblerSettings:
+        self.file_name = file_name
+        return self
+    
+    def set_file_directory(self, file_directory: str) -> AssemblerSettings:
+        self.file_directory = file_directory
+        return self
+
+    def set_file_directory_search(self, file_directory_search: str) -> AssemblerSettings:
+        self.file_directory_search = file_directory_search
+        return self
+
+    def set_print_mode(self, print_mode: str) -> AssemblerSettings:
+        self.print_mode = print_mode
+        return self
+    
+    def set_source(self, source: str) -> AssemblerSettings:
+        self.source = source
+        return self
 
 class Assembler():
     
@@ -95,7 +115,8 @@ class Assembler():
 
         info(f"Reading file '{self.file_name}'...")
 
-        full_file_name = self.program_directory + "/" + self.file_name
+        # Find the first file with the given name
+        full_file_name = find_file(self.file_name, ".")
 
         # TODO: Make this a function that is called in `read()` and `parse()`
         try:
