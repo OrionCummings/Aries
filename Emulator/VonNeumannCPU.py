@@ -1,24 +1,69 @@
 from __future__ import annotations
-from Constants import PC_INC
+from option import Ok, Result
+from Memory import Memory
+from RegisterFile import RegisterFile
+from Types import Program, Address, Instruction, RegisterValue
+from Constants import EC_PC_OVERRUN, PC_INC
 from Utilities import trace
-from Types import Program, Address
-from option import Result
-from Assembler import Assembler, AssemblerSettings, AssemblerSettingsSource
 from PrettyPrinting import PrintMode
-from Emulator import CPU
+from CPU import CPU, CPUSettings
+from Assembler import Assembler, AssemblerSettings, AssemblerSettingsSource
 
 class VonNeumannCPU(CPU):
 
-    def __init__(self):
-        pass
+    def __init__(self, settings: CPUSettings):
+        
+        super().__init__(settings)
 
-    def __eq__(self) -> bool:
-        pass
+        # Create a register file
+        self.register_file = RegisterFile()
+        self.register_file.set_reg("PC", self.settings.instruction_memory_base)
+
+        # Create a single memory bank
+        self.memory = Memory(self.settings.memory_size)
+
+        # Set the highlight range to properly display for memory
+        self.memory.set_highlight_range(range(self.settings.instruction_memory_base, self.settings.instruction_memory_base + 4))
+
+        # Set the stack pointer to the beginning of stack memory
+        self.stack_pointer = self.settings.stack_memory_base
+
+    def __eq__(self, other: VonNeumannCPU) -> bool:
+
+        if not isinstance(other, VonNeumannCPU):
+            return False
+        
+        register_file = self.register_file == other.register_file
+        memory        = self.memory == other.memory
+        
+        halt_equal    = self.halted == other.halted
+
+        return (register_file and memory and halt_equal)
 
     def __str__(self) -> str:
-        pass
 
-    def load_program(self, program: Program, program_name: str, instruction_base_address: Address = 0) -> Result[None, str]:
+        # Get the program counter
+        program_counter = self.register_file.get_pc()
+        
+        # Begin the string builder by including the program counter
+        builder: str = "PC: " + str(program_counter) + "\n"
+
+        # Append the register file if it exists
+        if self.register_file not in [None, 0]:
+            builder += "Register File\n"
+            builder += str(self.register_file)
+
+        # Append the instruction memory if it exists
+        if self.memory not in [None, 0] and self.memory.capacity != 0:
+            builder += "\nMemory\n"
+            builder += str(self.memory)
+
+        return builder
+
+    def update_stack_pointer(self, new_stack_pointer: RegisterValue) -> None:
+        self.stack_pointer = new_stack_pointer
+
+    def load_program(self, program: Program, program_name: str) -> Result[None, str]:
 
         # If the input is a string, then assemble that string and reassign `program`
         if isinstance(program, str):
@@ -37,12 +82,41 @@ class VonNeumannCPU(CPU):
 
             program = assembler.instructions
 
-        r_load = self.memory.load_instructions(program, instruction_base_address, endianness='little')
+        r_load = self.memory.load_instructions(program, self.settings.instruction_memory_base, endianness='little')
         if r_load.is_err:
             return trace("failed to load instructions", r_load.unwrap_err())
+        
+        return Ok(None)
 
+    def get_current_instruction(self) -> Result[Instruction, str]:
 
+        r_current_instruction = self.memory.get_instruction(self.register_file.get_pc())
+        if r_current_instruction.is_err:
+            return trace("failed to get instruction", r_current_instruction.unwrap_err())
 
+        return r_current_instruction
+
+    def clock(self) -> bool:
+        """Perform one clock cycle."""
+
+        # Execute the current instruction
+        execution_result = self.execute_current_instruction()
+        if execution_result.is_err:
+            trace("failed to execute current instruction", execution_result.unwrap_err())
+        
+        # TODO: Refactor/remove panic and use a result type!
+        # Check if the current program counter is valid.
+        pc = self.register_file.get_pc()
+        if pc >= self.memory.capacity - 1:
+            trace("program counter overrun!", error_code=EC_PC_OVERRUN)
+
+        sp = self.register_file.get_sp()
+        self.update_stack_pointer(sp)
+
+        # Update the instruction memory range
+        self.memory.set_highlight_range(range(pc, pc + PC_INC))
+
+        return not self.halted
 
 
 

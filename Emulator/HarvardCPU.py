@@ -31,10 +31,10 @@ class HarvardCPU(CPU):
         # Set the highlight range to properly display for instruction memory
         self.instruction_memory.set_highlight_range(range(0, 4))
 
-    def __eq__(self, other: CPU) -> bool:
+    def __eq__(self, other: HarvardCPU) -> bool:
 
-        if not isinstance(other, CPU):
-            return NotImplemented
+        if not isinstance(other, HarvardCPU):
+            return False
         
         register_file_equal        = self.register_file == other.register_file
         instruction_memory_equal   = self.instruction_memory == other.instruction_memory
@@ -80,7 +80,7 @@ class HarvardCPU(CPU):
         
         return builder
 
-    def load_program(self, program: Program, program_name: str, instruction_base_address: Address = 0) -> Result[None, str]:
+    def load_program(self, program: Program, program_name: str) -> Result[None, str]:
 
         # If the input is a string, then assemble that string and reassign `program`
         if isinstance(program, str):
@@ -101,23 +101,23 @@ class HarvardCPU(CPU):
 
         # If the instruction base address is higher than the instruction memory capacity,
         # then there is no way for this program to be loaded successfully; error
-        if instruction_base_address > self.instruction_memory.capacity:
+        if self.settings.instruction_memory_base > self.instruction_memory.capacity:
             return trace("program begins outside of memory address space")
         
         # If the length of the program overruns the instruction memory capacity,
         # then there is no way for this program to be loaded successfully; error
         program_length_in_bytes = len(program) * PC_INC
-        if program_length_in_bytes + instruction_base_address > self.instruction_memory.capacity:
+        if program_length_in_bytes + self.settings.instruction_memory_base > self.instruction_memory.capacity:
             return trace(f"program size ({program_length_in_bytes}) exceeds the instruction memory capacity ({self.instruction_memory.capacity})!")
         
         # If the program is empty, this is probably an issue
         if program_length_in_bytes == 0: warning("loading null program")
         
         # Load the instructions into instruction memory starting at the instruction base address
-        r_update = self.instruction_memory.load_instructions(program, instruction_base_address)
+        r_update = self.instruction_memory.load_instructions(program, self.settings.instruction_memory_base)
         if r_update.is_err: return trace("failed to load instructions", r_update.unwrap_err())
 
-        info(f"Loaded '{program_name}' starting at address {instruction_base_address} ({instruction_base_address:0X})")
+        info(f"Loaded '{program_name}' starting at address {self.settings.instruction_memory_base} ({self.settings.instruction_memory_base:0X})")
 
         return Ok(None)
 
@@ -128,6 +128,27 @@ class HarvardCPU(CPU):
             return trace("failed to get instruction", r_current_instruction.unwrap_err())
 
         return r_current_instruction
+
+    def clock(self) -> bool:
+        """Perform one clock cycle."""
+
+        # Execute the current instruction
+        execution_result = self.execute_current_instruction()
+        if execution_result.is_err:
+            panic("failed to execute current instruction", execution_result.unwrap_err())
+        
+        # TODO: Refactor/remove panic and use a result type!
+        # Check if the current program counter is valid.
+        pc = self.register_file.get_pc()
+        if pc >= self.instruction_memory.capacity - 1: panic("program counter overrun!", error_code=EC_PC_OVERRUN)
+
+        sp = self.register_file.get_sp()
+        self.stack_memory.update_stack_pointer(sp)
+
+        # Update the instruction memory range
+        self.instruction_memory.set_highlight_range(range(pc, pc + PC_INC))
+
+        return not self.halted
 
 
 

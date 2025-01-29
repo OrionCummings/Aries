@@ -2,6 +2,7 @@ from functools import partial
 from pynput.keyboard import Key, Listener
 from CPU import CPU, CPUArchitecture, CPUSettings
 from HarvardCPU import HarvardCPU
+from VonNeumannCPU import VonNeumannCPU
 from Assembler import Assembler, AssemblerSettings, AssemblerSettingsSource, PrintMode
 from Constants import EC_ASSEMBLER_FAILURE
 from PrettyPrinting import info, red_bold
@@ -31,10 +32,10 @@ r_cpu_settings = (CPUSettings()
 
 if r_cpu_settings.is_err: panic("invalid cpu settings", r_cpu_settings.unwrap_err())
 cpu_settings = r_cpu_settings.unwrap()
-cpu = HarvardCPU(cpu_settings)
+cpu = VonNeumannCPU(cpu_settings)
 
 # Load the assembler's program into the CPU
-r_load = cpu.load_program(assembler.instructions, assembler.file_name, 0)
+r_load = cpu.load_program(assembler.instructions, assembler.file_name)
 if r_load.is_err: panic("failed to load program", r_load.unwrap_err())
 
 def press(key) -> bool:

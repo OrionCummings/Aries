@@ -173,7 +173,7 @@ class CPU():
         
         return Err(abc_not_implemented())
     
-    def load_program(self, program: Program, program_name: str, instruction_base_address_in_bytes: int = 0) -> Result[bool, str]:
+    def load_program(self, program: Program, program_name: str) -> Result[bool, str]:
         """Loads a program into memory at the given address.
         Can accept a list of instructions or a string as a program.
         """
@@ -241,6 +241,7 @@ class CPU():
         if pc >= self.instruction_memory.capacity - 1: panic("program counter overrun!", error_code=EC_PC_OVERRUN)
 
         sp = self.register_file.get_sp()
+        self.stack_memory.update_stack_pointer(sp)
 
         # Update the instruction memory range
         self.instruction_memory.set_highlight_range(range(pc, pc + PC_INC))
