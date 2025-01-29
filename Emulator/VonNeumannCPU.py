@@ -19,8 +19,19 @@ class VonNeumannCPU(CPU):
         self.register_file = RegisterFile()
         self.register_file.set_reg("PC", self.settings.instruction_memory_base)
 
-        # Create a single memory bank
-        self.memory = Memory(self.settings.memory_size)
+        # Create memory boundaries
+        instruction_memory_boundary = range(settings.instruction_memory_base, settings.instruction_memory_base + settings.instruction_memory_size)
+        data_memory_boundary = range(settings.data_memory_base, settings.data_memory_base + settings.data_memory_size)
+        video_memory_boundary = range(settings.video_memory_base, settings.video_memory_base + settings.video_memory_size)
+        stack_memory_boundary = range(settings.stack_memory_base, settings.stack_memory_base + settings.stack_memory_size)
+
+        # Create a single memory bank with boundaries
+        self.memory = (Memory(self.settings.memory_size)
+            .set_instruction_memory_boundary(instruction_memory_boundary)
+            .set_data_memory_boundary(data_memory_boundary)
+            .set_video_memory_boundary(video_memory_boundary)
+            .set_stack_memory_boundary(stack_memory_boundary)
+        )
 
         # Set the highlight range to properly display for memory
         self.memory.set_highlight_range(range(self.settings.instruction_memory_base, self.settings.instruction_memory_base + 4))

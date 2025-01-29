@@ -3,8 +3,8 @@ from Types import Instruction
 from enum import Enum
 from option import Err, Ok, Result
 from ByteBank import ByteBank
-from Constants import PC_INC, TextRenderTarget
-from PrettyPrinting import bold, red_bold
+from Constants import HEX_FORMAT, PC_INC, TextRenderTarget
+from PrettyPrinting import blue, bold, green, orange, red, red_bold, yellow
 from Utilities import trace
 
 class Memory(ByteBank):
@@ -18,6 +18,12 @@ class Memory(ByteBank):
             capacity (int): The size of memory in bytes. Expected (but not required) to be a power of 2.
         """
         super().__init__(capacity_in_bytes)
+
+        # Initialize memory boundaries
+        self.instruction_memory_boundary = None
+        self.data_memory_boundary = None
+        self.video_memory_boundary = None
+        self.stack_memory_boundary = None
     
     def __eq__(self, other: Memory) -> bool:
         """Equality operator overload. Determines if two Memory instances are equivalent.
@@ -39,7 +45,52 @@ class Memory(ByteBank):
             str: A string representation of the Memory instance.
         """
 
-        return super().__str__()
+        # Create the string builder
+        builder = ""
+
+        # For every byte in memory, ...
+        for index in range(0, self.capacity):
+
+            if index % self.print_num_rows == 0:
+                builder += f"0x{index:08X} "
+
+            # Color each section in memory
+            if index in self.instruction_memory_boundary:
+
+                # If the current address in memory is in the highlight range, print it in bold
+                if self.highlight_range is not None and index in self.highlight_range:
+                    builder += red_bold(HEX_FORMAT.format(self.content[index]))
+                else:
+                    builder += red(HEX_FORMAT.format(self.content[index]))
+
+            elif index in self.data_memory_boundary:
+                builder += blue(HEX_FORMAT.format(self.content[index]))
+
+            elif index in self.video_memory_boundary:
+                builder += yellow(HEX_FORMAT.format(self.content[index]))
+
+            elif index in self.stack_memory_boundary:
+                builder += green(HEX_FORMAT.format(self.content[index]))
+
+            else:
+                builder += HEX_FORMAT.format(self.content[index])
+
+            # Add a space between bytes
+            builder += " "
+
+            # If the index is at the end of the line, ...
+            if index % self.print_num_rows == self.print_num_rows - 1:
+
+                # Add the bytes in this line as text
+                for line_index in range(index - self.print_num_rows, index):
+                    byt: bytes = self.content[line_index]
+                    string = chr(byt)
+                    builder += string
+
+                # Add a new line
+                builder += '\n'
+
+        return builder
        
     def get_instruction(self, index: int) -> Result[Instruction, str]:
         
@@ -87,4 +138,20 @@ class Memory(ByteBank):
             if load_result.is_err: return trace("failed to load instruction", load_result.unwrap_err())
         
         return Ok(None)
+
+    def set_instruction_memory_boundary(self, boundary: range) -> Memory:
+        self.instruction_memory_boundary = boundary
+        return self
+
+    def set_data_memory_boundary(self, boundary: range) -> Memory:
+        self.data_memory_boundary = boundary
+        return self
+
+    def set_video_memory_boundary(self, boundary: range) -> Memory:
+        self.video_memory_boundary = boundary
+        return self
+
+    def set_stack_memory_boundary(self, boundary: range) -> Memory:
+        self.stack_memory_boundary = boundary
+        return self
 

@@ -10,7 +10,7 @@ from Utilities import panic
 
 # Create assembler settings 
 assmbler_settings = (AssemblerSettings()
-    .set_file_name("example")
+    .set_file_name("load_string")
     .set_print_mode(PrintMode.Hex)
     .set_source(AssemblerSettingsSource.File)
 )
@@ -25,7 +25,7 @@ if r_run.is_err:
 r_cpu_settings = (CPUSettings()
     .set_instruction_memory_size(64)
     .set_data_memory_size(64)
-    .set_video_memory_size(0)
+    .set_video_memory_size(64)
     .set_stack_memory_size(64)
     .pack()
 )

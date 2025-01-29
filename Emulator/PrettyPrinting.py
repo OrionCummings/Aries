@@ -1,16 +1,28 @@
 from enum import Enum
 
 class TextFormatting():
-    PURPLE = '\033[95m'
-    CYAN = '\033[96m'
-    DARKCYAN = '\033[36m'
-    BLUE = '\033[94m'
-    GREEN = '\033[92m'
+    BLACK = '\033[30m'
+    RED = '\033[31m'
+    GREEN = '\033[32m'
+    ORANGE = '\033[92m'
+    BLUE = '\033[34m'
+    PURPLE = '\033[35m'
+    CYAN = '\033[36m'
+    LIGHTGREY = '\033[37m'
+    DARKGREY = '\033[90m'
+    LIGHTRED = '\033[91m'
+    LIGHTGREEN = '\033[92m'
     YELLOW = '\033[93m'
-    RED = '\033[91m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-    END = '\033[0m'
+    LIGHTBLUE = '\033[94m'
+    PINK = '\033[95m'
+    LIGHTCYAN = '\033[96m'
+    RESET = '\033[0m'
+    BOLD = '\033[01m'
+    DISABLE = '\033[02m'
+    UNDERLINE = '\033[04m'
+    REVERSE = '\033[07m'
+    STRIKETHROUGH = '\033[09m'
+    INVISIBLE = '\033[08m'
     
 def hex_literal(s: str) -> str:
     return "{:X}".format(s)
@@ -28,19 +40,22 @@ def blue_bold(s: str) -> str:
     return blue(bold(s))
 
 def bold(s: str) -> str:
-    return str(TextFormatting.BOLD) + str(s) + str(TextFormatting.END)
+    return str(TextFormatting.BOLD) + str(s) + str(TextFormatting.RESET)
 
 def red(s: str) -> str:
-    return str(TextFormatting.RED) + str(s) + str(TextFormatting.END)
+    return str(TextFormatting.RED) + str(s) + str(TextFormatting.RESET)
 
 def green(s: str) -> str:
-    return str(TextFormatting.GREEN) + str(s) + str(TextFormatting.END)
+    return str(TextFormatting.GREEN) + str(s) + str(TextFormatting.RESET)
 
 def blue(s: str) -> str:
-    return str(TextFormatting.BLUE) + str(s) + str(TextFormatting.END)
+    return str(TextFormatting.BLUE) + str(s) + str(TextFormatting.RESET)
 
 def yellow(s: str) -> str:
-    return str(TextFormatting.YELLOW) + str(s) + str(TextFormatting.END)
+    return str(TextFormatting.YELLOW) + str(s) + str(TextFormatting.RESET)
+
+def orange(s: str) -> str:
+    return str(TextFormatting.ORANGE) + str(s) + str(TextFormatting.RESET)
 
 def print_red(s: str) -> None:
     print(red(s))

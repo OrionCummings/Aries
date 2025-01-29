@@ -238,7 +238,8 @@ class CPU():
         # TODO: Refactor/remove panic and use a result type!
         # Check if the current program counter is valid.
         pc = self.register_file.get_pc()
-        if pc >= self.instruction_memory.capacity - 1: panic("program counter overrun!", error_code=EC_PC_OVERRUN)
+        if pc >= self.instruction_memory.capacity - 1:
+            panic("program counter overrun!", error_code=EC_PC_OVERRUN)
 
         sp = self.register_file.get_sp()
         self.stack_memory.update_stack_pointer(sp)
