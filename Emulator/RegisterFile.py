@@ -1,5 +1,6 @@
 from __future__ import annotations
 from enum import Enum
+from Types import RegisterValue
 from option import Err, Ok, Result
 from BitManipulation import get_bit, reset_bit, set_bit, toggle_bit
 from Constants import CONSTANT_REGISTER_MAP, BP_INC, FL_ZERO, PC_INC, SP_INC, TextRenderTarget
@@ -73,9 +74,12 @@ class RegisterFile():
             return Ok(self.registers[reg])
         return trace(f"No register with key '{reg}'")
     
-    def get_pc(self) -> int:
+    def get_pc(self) -> RegisterValue:
         return self.registers["PC"]
     
+    def get_sp(self) -> RegisterValue:
+        return self.registers["SP"]
+
     def increment_program_counter(self) -> None:
         self.registers['PC'] += PC_INC
     

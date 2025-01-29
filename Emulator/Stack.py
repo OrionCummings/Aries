@@ -2,13 +2,13 @@ from __future__ import annotations
 from option import Result, Ok
 from ByteBank import ByteBank
 from Utilities import trace
+from Types import RegisterValue
 
 class Stack(ByteBank):
 
     def __init__(self, capacity_in_bytes: int):
         super().__init__(capacity_in_bytes)
 
-        # TODO: Sync this with cpu stack pointer!!!!!!!!!!!!!!!!!!
         self.stack_pointer: int = 0
 
     def __eq__(self, other: Stack):
@@ -17,6 +17,9 @@ class Stack(ByteBank):
 
     def __str__(self) -> str:
         return super().__str__()
+
+    def update_stack_pointer(self, new_stack_pointer: RegisterValue) -> None:
+        self.stack_pointer = new_stack_pointer
 
     def is_empty(self) -> bool:
         return self.size() == 0
@@ -119,27 +122,3 @@ class Stack(ByteBank):
         value = int.from_bytes(little_endian_bytes, byteorder='little', signed=False)
 
         return Ok(value)
-
-# if __name__ == '__main__':
-
-#     #TODO: Fix push and pop! They don't play nicely with the byte conversion!
-
-#     stack = Stack(64)
-#     stack.push(4294967295)
-#     stack.push(4008636142)
-#     stack.push(3722304989)
-#     stack.push(3435973836)
-#     stack.push(3149642683)
-#     stack.push(2863311530)
-#     stack.push(2576980377)
-#     stack.push(2290649224)
-#     stack.push(2004318071)
-#     stack.push(1717986918)
-#     stack.push(1431655765)
-#     stack.push(1145324612)
-#     stack.push(858993459)
-#     stack.push(572662306)
-#     stack.push(286331153)
-#     stack.push(0)
-#     print(stack)
-
