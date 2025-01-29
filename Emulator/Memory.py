@@ -1,4 +1,5 @@
 from __future__ import annotations
+from Types import Instruction
 from enum import Enum
 from option import Err, Ok, Result
 from ByteBank import ByteBank
@@ -40,7 +41,7 @@ class Memory(ByteBank):
 
         return super().__str__()
        
-    def get_instruction(self, index: int) -> Result[int, str]:
+    def get_instruction(self, index: int) -> Result[Instruction, str]:
         
         if index not in range(0, self.capacity): return trace(f"index '{index}' out of range")
         if index % 4 != 0: return trace(f"index '{index}' is not aligned with four byte boundary")
@@ -51,7 +52,7 @@ class Memory(ByteBank):
         if r_get_bytes.is_err:
             return trace("failed to get bytes", r_get_bytes.unwrap_err())
         
-        instruction = int.from_bytes(r_get_bytes.unwrap(), byteorder='little')
+        instruction: Instruction = int.from_bytes(r_get_bytes.unwrap(), byteorder='little')
 
         return Ok(instruction)
 

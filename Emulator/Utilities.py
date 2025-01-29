@@ -13,18 +13,21 @@ def get_current_line() -> str:
 def get_current_function_name() -> str:
     return str(inspect.stack()[1][3])
 
-def debug(function_depth: int = 1) -> str:
+def abc_not_implemented() -> str:
+    return debug(2, "not implemented for abstract base classes")
+
+def debug(function_depth: int = 1, message: str = "") -> str:
     stack = inspect.stack()[function_depth]
     file_name = os.path.split(stack[1])[1]
     line_number = str(stack[2])
     function_name = str(stack[3])
-    return str(yellow(file_name + ":" + line_number + ":" + function_name + "():"))
+    return str(yellow(file_name + ":" + line_number + ":" + function_name + f"(): {message}"))
 
 def trace(new_message: str, old_messages: str = None, depth: int = 2) -> Result.Err:
     if old_messages is None:
-        return Err(f"{debug(depth)} {new_message}")
+        return Err(f"{debug(depth)}{new_message}")
     else:
-        return Err(f"{debug(depth)} {new_message}\n{old_messages}")
+        return Err(f"{debug(depth)}{new_message}\n{old_messages}")
 
 def panic(new_message: str, old_messages: str = None, depth: int = 3, error_code: int = 0):
     result: Result = trace(new_message, old_messages, depth)

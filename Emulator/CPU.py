@@ -1,14 +1,15 @@
 from __future__ import annotations
 import struct
 from enum import Enum
-from option import Ok, Result
+from option import Err, Ok, Result
+from Types import Program
 from Assembler import Assembler, AssemblerSettings, AssemblerSettingsSource
 from Stack import Stack
 from Memory import Memory
 from RegisterFile import RegisterFile
 from Transformations import decode
 from PrettyPrinting import PrintMode, green_bold, info, warning
-from Utilities import panic, debug, trace
+from Utilities import abc_not_implemented, panic, debug, trace
 from Constants import CONSTANT_REGISTER_MAP, DEFAULT_DATA_MEMORY_BASE_ADDRESS, DEFAULT_DATA_MEMORY_SIZE_IN_BYTES, DEFAULT_INSTRUCTION_MEMORY_BASE_ADDRESS, DEFAULT_INSTRUCTION_MEMORY_SIZE_IN_BYTES, DEFAULT_STACK_MEMORY_BASE_ADDRESS, DEFAULT_STACK_MEMORY_SIZE_IN_BYTES, DEFAULT_VIDEO_MEMORY_BASE_ADDRESS, DEFAULT_VIDEO_MEMORY_SIZE_IN_BYTES, FL_ZERO, PC_INC, EC_PC_OVERRUN, TextRenderTarget
 
 # TODO: Implement these as subclasses of CPU! Otherwise every function
@@ -158,35 +159,11 @@ class CPU():
     def __init__(self, settings: CPUSettings) -> None:
         """Initializes a CPU instance with a the given settings."""
         
-        # Save the cpu settings for later use
+        # Save the cpu settings
         self.settings = settings
 
-        # Both Harvard and von Neumann CPUs will have registers* and be able to halt*
-        self.register_file = RegisterFile()
+        # All CPUs have a notion of a halted state
         self.halted: bool = False
-
-        match self.settings.architecture:
-            case CPUArchitecture.Harvard:
-
-                # Create seperate memory banks for each type of memory
-                self.instruction_memory = Memory(self.settings.instruction_memory_size)
-                self.data_memory = Memory(self.settings.data_memory_size)
-                self.video_memory = Memory(self.settings.video_memory_size)
-                self.stack_memory = Stack(self.settings.stack_memory_size)
-
-                # Set the highlight range to properly display for instruction memory
-                self.instruction_memory.set_highlight_range(range(0, 4))
-
-            case CPUArchitecture.VonNeumann:
-
-                # Create one memory bank
-                self.memory = Memory(self.settings.memory_size)
-
-            case _:
-                panic(f"unknown architecture '{self.settings.architecture}'")
-
-        # Auxilary metadata
-        # TODO: Add some stuff
 
     def __eq__(self, other):
         
@@ -204,104 +181,31 @@ class CPU():
 
     def __str__(self) -> str:
         
-        # Get the program counter
-        program_counter = self.register_file.get_pc()
-        
-        # Begin the string builder by including the program counter
-        builder: str = "PC: " + str(program_counter) + "\n"
-        
-        # Append the register file
-        builder += str(self.register_file)
-
-        # Append the instruction memory
-        builder += "Instruction Memory\n"
-        builder += str(self.instruction_memory)
-
-        # Append the data memory
-        builder += "\n\nData Memory\n"
-        builder += str(self.data_memory)
-
-        # Append the video memory
-        builder += "\n\nVideo Memory\n"
-        builder += str(self.video_memory)
-
-        # Append the stack
-        builder += "\n\nStack\n"
-        builder += str(self.stack_memory)
-        
-        return builder
+        return Err(abc_not_implemented())
     
-    def load_program(self, program: list[int] | str, program_name: str, instruction_base_address_in_bytes: int = 0) -> Result[bool, str]:
+    def load_program(self, program: Program, program_name: str, instruction_base_address_in_bytes: int = 0) -> Result[bool, str]:
         """Loads a program into memory at the given address.
         Can accept a list of instructions or a string as a program.
         """
-        
-        # If the input is a string, then assemble that string and reassign `program`
-        if isinstance(program, str):
 
-            assmbler_settings = (AssemblerSettings()
-                .set_file_name(program_name)
-                .set_print_mode(PrintMode.NoOutput)
-                .set_source(AssemblerSettingsSource.String)
-            )
-
-            assembler = Assembler(assmbler_settings)
-
-            r_run = assembler.run(program)
-            if r_run.is_err:
-                return trace("failed to run assembler", r_run.unwrap_err())
-
-            program = assembler.instructions
-        
-        if self.settings.architecture == CPUArchitecture.Harvard:
-
-            # If the instruction base address is higher than the instruction memory capacity,
-            # then there is no way for this program to be loaded successfully; error
-            if instruction_base_address_in_bytes > self.instruction_memory.capacity:
-                return trace(f"program begins outside of memory address space")
-            
-            # If the length of the program overruns the instruction memory capacity,
-            # then there is no way for this program to be loaded successfully; error
-            program_length_in_bytes = len(program) * PC_INC
-            if program_length_in_bytes + instruction_base_address_in_bytes > self.instruction_memory.capacity:
-                return trace(f"program size ({program_length_in_bytes}) exceeds the instruction memory capacity ({self.instruction_memory.capacity})!")
-            
-            # If the program is empty, this is probably an issue
-            if program_length_in_bytes == 0: warning("loading null program")
-            
-            # Load the instructions into instruction memory starting at the instruction base address
-            r_update = self.instruction_memory.load_instructions(program, instruction_base_address_in_bytes)
-            if r_update.is_err: return trace("failed to load instructions", r_update.unwrap_err())
-
-        elif self.settings.architecture == CPUArchitecture.VonNeumann:
-            
-            r_load = self.memory.load_instructions(program, instruction_base_address_in_bytes, endianness='little')
-            if r_load.is_err:
-                return trace("failed to load instructions", r_load.unwrap_err())
-
-        else:
-            return trace(f"unknown architecture '{self.settings.architecture}'")
-
-        info(f"Loaded '{program_name}' starting at address {instruction_base_address_in_bytes} ({instruction_base_address_in_bytes:0X})")
-
-        return Ok(True)
+        return Err(abc_not_implemented())
     
     def get_current_instruction(self):
         """Returns the current instruction."""
 
-        r_current_instruction = self.instruction_memory.get_instruction(self.register_file.get_pc())
-        if r_current_instruction.is_err:
-            return trace("failed to get instruction", r_current_instruction.unwrap_err())
-
-        return r_current_instruction.unwrap()
+        return Err(abc_not_implemented())
     
-    def execute_current_instruction(self) -> Result[bool, str]:
+    def execute_current_instruction(self) -> Result[None, str]:
         """Executes the current instruction. On success, returns True. On failure, returns an
         error message string.
         """
         
         # Get the current instruction and line
-        current_instruction = self.get_current_instruction()
+        r_current_instruction = self.get_current_instruction()
+        if r_current_instruction.is_err:
+            return trace("failed to get current instruction", r_current_instruction.unwrap_err())
+
+        current_instruction = r_current_instruction.unwrap()
 
         # TODO: Add this!
         current_line = -1
@@ -331,7 +235,7 @@ class CPU():
         
         print(green_bold(f"Executed '{decoded_instruction}'"))
 
-        return Ok(True)
+        return Ok(None)
         
     def clock(self) -> bool:
         """Perform one clock cycle."""

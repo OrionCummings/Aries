@@ -1,6 +1,7 @@
 from functools import partial
 from pynput.keyboard import Key, Listener
 from CPU import CPU, CPUArchitecture, CPUSettings
+from HarvardCPU import HarvardCPU
 from Assembler import Assembler, AssemblerSettings, AssemblerSettingsSource, PrintMode
 from Constants import EC_ASSEMBLER_FAILURE
 from PrettyPrinting import info, red_bold
@@ -21,7 +22,6 @@ if r_run.is_err:
 
 # Create the CPU
 r_cpu_settings = (CPUSettings()
-    .set_architecture(CPUArchitecture.VonNeumann)
     .set_instruction_memory_size(64)
     .set_data_memory_size(64)
     .set_video_memory_size(0)
@@ -29,16 +29,13 @@ r_cpu_settings = (CPUSettings()
     .pack()
 )
 
-if r_cpu_settings.is_err:
-    panic("invalid cpu settings", r_cpu_settings.unwrap_err())
+if r_cpu_settings.is_err: panic("invalid cpu settings", r_cpu_settings.unwrap_err())
 cpu_settings = r_cpu_settings.unwrap()
-
-cpu = CPU(cpu_settings)
+cpu = HarvardCPU(cpu_settings)
 
 # Load the assembler's program into the CPU
 r_load = cpu.load_program(assembler.instructions, assembler.file_name, 0)
-if r_load.is_err:
-    panic("failed to load program", r_load.unwrap_err())
+if r_load.is_err: panic("failed to load program", r_load.unwrap_err())
 
 def press(key) -> bool:
     """Runs one clock cycle if the space bar is pressed.
