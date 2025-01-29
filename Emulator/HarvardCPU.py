@@ -31,8 +31,19 @@ class HarvardCPU(CPU):
         # Set the highlight range to properly display for instruction memory
         self.instruction_memory.set_highlight_range(range(0, 4))
 
-    def __eq__(self) -> bool:
-        pass
+    def __eq__(self, other: CPU) -> bool:
+
+        if not isinstance(other, CPU):
+            return NotImplemented
+        
+        register_file_equal        = self.register_file == other.register_file
+        instruction_memory_equal   = self.instruction_memory == other.instruction_memory
+        data_memory_equal          = self.data_memory == other.data_memory
+        stack                      = self.stack_memory == other.stack_memory
+        
+        halt_equal                 = self.halted == other.halted
+        
+        return (register_file_equal and instruction_memory_equal and data_memory_equal and stack and halt_equal)
 
     def __str__(self) -> str:
 
@@ -43,23 +54,29 @@ class HarvardCPU(CPU):
         builder: str = "PC: " + str(program_counter) + "\n"
 
         # Append the register file
-        builder += str(self.register_file)
+        if self.register_file not in [None, 0]:
+            builder += "Register File\n"
+            builder += str(self.register_file)
 
         # Append the instruction memory
-        builder += "Instruction Memory\n"
-        builder += str(self.instruction_memory)
+        if self.instruction_memory not in [None, 0]:
+            builder += "\nInstruction Memory\n"
+            builder += str(self.instruction_memory)
 
         # Append the data memory
-        builder += "\n\nData Memory\n"
-        builder += str(self.data_memory)
+        if self.data_memory not in [None, 0]:
+            builder += "\n\nData Memory\n"
+            builder += str(self.data_memory)
 
         # Append the video memory
-        builder += "\n\nVideo Memory\n"
-        builder += str(self.video_memory)
+        if self.video_memory not in [None, 0]:
+            builder += "\n\nVideo Memory\n"
+            builder += str(self.video_memory)
 
         # Append the stack
-        builder += "\n\nStack\n"
-        builder += str(self.stack_memory)
+        if self.stack_memory not in [None, 0]:
+            builder += "\n\nStack\n"
+            builder += str(self.stack_memory)
         
         return builder
 

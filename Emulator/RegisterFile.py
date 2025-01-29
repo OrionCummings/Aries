@@ -34,7 +34,7 @@ class RegisterFile():
                 builder += "\n"
             else:
                 builder += " "
-        builder += (" " * 143) + "HTIOSPCZ\n"
+        builder += (" " * 143) + "HTIOSPCZ"
 
         return builder
     

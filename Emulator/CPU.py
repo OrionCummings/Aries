@@ -167,17 +167,7 @@ class CPU():
 
     def __eq__(self, other):
         
-        if not isinstance(other, CPU):
-            return NotImplemented
-        
-        register_file_equal        = self.register_file == other.register_file
-        instruction_memory_equal   = self.instruction_memory == other.instruction_memory
-        data_memory_equal          = self.data_memory == other.data_memory
-        stack                      = self.stack == other.stack
-        
-        halt_equal                 = self.halted == other.halted
-        
-        return (register_file_equal and instruction_memory_equal and data_memory_equal and stack and halt_equal)
+        return Err(abc_not_implemented())
 
     def __str__(self) -> str:
         

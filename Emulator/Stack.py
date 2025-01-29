@@ -12,7 +12,7 @@ class Stack(ByteBank):
         self.stack_pointer: int = 0
 
     def __eq__(self, other: Stack):
-        return \
+        return isinstance(other, Stack) and \
             (type(self), self.capacity, self.stack_pointer, self.content) == (type(other), other.capacity, other.stack_pointer, other.content)
 
     def __str__(self) -> str:

@@ -29,7 +29,7 @@ class Memory(ByteBank):
             bool: Returns boolean True if both Memory instances are equivalent.
         """
 
-        return \
+        return isinstance(other, Memory) and \
             (self.capacity, self.content) == (other.capacity, other.content)
     
     def __str__(self) -> str:
