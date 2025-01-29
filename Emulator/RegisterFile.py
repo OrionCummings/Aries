@@ -28,10 +28,13 @@ class RegisterFile():
         """Returns a string representation of a RegisterFile."""
 
         builder = ""
-        for (name, value) in self.registers.items():
+        for (index, (name, value)) in enumerate(self.registers.items()):
             builder += ("{:2} = {:032b}".format(name, value))
-            builder += "\n"
-        builder += "                             HTIOSPCZ\n"
+            if index % 4 == 3:
+                builder += "\n"
+            else:
+                builder += " "
+        builder += (" " * 143) + "HTIOSPCZ\n"
 
         return builder
     
