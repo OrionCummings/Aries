@@ -53,28 +53,28 @@ class HarvardCPU(CPU):
         # Begin the string builder by including the program counter
         builder: str = "PC: " + str(program_counter) + "\n"
 
-        # Append the register file
+        # Append the register file if it exists
         if self.register_file not in [None, 0]:
             builder += "Register File\n"
             builder += str(self.register_file)
 
-        # Append the instruction memory
-        if self.instruction_memory not in [None, 0]:
+        # Append the instruction memory if it exists
+        if self.instruction_memory not in [None, 0] and self.instruction_memory.capacity != 0:
             builder += "\nInstruction Memory\n"
             builder += str(self.instruction_memory)
 
-        # Append the data memory
-        if self.data_memory not in [None, 0]:
+        # Append the data memory if it exists
+        if self.data_memory not in [None, 0] and self.data_memory.capacity != 0:
             builder += "\n\nData Memory\n"
             builder += str(self.data_memory)
 
-        # Append the video memory
-        if self.video_memory not in [None, 0]:
+        # Append the video memory if it exists
+        if self.video_memory not in [None, 0] and self.video_memory.capacity != 0:
             builder += "\n\nVideo Memory\n"
             builder += str(self.video_memory)
 
-        # Append the stack
-        if self.stack_memory not in [None, 0]:
+        # Append the stack if it exists
+        if self.stack_memory not in [None, 0] and self.stack_memory.capacity != 0:
             builder += "\n\nStack\n"
             builder += str(self.stack_memory)
         
