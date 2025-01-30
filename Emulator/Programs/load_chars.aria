@@ -1,0 +1,18 @@
+
+; Load 255 into A
+ldi 255 A
+
+; Main loop
+loop:
+
+; Load a character into memory
+str B B
+
+; Increment B by 1
+addi 1 B
+
+; If B is not equal to A, then continue
+cmp A B
+bne loop
+
+hlt

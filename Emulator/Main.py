@@ -10,7 +10,7 @@ from Utilities import panic
 
 # Create assembler settings 
 assmbler_settings = (AssemblerSettings()
-    .set_file_name("load_string")
+    .set_file_name("load_chars")
     .set_print_mode(PrintMode.Hex)
     .set_source(AssemblerSettingsSource.File)
 )

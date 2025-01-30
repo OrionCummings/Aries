@@ -83,8 +83,11 @@ class Memory(ByteBank):
 
                 # Add the bytes in this line as text
                 for line_index in range(index - self.print_num_rows, index):
-                    byt: bytes = self.content[line_index]
-                    string = chr(byt)
+                    byt: int = self.content[line_index]
+                    if byt == 0:
+                        string = '0'
+                    else:
+                        string = chr(byt)
                     builder += string
 
                 # Add a new line
