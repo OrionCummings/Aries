@@ -1,7 +1,7 @@
 from functools import partial
 from option import Err, Ok, Result
 from pynput.keyboard import Key, Listener
-from CPU import CPU, CPUArchitecture, CPUSettings
+from CPU import CPU, CPUArchitecture, CPUSettings, MemoryLayout
 from HarvardCPU import HarvardCPU
 from VonNeumannCPU import VonNeumannCPU
 from Assembler import Assembler, AssemblerSettings, AssemblerSettingsSource, PrintMode
@@ -11,7 +11,7 @@ from Utilities import panic, trace
 
 # Create assembler settings 
 assmbler_settings = (AssemblerSettings()
-    .set_file_name("st")
+    .set_file_name("load_chars")
     .set_print_mode(PrintMode.Hex)
     .set_source(AssemblerSettingsSource.File)
 )
@@ -24,14 +24,20 @@ if r_run.is_err:
 
 # Create the CPU
 r_cpu_settings = (CPUSettings()
-    .set_instruction_memory_size(64)
-    .set_data_memory_size(64)
+    .set_memory_layout(MemoryLayout.Sequential)
+    .set_instruction_memory_base(0)
+    .set_instruction_memory_size(32)
+    .set_data_memory_base(32)
+    .set_data_memory_size(256)
+    .set_video_memory_base(288)
     .set_video_memory_size(64)
+    .set_stack_memory_base(352)
     .set_stack_memory_size(64)
-    .pack()
+    .validate()
 )
 
-if r_cpu_settings.is_err: panic("invalid cpu settings", r_cpu_settings.unwrap_err())
+if r_cpu_settings.is_err: 
+    panic("invalid cpu settings", r_cpu_settings.unwrap_err())
 cpu_settings = r_cpu_settings.unwrap()
 # cpu = VonNeumannCPU(cpu_settings)
 cpu = HarvardCPU(cpu_settings)
@@ -45,7 +51,7 @@ def once(key) -> Result[bool, str]:
     if key == Key.space:
         
         # Clear the screen
-        print("\033c", end="")
+        # print("\033c", end="")
         
         # Run one clock cycle of the CPU
         r_clock = cpu.clock()

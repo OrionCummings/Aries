@@ -2,7 +2,7 @@ import inspect
 import os
 from option import Result, Ok, Err
 from Constants import CONSTANT_OPCODE_MAP
-from PrettyPrinting import bold, print_red, yellow
+from PrettyPrinting import bold, print_red, red, yellow
 
 def get_current_filename() -> str:
     return str(inspect.stack()[1][1])
@@ -25,13 +25,13 @@ def debug(function_depth: int = 1, message: str = "") -> str:
 
 def trace(new_message: str, old_messages: str = None, depth: int = 2) -> Result.Err:
     if old_messages is None:
-        return Err(f"{debug(depth)}{new_message}")
+        return Err(f"{red('[ERROR]')} {debug(depth)}{new_message}")
     else:
-        return Err(f"{debug(depth)}{new_message}\n{old_messages}")
+        return Err(f"{red('[ERROR]')} {debug(depth)}{new_message}\n{old_messages}")
 
 def panic(new_message: str, old_messages: str = None, depth: int = 3, error_code: int = 0):
     result: Result = trace(new_message, old_messages, depth)
-    print_red(bold(result.unwrap_err()))
+    print(red(result.unwrap_err()))
     exit(error_code)
 
 def get_opcode_from_id(id: int) -> Result[str, str]:

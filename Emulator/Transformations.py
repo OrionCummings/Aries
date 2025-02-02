@@ -174,17 +174,22 @@ def encode(line: str) -> Result[int, str]:
             # Immediate loads have 2 arguments
             if len(arguments) == 2:
 
-                if opcode_str == 'st':
-                    (potential_reg_str, potential_address_str) = arguments
-                elif opcode_str == 'ld':
-                    (potential_value_str, potential_address_str) = arguments
-                elif opcode_str == 'ldi':
+                # if opcode_str == 'st':
+                #     (potential_reg_str, potential_address_str) = arguments
+                # elif opcode_str == 'ld':
+                #     (potential_value_str, potential_address_str) = arguments
+                if opcode_str == 'ldi':
                     (potential_value_str, potential_address_str) = arguments
                     try:
                         potential_value = int(potential_value_str)
                     except ValueError:
                         return trace("failed to convert potential value to a string in 'ldi'")
-
+                elif opcode_str == 'addi':
+                    (potential_value_str, potential_reg_str) = arguments
+                    try:
+                        potential_value = int(potential_value_str)
+                    except ValueError:
+                        return trace("failed to convert potential value to a string in 'ldi'")
 
                 # try:
                 #     potential_value = int(potential_value_str)

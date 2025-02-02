@@ -12,6 +12,24 @@ from PrettyPrinting import PrintMode, green_bold, info, warning
 from Utilities import abc_not_implemented, panic, debug, trace
 from Constants import CONSTANT_REGISTER_MAP, DEFAULT_DATA_MEMORY_BASE_ADDRESS, DEFAULT_DATA_MEMORY_SIZE_IN_BYTES, DEFAULT_INSTRUCTION_MEMORY_BASE_ADDRESS, DEFAULT_INSTRUCTION_MEMORY_SIZE_IN_BYTES, DEFAULT_STACK_MEMORY_BASE_ADDRESS, DEFAULT_STACK_MEMORY_SIZE_IN_BYTES, DEFAULT_VIDEO_MEMORY_BASE_ADDRESS, DEFAULT_VIDEO_MEMORY_SIZE_IN_BYTES, FL_ZERO, PC_INC, EC_PC_OVERRUN, TextRenderTarget
 
+class MemoryLayout(Enum):
+    
+    # Specify no layout. Bases and sizes are expected to be configured
+    # via CPUSettings setters.
+    NoLayout = 0
+    
+    # Place memory contigiously in order of instruction,
+    # data, video, and stack memory.
+    Sequential = 1
+    
+    # Place memory contigiously in order of instruction,
+    # data, video, and stack memory with 16 bytes of padding
+    Padded16B = 2
+    
+    # Place the stack at the end of memory
+    StackBack = 3
+    
+
 # TODO: Implement these as subclasses of CPU! Otherwise every function
 # will be an if statement that changes behavior between the two types:
 # it's stupid!
@@ -38,6 +56,7 @@ class CPUSettings():
 
     def __init__(self):
         self.architecture = None
+        self.memory_layout = None
         self.memory_size = None
         self.instruction_memory_base = None
         self.instruction_memory_size = None
@@ -50,6 +69,10 @@ class CPUSettings():
 
     def set_architecture(self, architecture: CPUArchitecture) -> CPUSettings:
         self.architecture = architecture
+        return self
+    
+    def set_memory_layout(self, layout: MemoryLayout) -> CPUSettings:
+        self.memory_layout = layout
         return self
 
     def set_instruction_memory_base(self, base_address: int) -> CPUSettings:
@@ -84,9 +107,11 @@ class CPUSettings():
         self.stack_memory_size = size
         return self
 
-    def pack(self) -> Result[CPU, str]:
-        
-        self.set_default_values()
+    def validate(self) -> Result[CPU, str]:
+
+        # TODO: Make this actually work
+        # self.set_default_values()
+        # self.apply_layout()
 
         r_valid = self.memory_layout_is_valid()
         if r_valid.is_err:
@@ -98,18 +123,30 @@ class CPUSettings():
         self.memory_size = r_total_memory_size.unwrap()
 
         return Ok(self)
+    
+    def apply_layout(self) -> None:
+        
+        match self.memory_layout:
+            
+            case MemoryLayout.Sequential:
+                
+                # Don't change the instruction memory base!
+                self.set_data_memory_base(self.instruction_memory_base + self.instruction_memory_size)
+                self.set_video_memory_base(self.data_memory_base + self.data_memory_size)
+                self.set_stack_memory_base(self.stack_memory_base + self.stack_memory_size)
+            
+            case _:
+                panic("invalid memory layout")
 
-    def set_default_values(self):
-
-        unset_set = [0, None]
-        if self.instruction_memory_base in unset_set: self.instruction_memory_base = DEFAULT_INSTRUCTION_MEMORY_BASE_ADDRESS
-        if self.instruction_memory_size in unset_set: self.instruction_memory_size = DEFAULT_INSTRUCTION_MEMORY_SIZE_IN_BYTES
-        if self.data_memory_base in unset_set: self.data_memory_base = DEFAULT_DATA_MEMORY_BASE_ADDRESS
-        if self.data_memory_size in unset_set: self.data_memory_size = DEFAULT_DATA_MEMORY_SIZE_IN_BYTES
-        if self.video_memory_base in unset_set: self.video_memory_base = DEFAULT_VIDEO_MEMORY_BASE_ADDRESS
-        if self.video_memory_size in unset_set: self.video_memory_size = DEFAULT_VIDEO_MEMORY_SIZE_IN_BYTES
-        if self.stack_memory_base in unset_set: self.stack_memory_base = DEFAULT_STACK_MEMORY_BASE_ADDRESS
-        if self.stack_memory_size in unset_set: self.stack_memory_size = DEFAULT_STACK_MEMORY_SIZE_IN_BYTES
+    def set_default_values(self) -> None:
+        if self.instruction_memory_base is None: self.instruction_memory_base = DEFAULT_INSTRUCTION_MEMORY_BASE_ADDRESS
+        if self.instruction_memory_size is None: self.instruction_memory_size = DEFAULT_INSTRUCTION_MEMORY_SIZE_IN_BYTES
+        if self.data_memory_base is None: self.data_memory_base = DEFAULT_DATA_MEMORY_BASE_ADDRESS
+        if self.data_memory_size is None: self.data_memory_size = DEFAULT_DATA_MEMORY_SIZE_IN_BYTES
+        if self.video_memory_base is None: self.video_memory_base = DEFAULT_VIDEO_MEMORY_BASE_ADDRESS
+        if self.video_memory_size is None: self.video_memory_size = DEFAULT_VIDEO_MEMORY_SIZE_IN_BYTES
+        if self.stack_memory_base is None: self.stack_memory_base = DEFAULT_STACK_MEMORY_BASE_ADDRESS
+        if self.stack_memory_size is None: self.stack_memory_size = DEFAULT_STACK_MEMORY_SIZE_IN_BYTES
 
     def calculate_total_memory_size(self) -> Result[int, str] | int:
         return Ok(sum([self.instruction_memory_size, self.data_memory_size, self.video_memory_size, self.stack_memory_size]))
