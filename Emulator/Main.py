@@ -33,8 +33,8 @@ r_cpu_settings = (CPUSettings()
 
 if r_cpu_settings.is_err: panic("invalid cpu settings", r_cpu_settings.unwrap_err())
 cpu_settings = r_cpu_settings.unwrap()
-cpu = VonNeumannCPU(cpu_settings)
-# cpu = HarvardCPU(cpu_settings)
+# cpu = VonNeumannCPU(cpu_settings)
+cpu = HarvardCPU(cpu_settings)
 
 # Load the assembler's program into the CPU
 r_load = cpu.load_program(assembler.instructions, assembler.file_name)
@@ -69,18 +69,22 @@ def main():
     info("Press space to execute one clock cycle")
     print(cpu)
 
-    # Block for user input
-    input("")
-
-    while not r_once_cycle.is_err:
+    while True:
+        
+        # Block for user input
+        input("")
+        
+        # Pass fake arg to `once()`
         r_once_cycle = once(Key.space)
-        one_cycle_err = r_once_cycle.unwrap()
-        pass
-    
-    panic("CPU halted", r_once_cycle.unwrap_err())
-    # print(red_bold("CPU halted"))
-
-
+        
+        # TODO: This could probably better. It should account
+        # for the error and do something 
+        if r_once_cycle.is_err:
+            panic("CPU halted", r_once_cycle.unwrap_err())
+            break
+        elif r_once_cycle.unwrap() == False:
+            panic("CPU halted")
+            break
 
 if __name__ == "__main__":
     main()

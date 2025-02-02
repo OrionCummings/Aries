@@ -81,6 +81,18 @@ class HarvardCPU(CPU):
         
         return builder
 
+    def get_pc(self) -> int:
+        return self.register_file.get_pc()
+    
+    def get_sp(self) -> int:
+        return self.register_file.get_sp()
+    
+    def set_sp(self, value) -> int:
+        return self.register_file.set_reg("SP", value)
+    
+    def set_highlight_range(self, range) -> None:
+        self.instruction_memory.set_highlight_range(range)
+
     def load_program(self, program: Program, program_name: str) -> Result[None, str]:
 
         # If the input is a string, then assemble that string and reassign `program`
@@ -129,30 +141,3 @@ class HarvardCPU(CPU):
             return trace("failed to get instruction", r_current_instruction.unwrap_err())
 
         return r_current_instruction
-
-    def clock(self) -> bool:
-        """Perform one clock cycle."""
-
-        # Execute the current instruction
-        execution_result = self.execute_current_instruction()
-        if execution_result.is_err:
-            panic("failed to execute current instruction", execution_result.unwrap_err())
-        
-        # TODO: Refactor/remove panic and use a result type!
-        # Check if the current program counter is valid.
-        pc = self.register_file.get_pc()
-        if pc >= self.instruction_memory.capacity - 1: panic("program counter overrun!", error_code=EC_PC_OVERRUN)
-
-        sp = self.register_file.get_sp()
-        self.stack_memory.update_stack_pointer(sp)
-
-        # Update the instruction memory range
-        self.instruction_memory.set_highlight_range(range(pc, pc + PC_INC))
-
-        return not self.halted
-
-
-
-
-
-

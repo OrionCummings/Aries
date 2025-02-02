@@ -230,27 +230,23 @@ class CPU():
 
         return Ok(None)
         
-    def clock(self) -> bool:
+    def clock(self) -> Result[bool, str]:
         """Perform one clock cycle."""
 
         # Execute the current instruction
         execution_result = self.execute_current_instruction()
         if execution_result.is_err:
-            panic("failed to execute current instruction", execution_result.unwrap_err())
+            return trace("failed to execute current instruction", execution_result.unwrap_err())
         
-        # TODO: Refactor/remove panic and use a result type!
         # Check if the current program counter is valid.
-        pc = self.register_file.get_pc()
-        if pc >= self.instruction_memory.capacity - 1:
-            panic("program counter overrun!", error_code=EC_PC_OVERRUN)
-
-        sp = self.register_file.get_sp()
-        self.stack_memory.update_stack_pointer(sp)
+        pc = self.get_pc()
+        if pc >= self.settings.memory_size - 1:
+            return trace("program counter overrun")
 
         # Update the instruction memory range
-        self.instruction_memory.set_highlight_range(range(pc, pc + PC_INC))
+        self.set_highlight_range(range(pc, pc + PC_INC))
 
-        return not self.halted
+        return Ok(not self.halted)
 
     def run(self) -> Result[bool, str]:
 
@@ -443,47 +439,51 @@ def i_ld(cpu: CPU, arguments: list) -> Result[CPU, str]:
 def i_st(cpu: CPU, arguments: list) -> Result[CPU, str]:
     """Execute a 'Store' instruction."""
 
-    # Get the register
-    potential_reg = arguments[1]
-    if potential_reg not in CONSTANT_REGISTER_MAP.keys():
-        return trace(f"parsed unknown register '{potential_reg}'")
+    # Get the value register
+    potential_value_reg = arguments[0]
+    if potential_value_reg not in CONSTANT_REGISTER_MAP.keys():
+        return trace(f"parsed unknown value register '{potential_value_reg}'")
+    value_reg = potential_value_reg
     
     # Get the value of the register and split it into 4 bytes
-    r_reg_value = cpu.register_file.get_reg(potential_reg)
+    r_reg_value = cpu.register_file.get_reg(value_reg)
     if r_reg_value.is_err:
-        return trace(f"failed to get register '{potential_reg}'")
+        return trace(f"failed to get register '{value_reg}'")
     
     # This value may be 1-4 bytes in size, so we need to treat it accordingly!
     reg_value = r_reg_value.unwrap()
 
-    # This assumes all loaded values are 4 bytes!
+    # TODO: Magic numbers! This assumes all loaded values are 4 bytes!
     # Create a list of each byte of the value (little endian!)
-    parts = []
+    value_bytes = []
     for _ in range(0, 4):
-        parts.append(reg_value & 255)
+        value_bytes.append(reg_value & 255)
         reg_value >>= 8
-
-    # Pack the bytes into a single number.
-    # '<' => little endian
-    # 'B' => one unsigned char (duplicated four times!)
-    try:
-        packed_bytes = struct.pack('>BBBB', *parts)
-    except struct.error as _:
-        return trace("failed to pack bytes")
-
-    # Get the memory address
-    potential_address = arguments[0]
-    try:
-        address = int(potential_address)
-    except ValueError:
-        return trace(f"failed to convert address '{potential_address}' to an integer")
-
-    # Set the value in memory to the register value
+    
+    # Overwrite this variable so it's more difficult to misuse!
+    reg_value = None
+    
+    # Get the address register
+    potential_address_reg = arguments[1]
+    if potential_address_reg not in CONSTANT_REGISTER_MAP.keys():
+        return trace(f"parsed unknown address register '{potential_address_reg}'")
+    address_reg = potential_address_reg
+    
+    # Get the value of the register and split it into 4 bytes
+    r_address = cpu.register_file.get_reg(address_reg)
+    if r_address.is_err:
+        return trace(f"failed to get register '{address_reg}'")
+    
+    # This value may be 1-4 bytes in size, so we need to treat it accordingly!
+    address = r_address.unwrap()
+    
     # TODO: Magic numbers!
-    r_set_bytes = cpu.data_memory.set_bytes(packed_bytes, range(address, address+4))
+    # Set the address in memory
+    address_range = range(address, address + 4)
+    r_set_bytes = cpu.data_memory.set_bytes(address_range, value_bytes)
     if r_set_bytes.is_err:
         return trace("failed to set bytes", r_set_bytes.unwrap_err())
-
+    
     # Increment the program counter
     cpu.register_file.increment_program_counter()
     
@@ -533,9 +533,9 @@ CONSTANT_INSTRUCTION_FUNCTIONS = {
     "j":        i_j,
     "cmp":      i_cmp,
     "ld":       i_ld,
-    "str":      i_st,
+    "st":       i_st,
     "call":     i_call,
-    "ret":     i_ret,
+    "ret":      i_ret,
 }
 
 if __name__ == '__main__':

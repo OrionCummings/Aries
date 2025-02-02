@@ -37,9 +37,6 @@ class VonNeumannCPU(CPU):
         # Set the highlight range to properly display for memory
         self.memory.set_highlight_range(range(self.settings.instruction_memory_base, self.settings.instruction_memory_base + 4))
 
-        # Set the stack pointer to the beginning of stack memory
-        self.stack_pointer = self.settings.stack_memory_base
-
     def __eq__(self, other: VonNeumannCPU) -> bool:
 
         if not isinstance(other, VonNeumannCPU):
@@ -72,8 +69,17 @@ class VonNeumannCPU(CPU):
 
         return builder
 
-    def update_stack_pointer(self, new_stack_pointer: RegisterValue) -> None:
-        self.stack_pointer = new_stack_pointer
+    def get_pc(self) -> int:
+        return self.register_file.get_pc()
+    
+    def get_sp(self) -> int:
+        return self.register_file.get_sp()
+    
+    def set_sp(self, value) -> None:
+        self.register_file.set_reg("SP", value)
+
+    def set_highlight_range(self, range) -> None:
+        self.memory.set_highlight_range(range)
 
     def load_program(self, program: Program, program_name: str) -> Result[None, str]:
 
@@ -107,28 +113,3 @@ class VonNeumannCPU(CPU):
             return trace("failed to get instruction", r_current_instruction.unwrap_err())
 
         return r_current_instruction
-
-    def clock(self) -> Result[bool, str]:
-        """Perform one clock cycle."""
-
-        # Execute the current instruction
-        execution_result = self.execute_current_instruction()
-        if execution_result.is_err:
-            return trace("failed to execute current instruction", execution_result.unwrap_err())
-        
-        # TODO: Refactor/remove panic and use a result type!
-        # Check if the current program counter is valid.
-        pc = self.register_file.get_pc()
-        if pc >= self.memory.capacity - 1:
-            return trace("program counter overrun!")
-
-        sp = self.register_file.get_sp()
-        self.update_stack_pointer(sp)
-
-        # Update the instruction memory range
-        self.memory.set_highlight_range(range(pc, pc + PC_INC))
-
-        return Ok(not self.halted)
-
-
-
