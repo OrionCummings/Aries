@@ -18,6 +18,10 @@ class Stack(ByteBank):
     def __str__(self) -> str:
         return super().__str__()
 
+    def set_stack_memory_boundary(self, boundary: range) -> Stack:
+        self.stack_memory_boundary = boundary
+        return self
+
     def update_stack_pointer(self, new_stack_pointer: RegisterValue) -> None:
         self.stack_pointer = new_stack_pointer
 

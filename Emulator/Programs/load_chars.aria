@@ -6,7 +6,7 @@ ldi 255 A
 loop:
 
 ; Load a character into memory
-str B B
+st B 16
 
 ; Increment B by 1
 addi 1 B

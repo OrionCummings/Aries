@@ -45,55 +45,70 @@ class Memory(ByteBank):
             str: A string representation of the Memory instance.
         """
 
-        # Create the string builder
-        builder = ""
+        # TODO: Need to create 'VonNeumann Memory' because the two DO NOT
+        # operate in the same EXACT way!!!!!!!! printing is different!!
 
-        # For every byte in memory, ...
-        for index in range(0, self.capacity):
+        match self.architecture:
 
-            if index % self.print_num_rows == 0:
-                builder += f"0x{index:08X} "
+            case CPUArchitecture.Harvard:
+                return super().__str__()
+    
+            case CPUArchitecture.VonNeumann:
 
-            # Color each section in memory
-            if index in self.instruction_memory_boundary:
+                # Create the string builder
+                builder = ""
 
-                # If the current address in memory is in the highlight range, print it in bold
-                if self.highlight_range is not None and index in self.highlight_range:
-                    builder += red_bold(HEX_FORMAT.format(self.content[index]))
-                else:
-                    builder += red(HEX_FORMAT.format(self.content[index]))
+                # For every byte in memory, ...
+                for index in range(0, self.capacity):
 
-            elif index in self.data_memory_boundary:
-                builder += blue(HEX_FORMAT.format(self.content[index]))
+                    if index % self.print_num_rows == 0:
+                        builder += f"0x{index:08X} "
 
-            elif index in self.video_memory_boundary:
-                builder += yellow(HEX_FORMAT.format(self.content[index]))
+                    # Color each section in memory
+                    if index in self.instruction_memory_boundary:
 
-            elif index in self.stack_memory_boundary:
-                builder += green(HEX_FORMAT.format(self.content[index]))
+                        # If the current address in memory is in the highlight range, print it in bold
+                        if self.highlight_range is not None and index in self.highlight_range:
+                            builder += red_bold(HEX_FORMAT.format(self.content[index]))
+                        else:
+                            builder += red(HEX_FORMAT.format(self.content[index]))
 
-            else:
-                builder += HEX_FORMAT.format(self.content[index])
+                    elif index in self.data_memory_boundary:
+                        builder += blue(HEX_FORMAT.format(self.content[index]))
 
-            # Add a space between bytes
-            builder += " "
+                    elif index in self.video_memory_boundary:
+                        builder += yellow(HEX_FORMAT.format(self.content[index]))
 
-            # If the index is at the end of the line, ...
-            if index % self.print_num_rows == self.print_num_rows - 1:
+                    elif index in self.stack_memory_boundary:
+                        builder += green(HEX_FORMAT.format(self.content[index]))
 
-                # Add the bytes in this line as text
-                for line_index in range(index - self.print_num_rows, index):
-                    byt: int = self.content[line_index]
-                    if byt == 0:
-                        string = '0'
                     else:
-                        string = chr(byt)
-                    builder += string
+                        builder += HEX_FORMAT.format(self.content[index])
 
-                # Add a new line
-                builder += '\n'
+                    # Add a space between bytes
+                    builder += " "
 
-        return builder
+                    # If the index is at the end of the line, ...
+                    if index % self.print_num_rows == self.print_num_rows - 1:
+
+                        # Add the bytes in this line as text
+                        for line_index in range(index - self.print_num_rows, index):
+                            byt: int = self.content[line_index]
+                            if byt == 0:
+                                string = '0'
+                            else:
+                                string = chr(byt)
+                            builder += string
+
+                        # Add a new line
+                        builder += '\n'
+
+                return builder
+    
+            case CPUArchitecture.OnlyMemory:
+                return "str(CPUArchitecture.OnlyMemory) not implemented yet!"
+
+        
        
     def get_instruction(self, index: int) -> Result[Instruction, str]:
         

@@ -169,22 +169,32 @@ def encode(line: str) -> Result[int, str]:
             
         case InstructionFormat.Immediate:
             
-            _, *arguments = line_vector
+            opcode_str, *arguments = line_vector
             
-            # Immediate loads/stores have 2 arguments
+            # Immediate loads have 2 arguments
             if len(arguments) == 2:
-            
-                potential_value_str = arguments[0]
 
-                try:
-                    potential_value = int(potential_value_str)
-                except ValueError:
-                    if isinstance(potential_value_str, str):
-                        # If this is a register, then the programmer probably mixed up the order of arguments
-                        if potential_value_str in CONSTANT_REGISTER_MAP.keys():
-                            return trace(f"str value '{potential_value_str}' found; did you mix up the order or arguments?")
-                        return trace(f"str value '{potential_value_str}' found")
-                    return trace(f"unknown value '{potential_value_str}' found")
+                if opcode_str == 'st':
+                    (potential_reg_str, potential_address_str) = arguments
+                elif opcode_str == 'ld':
+                    (potential_value_str, potential_address_str) = arguments
+                elif opcode_str == 'ldi':
+                    (potential_value_str, potential_address_str) = arguments
+                    try:
+                        potential_value = int(potential_value_str)
+                    except ValueError:
+                        return trace("failed to convert potential value to a string in 'ldi'")
+
+
+                # try:
+                #     potential_value = int(potential_value_str)
+                # except ValueError:
+                #     if isinstance(potential_value_str, str):
+                #         # If this is a register, then the programmer probably mixed up the order of arguments
+                #         if potential_value_str in CONSTANT_REGISTER_MAP.keys():
+                #             return trace(f"st value '{potential_value_str}' found; did you mix up the order or arguments?")
+                #         return trace(f"st value '{potential_value_str}' found")
+                #     return trace(f"unknown value '{potential_value_str}' found")
 
                 # TODO: This could be handled with a psuedoinstruction!
                 if potential_value >= 2**16:

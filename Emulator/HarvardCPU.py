@@ -2,7 +2,8 @@ from __future__ import annotations
 import struct
 from enum import Enum
 from option import Err, Ok, Result
-from CPU import CPU, CPUSettings
+from CPU import CPU, CPUArchitecture, CPUSettings
+from HarvardMemory import HarvardMemory
 from Types import Program, Address, Instruction
 from Assembler import Assembler, AssemblerSettings, AssemblerSettingsSource
 from Stack import Stack
@@ -23,9 +24,9 @@ class HarvardCPU(CPU):
         self.register_file = RegisterFile()
 
         # Create seperate memory banks for each type of memory
-        self.instruction_memory = Memory(self.settings.instruction_memory_size)
-        self.data_memory = Memory(self.settings.data_memory_size)
-        self.video_memory = Memory(self.settings.video_memory_size)
+        self.instruction_memory = HarvardMemory(self.settings.instruction_memory_size)
+        self.data_memory = HarvardMemory(self.settings.data_memory_size)
+        self.video_memory = HarvardMemory(self.settings.video_memory_size)
         self.stack_memory = Stack(self.settings.stack_memory_size)
 
         # Set the highlight range to properly display for instruction memory

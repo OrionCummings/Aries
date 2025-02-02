@@ -1,5 +1,6 @@
 from __future__ import annotations
 from option import Ok, Result
+from VonNeumannMemory import VonNeumannMemory
 from Memory import Memory
 from RegisterFile import RegisterFile
 from Types import Program, Address, Instruction, RegisterValue
@@ -26,7 +27,7 @@ class VonNeumannCPU(CPU):
         stack_memory_boundary = range(settings.stack_memory_base, settings.stack_memory_base + settings.stack_memory_size)
 
         # Create a single memory bank with boundaries
-        self.memory = (Memory(self.settings.memory_size)
+        self.memory = (VonNeumannMemory(self.settings.memory_size)
             .set_instruction_memory_boundary(instruction_memory_boundary)
             .set_data_memory_boundary(data_memory_boundary)
             .set_video_memory_boundary(video_memory_boundary)
@@ -107,19 +108,19 @@ class VonNeumannCPU(CPU):
 
         return r_current_instruction
 
-    def clock(self) -> bool:
+    def clock(self) -> Result[bool, str]:
         """Perform one clock cycle."""
 
         # Execute the current instruction
         execution_result = self.execute_current_instruction()
         if execution_result.is_err:
-            trace("failed to execute current instruction", execution_result.unwrap_err())
+            return trace("failed to execute current instruction", execution_result.unwrap_err())
         
         # TODO: Refactor/remove panic and use a result type!
         # Check if the current program counter is valid.
         pc = self.register_file.get_pc()
         if pc >= self.memory.capacity - 1:
-            trace("program counter overrun!", error_code=EC_PC_OVERRUN)
+            return trace("program counter overrun!")
 
         sp = self.register_file.get_sp()
         self.update_stack_pointer(sp)
@@ -127,7 +128,7 @@ class VonNeumannCPU(CPU):
         # Update the instruction memory range
         self.memory.set_highlight_range(range(pc, pc + PC_INC))
 
-        return not self.halted
+        return Ok(not self.halted)
 
 
 

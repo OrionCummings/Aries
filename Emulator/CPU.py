@@ -25,11 +25,14 @@ class CPUArchitecture(Enum):
     # also seperate memory banks to ease any conflicts.
     Harvard = 0
 
-    # von Neumann has a single memory bank for (traditionally)
+    # VonNeumann has a single memory bank for (traditionally)
     # instruction and data. Regions of memory can be mapped to
     # perform a specific purpose (like a stack or video memory),
     # but that is not an architecture decision.
     VonNeumann = 1
+
+    # OnlyMemory has a single memory bank and no registers.
+    OnlyMemory = 2
 
 class CPUSettings():
 
@@ -437,7 +440,7 @@ def i_ld(cpu: CPU, arguments: list) -> Result[CPU, str]:
 
     return Ok(cpu)
 
-def i_str(cpu: CPU, arguments: list) -> Result[CPU, str]:
+def i_st(cpu: CPU, arguments: list) -> Result[CPU, str]:
     """Execute a 'Store' instruction."""
 
     # Get the register
@@ -530,7 +533,7 @@ CONSTANT_INSTRUCTION_FUNCTIONS = {
     "j":        i_j,
     "cmp":      i_cmp,
     "ld":       i_ld,
-    "str":      i_str,
+    "str":      i_st,
     "call":     i_call,
     "ret":     i_ret,
 }
