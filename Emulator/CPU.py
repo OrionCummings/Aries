@@ -9,7 +9,7 @@ from Memory import Memory
 from RegisterFile import RegisterFile
 from Transformations import decode
 from PrettyPrinting import PrintMode, green_bold, info, warning
-from Utilities import abc_not_implemented, panic, debug, trace
+from Utilities import abc_not_implemented, panic, debug, range_overlap, trace
 from Constants import CONSTANT_REGISTER_MAP, DEFAULT_DATA_MEMORY_BASE_ADDRESS, DEFAULT_DATA_MEMORY_SIZE_IN_BYTES, DEFAULT_INSTRUCTION_MEMORY_BASE_ADDRESS, DEFAULT_INSTRUCTION_MEMORY_SIZE_IN_BYTES, DEFAULT_STACK_MEMORY_BASE_ADDRESS, DEFAULT_STACK_MEMORY_SIZE_IN_BYTES, DEFAULT_VIDEO_MEMORY_BASE_ADDRESS, DEFAULT_VIDEO_MEMORY_SIZE_IN_BYTES, FL_ZERO, PC_INC, EC_PC_OVERRUN, TextRenderTarget
 
 class MemoryLayout(Enum):
@@ -57,15 +57,15 @@ class CPUSettings():
     def __init__(self):
         self.architecture = None
         self.memory_layout = None
-        self.memory_size = None
-        self.instruction_memory_base = None
-        self.instruction_memory_size = None
-        self.data_memory_base = None
-        self.data_memory_size = None
-        self.video_memory_base = None
-        self.video_memory_size = None
-        self.stack_memory_base = None
-        self.stack_memory_size = None
+        self.memory_size = 0
+        self.instruction_memory_base = 0
+        self.instruction_memory_size = 0
+        self.data_memory_base = 0
+        self.data_memory_size = 0
+        self.video_memory_base = 0
+        self.video_memory_size = 0
+        self.stack_memory_base = 0
+        self.stack_memory_size = 0
 
     def set_architecture(self, architecture: CPUArchitecture) -> CPUSettings:
         self.architecture = architecture
@@ -111,7 +111,9 @@ class CPUSettings():
 
         # TODO: Make this actually work
         # self.set_default_values()
-        # self.apply_layout()
+
+        # Apply the requested layout
+        self.apply_layout()
 
         r_valid = self.memory_layout_is_valid()
         if r_valid.is_err:
@@ -130,14 +132,15 @@ class CPUSettings():
             
             case MemoryLayout.Sequential:
                 
-                # Don't change the instruction memory base!
+                self.set_instruction_memory_base(0)
                 self.set_data_memory_base(self.instruction_memory_base + self.instruction_memory_size)
                 self.set_video_memory_base(self.data_memory_base + self.data_memory_size)
-                self.set_stack_memory_base(self.stack_memory_base + self.stack_memory_size)
+                self.set_stack_memory_base(self.video_memory_base + self.video_memory_size)
             
             case _:
                 panic("invalid memory layout")
 
+    # TODO: Make this real; fields are never None
     def set_default_values(self) -> None:
         if self.instruction_memory_base is None: self.instruction_memory_base = DEFAULT_INSTRUCTION_MEMORY_BASE_ADDRESS
         if self.instruction_memory_size is None: self.instruction_memory_size = DEFAULT_INSTRUCTION_MEMORY_SIZE_IN_BYTES
@@ -166,27 +169,27 @@ class CPUSettings():
         # but I wan't to have unique outputs for each case. (4 C 2 = 6)
         
         # Check if instruction memory and data memory overlap
-        if range_instruction_memory.stop > range_data_memory.start:
+        if range_overlap(range_instruction_memory, range_data_memory):
             return trace(f"instruction memory ({range_instruction_memory.start}, {range_instruction_memory.stop}) and data memory ({range_data_memory.start}, {range_data_memory.stop}) overlap")
         
         # Check if data memory and video memory overlap
-        if range_data_memory.stop > range_video_memory.start:
+        if range_overlap(range_data_memory, range_video_memory):
             return trace(f"data memory ({range_data_memory.start}, {range_data_memory.stop}) and video memory ({range_video_memory.start}, {range_video_memory.stop}) overlap")
         
         # Check if video memory and the stack overlap
-        if range_data_memory.stop > range_stack.start:
+        if range_overlap(range_data_memory, range_stack):
             return trace(f"video memory ({range_video_memory.start}, {range_video_memory.stop}) and stack memory ({range_stack.start}, {range_stack.stop}) overlap")
         
         # Check if instruction memory and the stack overlap
-        if range_instruction_memory.stop > range_stack.start:
+        if range_overlap(range_instruction_memory, range_stack):
             return trace(f"instruction memory ({range_instruction_memory.start}, {range_instruction_memory.stop}) and stack memory ({range_stack.start}, {range_stack.stop}) overlap")
         
         # Check if instruction memory and video memory overlap
-        if range_instruction_memory.stop > range_video_memory.start:
+        if range_overlap(range_instruction_memory, range_video_memory):
             return trace(f"instruction memory ({range_instruction_memory.start}, {range_instruction_memory.stop}) and video memory ({range_video_memory.start}, {range_video_memory.stop}) overlap")
         
         # Check if data memory and stack memory overlap
-        if range_data_memory.stop > range_stack.start:
+        if range_overlap(range_data_memory, range_stack):
             return trace(f"data memory ({range_data_memory.start}, {range_data_memory.stop}) and stack memory ({range_stack.start}, {range_stack.stop}) overlap")
         
         # TODO: Add more checks as memory complexity grows
@@ -257,7 +260,7 @@ class CPU():
 
         r_new_cpu_state = function(self, arguments)
         if r_new_cpu_state.is_err:
-            return trace("invalid cpu state", r_new_cpu_state.unwrap_err())
+            return trace("instruction invalidated cpu state", r_new_cpu_state.unwrap_err())
         
         # TODO: Reassigning 'self' is probably bad practice. Should there be an object
         # that contains a CPU that handles CPU state changes?
@@ -300,7 +303,7 @@ class CPU():
         pc = self.register_file.get_pc()
 
         # Save the program counter on the call stack
-        r_push = self.stack.push(pc)
+        r_push = self.push(pc)
         if r_push.is_err:
             return trace(f"failed to push program counter '{pc}' to call stack", r_push.unwrap_err())
 
@@ -310,7 +313,7 @@ class CPU():
         """Restores the previous CPU context from the Call Stack."""
 
         # Save the program counter on the call stack
-        r_pop = self.stack.pop()
+        r_pop = self.pop()
         if r_pop.is_err:
             return trace("failed to pop program counter from call stack", r_pop.unwrap_err())
 
@@ -496,7 +499,7 @@ def i_st(cpu: CPU, arguments: list) -> Result[CPU, str]:
     for _ in range(0, 4):
         value_bytes.append(reg_value & 255)
         reg_value >>= 8
-    
+
     # Overwrite this variable so it's more difficult to misuse!
     reg_value = None
     

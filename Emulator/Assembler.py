@@ -210,7 +210,7 @@ class Assembler():
 
         info(f"Validating file '{self.file_name}'...")
 
-        info(f"Resolving labels...")
+        info("Resolving labels...")
 
         # Find all labels
         known_labels = {}

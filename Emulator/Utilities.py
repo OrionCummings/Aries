@@ -47,3 +47,6 @@ def find_file(name, path):
     for root, dirs, files in os.walk(path):
         if name in files:
             return os.path.join(root, name)
+        
+def range_overlap(a: range, b: range):
+    return a.stop > b.start and b.stop > a.start

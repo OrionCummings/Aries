@@ -9,19 +9,22 @@
 ;   * memory object dump printing
 
 ; Load 255 into B
-ldi 255 B
+ldi 256 B
 
 ; Temp!
-ldi 126 A
+; ldi 252 A
 
 ; Main loop
 loop:
 
 ; Load the value of A into MEM[A]
-st A A
+st A C
 
-; Increment B by 1
+; Increment A by 1
 addi 1 A
+
+; Increment C by 4
+addi 4 C
 
 ; If A is not equal to B, then continue
 cmp A B

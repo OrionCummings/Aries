@@ -141,3 +141,17 @@ class HarvardCPU(CPU):
             return trace("failed to get instruction", r_current_instruction.unwrap_err())
 
         return r_current_instruction
+
+    def push(self, data) -> Result[None, str]:
+        r_data = self.stack_memory.push(data)
+        if r_data.is_err:
+            return trace(f"failed to push '{data}'", r_data.unwrap_err())
+        
+        return r_data
+
+    def pop(self) -> Result[int, str]:
+        r_data = self.stack_memory.pop()
+        if r_data.is_err:
+            return trace("failed to pop", r_data.unwrap_err())
+
+        return r_data

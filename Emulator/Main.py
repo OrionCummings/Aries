@@ -6,12 +6,12 @@ from HarvardCPU import HarvardCPU
 from VonNeumannCPU import VonNeumannCPU
 from Assembler import Assembler, AssemblerSettings, AssemblerSettingsSource, PrintMode
 from Constants import EC_ASSEMBLER_FAILURE
-from PrettyPrinting import info, red_bold
+from PrettyPrinting import info, red_bold, success
 from Utilities import panic, trace
 
 # Create assembler settings 
 assmbler_settings = (AssemblerSettings()
-    .set_file_name("load_chars")
+    .set_file_name("call2")
     .set_print_mode(PrintMode.Hex)
     .set_source(AssemblerSettingsSource.File)
 )
@@ -25,13 +25,9 @@ if r_run.is_err:
 # Create the CPU
 r_cpu_settings = (CPUSettings()
     .set_memory_layout(MemoryLayout.Sequential)
-    .set_instruction_memory_base(0)
-    .set_instruction_memory_size(32)
-    .set_data_memory_base(32)
-    .set_data_memory_size(256)
-    .set_video_memory_base(288)
+    .set_instruction_memory_size(64)
+    .set_data_memory_size(64)
     .set_video_memory_size(64)
-    .set_stack_memory_base(352)
     .set_stack_memory_size(64)
     .validate()
 )
@@ -51,7 +47,7 @@ def once(key) -> Result[bool, str]:
     if key == Key.space:
         
         # Clear the screen
-        # print("\033c", end="")
+        print("\033c", end="")
         
         # Run one clock cycle of the CPU
         r_clock = cpu.clock()
@@ -65,12 +61,9 @@ def once(key) -> Result[bool, str]:
          
         return Ok(clock) #?
     else:
-        return Err("non-space key hit")
+        return trace("non-space key hit")
 
 def main():
-
-    # cpu.run()
-    # print(cpu)
 
     info("Press space to execute one clock cycle")
     print(cpu)
@@ -89,7 +82,7 @@ def main():
             panic("CPU halted", r_once_cycle.unwrap_err())
             break
         elif r_once_cycle.unwrap() == False:
-            panic("CPU halted")
+            success("CPU halted")
             break
 
 if __name__ == "__main__":
