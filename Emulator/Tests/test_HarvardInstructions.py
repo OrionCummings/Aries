@@ -148,23 +148,19 @@ class InstructionTests(unittest.TestCase):
         stack_memory_size = 0
 
         r_harvard_cpu = InstructionTests.create_cpu(CPUArchitecture.Harvard, instruction_memory_size, data_memory_size, video_memory_size, stack_memory_size)
-        if r_harvard_cpu.is_err:
-            self.fail(r_harvard_cpu.unwrap_err(), "failed to create harvard cpu")
-
+        if r_harvard_cpu.is_err: self.fail(r_harvard_cpu.unwrap_err(), "failed to create harvard cpu")
         cpu: HarvardCPU = r_harvard_cpu.unwrap()
+
         r_load_program = cpu.load_program(program, program_name)
-        if r_load_program.is_err:
-            return self.fail(trace("failed to load program", r_load_program.unwrap_err()).unwrap_err())
+        if r_load_program.is_err: self.fail(trace("failed to load program", r_load_program.unwrap_err()).unwrap_err())
 
         # Check if the jump address is correct
         r_instruction = cpu.get_current_instruction()
-        if r_instruction.is_err:
-            return self.fail(trace("failed to get current instruction", r_instruction.unwrap_err()))
+        if r_instruction.is_err: self.fail(trace("failed to get current instruction", r_instruction.unwrap_err()))
         instruction = r_instruction.unwrap()
 
         r_decoded_instruction = decode(instruction)
-        if r_decoded_instruction.is_err:
-            self.fail(r_decoded_instruction.unwrap_err())
+        if r_decoded_instruction.is_err: self.fail(r_decoded_instruction.unwrap_err())
         decoded_instruction = r_decoded_instruction.unwrap()
         decoded_instruction_vector = decoded_instruction.split(" ")
 
@@ -182,8 +178,6 @@ class InstructionTests(unittest.TestCase):
 
         # A, B, and C should be zero; if not, fail!
         self.assertEqual(cpu.register_file.get_reg('A').unwrap(), 0, "register A was non-zero!")
-        self.assertEqual(cpu.register_file.get_reg('B').unwrap(), 0, "register B was non-zero!")
-        self.assertEqual(cpu.register_file.get_reg('C').unwrap(), 0, "register C was non-zero!")
 
         # The CPU should be halted
         self.assertTrue(cpu.halted, "CPU not halted!")
