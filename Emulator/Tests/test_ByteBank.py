@@ -206,23 +206,6 @@ class ByteBankTests(unittest.TestCase):
 
             self.assertEqual(expected_value, actual_value)
 
-    def test_byte_bank_set_bytes_success_single_value(self):
-
-        bank = ByteBank(64)
-        indices = [3, 4, 5]
-        values = 255
-
-        r_set_bytes = bank.set_bytes(indices, values)
-        
-        if r_set_bytes.is_err:
-            self.fail(r_set_bytes.unwrap_err())
-
-        for (vindex, cindex) in enumerate(indices):
-            actual_value = bank.content[cindex]
-            expected_value = 255
-
-            self.assertEqual(expected_value, actual_value)
-
     def test_byte_bank_set_bytes_failure_range_and_value_length_differ(self):
 
         bank = ByteBank(64)

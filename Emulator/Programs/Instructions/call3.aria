@@ -11,8 +11,13 @@ ret
 
 p:
 ldi 255 C
+call v
+ret
+
+v:
+ldi 255 D
 ret
 
 end:
-ldi 255 D
+ldi 255 E
 hlt

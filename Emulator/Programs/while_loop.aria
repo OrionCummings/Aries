@@ -7,7 +7,7 @@ loop:
 ; Do whatever in the loop
 
 ; Store the value of A at memory address 0
-str 0 A
+st 0 A
 
 ; Increment A by 1
 addi 1 A        ; [A++]

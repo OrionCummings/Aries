@@ -124,7 +124,7 @@ class HarvardCPU(CPU):
             return trace(f"program size ({program_length_in_bytes}) exceeds the instruction memory capacity ({self.instruction_memory.capacity})!")
         
         # If the program is empty, this is probably an issue
-        if program_length_in_bytes == 0: warning("loading null program")
+        if program_length_in_bytes == 0: return trace("attempted to load null program")
         
         # Load the instructions into instruction memory starting at the instruction base address
         r_update = self.instruction_memory.load_instructions(program, self.settings.instruction_memory_base)

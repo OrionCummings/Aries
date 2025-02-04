@@ -24,6 +24,7 @@ if r_run.is_err:
 
 # Create the CPU
 r_cpu_settings = (CPUSettings()
+    .set_architecture(CPUArchitecture.Harvard)
     .set_memory_layout(MemoryLayout.Sequential)
     .set_instruction_memory_size(64)
     .set_data_memory_size(64)

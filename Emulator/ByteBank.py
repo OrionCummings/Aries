@@ -66,15 +66,12 @@ class ByteBank():
         
         return Ok(None)
 
-    def set_bytes(self, dest_range: range | list[SupportsIndex], values: list[int] | int) -> Result[None, str]:
+    def set_bytes(self, dest_range: range | list[SupportsIndex], values: list[int]) -> Result[None, str]:
 
         if isinstance(dest_range, range):
             dest_range = list(dest_range)
 
         len_dest_range = len(dest_range)
-
-        if isinstance(values, int):
-            values = [values] * len_dest_range
 
         len_values = len(values)
 
