@@ -17,7 +17,24 @@ class InstructionTests(unittest.TestCase):
     file_extension = ".aria"
 
     @staticmethod
-    def validate_harvard_memory(harvard_cpu: HarvardCPU, instruction_memory_exclusion_range: range, data_memory_exclusion_range: range, video_memory_exclusion_range: range, stack_memory_exclusion_range: range) -> Result[None, str]:
+    def validate_register_file_is_empty(harvard_cpu: HarvardCPU, exceptions: list[str] = []) -> Result[None, str]:
+    
+        for reg in CONSTANT_REGISTER_MAP.keys():
+            if reg in exceptions:
+                continue
+
+            r_reg_value = harvard_cpu.register_file.get_reg(reg)
+            if r_reg_value.is_err:
+                return trace(f"failed to get register {reg}", r_reg_value.unwrap_err())
+            reg_value = r_reg_value.unwrap()
+            
+            if reg_value != 0:
+                return trace(f"register {reg} has non-zero value of {reg_value}")
+            
+        return Ok(None)
+
+    @staticmethod
+    def validate_harvard_memory_is_empty(harvard_cpu: HarvardCPU, instruction_memory_exclusion_range: range, data_memory_exclusion_range: range, video_memory_exclusion_range: range, stack_memory_exclusion_range: range) -> Result[None, str]:
 
         # Check that instruction memory is valid
         r_instruction_memory_valid = InstructionTests.validate_memory_initalization(harvard_cpu.instruction_memory, instruction_memory_exclusion_range)
@@ -223,7 +240,6 @@ class InstructionTests(unittest.TestCase):
         nop
         hlt
         """
-        program_name = get_current_function_name()
         instruction_memory_size = 8
         data_memory_size = 0
         video_memory_size = 0
@@ -234,32 +250,21 @@ class InstructionTests(unittest.TestCase):
             self.fail(r_harvard_cpu.unwrap_err(), "failed to create harvard cpu")
 
         cpu: HarvardCPU = r_harvard_cpu.unwrap()
-        r_load_program = cpu.load_program(program, program_name)
+        r_load_program = cpu.load_program(program, get_current_function_name())
         if r_load_program.is_err:
-            return self.fail(trace("failed to load program", r_load_program.unwrap_err()).unwrap_err())
+            self.fail(trace("failed to load program", r_load_program.unwrap_err()))
 
         # Ensure all registers are zero
-        for reg in CONSTANT_REGISTER_MAP.keys():
-            r_reg_value = cpu.register_file.get_reg(reg)
-            if r_reg_value.is_err:
-                self.fail(r_reg_value.unwrap_err())
-            reg_value = r_reg_value.unwrap()
-
-            self.assertEqual(reg_value, 0)
+        r_register_file = InstructionTests.validate_register_file_is_empty(cpu)
+        if r_register_file.is_err:
+            self.fail(trace("failed to validate register file", r_register_file.unwrap_err()))
 
         # TODO: Make this depend on the size of the input program!!
         # Exclude the instructions after program loading
-        instruction_memory_exclusion_range = range(0, 2 * 4)
-
-        # These should all be zero for this test
-        data_memory_exclusion_range = range(0, 0)
-        video_memory_exclusion_range = range(0, 0)
-        stack_memory_exclusion_range = range(0, 0)
-
         # Ensure all* memory is still zero
-        r_validate_harvard_memory = InstructionTests.validate_harvard_memory(cpu, instruction_memory_exclusion_range, data_memory_exclusion_range, video_memory_exclusion_range, stack_memory_exclusion_range)
+        r_validate_harvard_memory = InstructionTests.validate_harvard_memory_is_empty(cpu, range(0, 2 * 4), range(0, 0), range(0, 0), range(0, 0))
         if r_validate_harvard_memory.is_err:
-            return trace("invalid instruction harvard memory state", r_validate_harvard_memory.unwrap_err())
+            self.fail(trace("invalid instruction harvard memory state", r_validate_harvard_memory.unwrap_err()))
 
         # Execute one instruction
         cpu.clock() # nop
@@ -277,9 +282,9 @@ class InstructionTests(unittest.TestCase):
                 self.assertEqual(reg_value, 0, "unexpected register value!")
 
         # Ensure all* memory is still zero
-        r_validate_harvard_memory = InstructionTests.validate_harvard_memory(cpu, instruction_memory_exclusion_range, data_memory_exclusion_range, video_memory_exclusion_range, stack_memory_exclusion_range)
+        r_validate_harvard_memory = InstructionTests.validate_register_file_is_empty(cpu, 'PC')
         if r_validate_harvard_memory.is_err:
-            return trace("invalid instruction harvard memory state", r_validate_harvard_memory.unwrap_err())
+            self.fail(trace("invalid instruction harvard memory state", r_validate_harvard_memory.unwrap_err()))
 
         self.assertFalse(cpu.halted, "CPU halted on 'nop' instruction!")
 
@@ -290,7 +295,6 @@ class InstructionTests(unittest.TestCase):
         program = """
         hlt
         """
-        program_name = get_current_function_name()
         instruction_memory_size = 4
         data_memory_size = 0
         video_memory_size = 0
@@ -301,7 +305,7 @@ class InstructionTests(unittest.TestCase):
             self.fail(r_harvard_cpu.unwrap_err(), "failed to create harvard cpu")
 
         cpu: HarvardCPU = r_harvard_cpu.unwrap()
-        r_load_program = cpu.load_program(program, program_name)
+        r_load_program = cpu.load_program(program, get_current_function_name())
         if r_load_program.is_err:
             return self.fail(trace("failed to load program", r_load_program.unwrap_err()).unwrap_err())
 
@@ -316,15 +320,8 @@ class InstructionTests(unittest.TestCase):
 
         # TODO: Make this depend on the size of the input program!!
         # Exclude the instructions after program loading
-        instruction_memory_exclusion_range = range(0, 1 * 4)
-
-        # These should all be zero for this test
-        data_memory_exclusion_range = range(0, 0)
-        video_memory_exclusion_range = range(0, 0)
-        stack_memory_exclusion_range = range(0, 0)
-
         # Ensure all* memory is still zero
-        r_validate_harvard_memory = InstructionTests.validate_harvard_memory(cpu, instruction_memory_exclusion_range, data_memory_exclusion_range, video_memory_exclusion_range, stack_memory_exclusion_range)
+        r_validate_harvard_memory = InstructionTests.validate_harvard_memory_is_empty(cpu, range(0, 1 * 4), range(0, 0), range(0, 0), range(0, 0))
         if r_validate_harvard_memory.is_err:
             return trace("invalid instruction harvard memory state", r_validate_harvard_memory.unwrap_err())
 
@@ -350,6 +347,42 @@ class InstructionTests(unittest.TestCase):
 
         self.assertTrue(cpu.halted, "CPU failed to halt on 'hlt' instruction!")
     
+    def test_call(self):
+
+        program = """
+        call label
+        hlt
+        label:
+        ret
+        """
+        instruction_memory_size = 64
+        data_memory_size = 0
+        video_memory_size = 0
+        stack_memory_size = 16
+
+        r_harvard_cpu = InstructionTests.create_cpu(CPUArchitecture.Harvard, instruction_memory_size, data_memory_size, video_memory_size, stack_memory_size)
+        if r_harvard_cpu.is_err: self.fail("failed to create harvard cpu")
+
+        cpu: HarvardCPU = r_harvard_cpu.unwrap()
+        r_load_program = cpu.load_program(program, get_current_function_name())
+        if r_load_program.is_err: self.fail("failed to load program")
+
+        # Perform one cycle
+        cpu.clock()
+
+        # Ensure that the program counter is now 12 (3)
+        pc = cpu.register_file.get_pc()
+        self.assertEqual(pc, 2 * 4)
+
+        # Ensure that the return address is pushed onto the stack
+        r_address = cpu.stack_memory.peek()
+        if r_address.is_err:
+            self.fail("failed to peek return address from stack")
+        address = r_address.unwrap()
+        self.assertEqual(address, 1 * 4)
+
+
+
     # def test_add(self):
     #     pass
     
