@@ -22,7 +22,7 @@ class Stack(ByteBank):
         self.stack_memory_boundary = boundary
         return self
 
-    def update_stack_pointer(self, new_stack_pointer: RegisterValue) -> None:
+    def update_stack_pointer(self, new_stack_pointer: int) -> None:
         self.stack_pointer = new_stack_pointer
 
     def is_empty(self) -> bool:

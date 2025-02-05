@@ -3,7 +3,6 @@ from option import Ok, Result
 from VonNeumannMemory import VonNeumannMemory
 from Memory import Memory
 from RegisterFile import RegisterFile
-from Types import Program, Address, Instruction, RegisterValue
 from Constants import EC_PC_OVERRUN, PC_INC
 from Utilities import trace
 from PrettyPrinting import PrintMode

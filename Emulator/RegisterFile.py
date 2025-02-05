@@ -74,10 +74,10 @@ class RegisterFile():
             return Ok(self.registers[reg])
         return trace(f"No register with key '{reg}'")
     
-    def get_pc(self) -> RegisterValue:
+    def get_pc(self) -> int:
         return self.registers["PC"]
     
-    def get_sp(self) -> RegisterValue:
+    def get_sp(self) -> int:
         return self.registers["SP"]
 
     def increment_program_counter(self) -> None:
