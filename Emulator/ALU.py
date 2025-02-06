@@ -1,7 +1,7 @@
 from __future__ import annotations
-from enum import Enum
 from typing import Optional
-from Operation import OperationType
+from Operation import Operation
+from ALU1Bit import ALU1Bit
 
 class ALU():
     
@@ -11,8 +11,8 @@ class ALU():
         self.a: Optional[int] = None
         self.b: Optional[int] = None
 
-        # Create outputs r (result) and c (carry)
-        self.r: Optional[int] = None
+        # Create outputs s (result) and c (carry)
+        self.s: Optional[int] = None
         self.c: Optional[int] = None
 
         # Create the invert signals
@@ -20,7 +20,12 @@ class ALU():
         self.invert_b: Optional[bool] = None
 
         # Create the operation signal
-        self.operation: Optional[OperationType] = None
+        self.operation: Optional[Operation] = None
+
+        # Create a list of 32 1-bit ALUs
+        self.alus = []
+        for _ in range(0, 32):
+            self.alus.append(ALU1Bit())
 
     def __str__(self) -> str:
         return "str(ALU)\n"

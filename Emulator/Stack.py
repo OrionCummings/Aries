@@ -2,7 +2,6 @@ from __future__ import annotations
 from option import Result, Ok
 from ByteBank import ByteBank
 from Utilities import trace
-from Types import RegisterValue
 
 class Stack(ByteBank):
 

@@ -10,71 +10,69 @@ class OperationType(Enum):
     Nor         = 6
     Xnor        = 7
     Add         = 8
-    Subtract    = 9
 
-def op_no_operation(a: bool, b: bool, cin: bool) -> tuple[bool, bool]:
-    r = False
-    c = False
-    return (r, c)
+class Operations:
 
-def op_not(a: bool, b: bool, cin: bool) -> tuple[bool, bool]:
-    r = not a
-    c = False
-    return (r, c)
+    @staticmethod
+    def op_no_operation(a: bool, b: bool, cin: bool) -> tuple[bool, bool]:
+        return (False, False)
 
-def op_and(a: bool, b: bool, cin: bool) -> tuple[bool, bool]:
-    r = a and b
-    c = False
-    return (r, c)
+    @staticmethod
+    def op_not(a: bool, b: bool, cin: bool) -> tuple[bool, bool]:
+        s = not a
+        return (s, False)
 
-def op_nand(a: bool, b: bool, cin: bool) -> tuple[bool, bool]:
-    r = not(a and b)
-    c = False
-    return (r, c)
+    @staticmethod
+    def op_and(a: bool, b: bool, cin: bool) -> tuple[bool, bool]:
+        s = a and b
+        return (s, False)
 
-def op_or(a: bool, b: bool, cin: bool) -> tuple[bool, bool]:
-    r = a or b
-    c = False
-    return (r, c)
+    @staticmethod
+    def op_nand(a: bool, b: bool, cin: bool) -> tuple[bool, bool]:
+        s = not(a and b)
+        return (s, False)
 
-def op_xor(a: bool, b: bool, cin: bool) -> tuple[bool, bool]:
-    r = (a or b) and not (a and b)
-    c = False
-    return (r, c)
+    @staticmethod
+    def op_or(a: bool, b: bool, cin: bool) -> tuple[bool, bool]:
+        s = a or b
+        return (s, False)
 
-def op_nor(a: bool, b: bool, cin: bool) -> tuple[bool, bool]:
-    r = not (a or b)
-    c = False
-    return (r, c)
+    @staticmethod
+    def op_xor(a: bool, b: bool, cin: bool) -> tuple[bool, bool]:
+        s = (a or b) and not (a and b)
+        return (s, False)
 
-def op_xnor(a: bool, b: bool, cin: bool) -> tuple[bool, bool]:
-    r = not ((a or b) and not (a and b))
-    c = False
-    return (r, c)
+    @staticmethod
+    def op_nor(a: bool, b: bool, cin: bool) -> tuple[bool, bool]:
+        s = not (a or b)
+        return (s, False)
 
-def op_add(a: bool, b: bool, cin: bool) -> tuple[bool, bool]:
-    (r, _) = op_xor(a, b)
-    (_, c) = op_and(a, b)
-    return (r, c)
+    @staticmethod
+    def op_xnor(a: bool, b: bool, cin: bool) -> tuple[bool, bool]:
+        s = not ((a or b) and not (a and b))
+        return (s, False)
 
-def op_subtract(a: bool, b: bool, cin: bool) -> tuple[bool, bool]:
-    (r, _) = op_xor(a, b)
-    (_, c) = op_and(a, b)
-    return (r, c)
+    @staticmethod
+    def op_add(a: bool, b: bool, cin: bool) -> tuple[bool, bool]:
 
-OPERATIONS = [
-    op_no_operation,
-    op_not,
-    op_and,
-    op_nand,
-    op_or,
-    op_xor,
-    op_nor,
-    op_xnor,
-    op_and,
-    op_add,
-    op_subtract
-]
+        (d,    _) = Operations.op_xor(a, b,   False)
+        (f,    _) = Operations.op_and(a, b,   False)
+        (e,    _) = Operations.op_and(d, cin, False)
+        (s,    _) = Operations.op_xor(d, cin, False)
+        (cout, _) = Operations.op_or (e, f,   False)
+        return (s, cout)
+
+    operation_list = [
+        op_no_operation,
+        op_not,
+        op_and,
+        op_nand,
+        op_or,
+        op_xor,
+        op_nor,
+        op_xnor,
+        op_add,
+    ]
 
 class Operation:
 
@@ -83,17 +81,16 @@ class Operation:
 
     def set_operation(self, operation_type: OperationType):
         self.operation_type = operation_type
-        self.function = OPERATIONS[operation_type.value]
+        self.function = Operations.operation_list[operation_type.value]
 
-    def eval(self, a: bool, b: bool) -> tuple[bool, bool]:
-        return self.function(a, b)
+    def eval(self, a: bool, b: bool, cin: bool) -> tuple[bool, bool]:
+        return self.function(a, b, cin)
     
 if __name__ == '__main__':
 
     op = Operation(OperationType.Add)
 
-    (r, cout) = op.eval(True, True, True)
-
-    print(r)
-    print(cout)
+    (s, cout) = op.eval(False, False, True)
+    print(f"expected: {True}\t{False}")
+    print(f"actual:   {s}\t{cout}")
 
