@@ -4,12 +4,13 @@ from Operation import Operation, OperationType
 from ALU1Bit import ALU1Bit
 
 class ALU():
-    
+
     def __init__(self):
 
-        # Create the inputs a and b
+        # Create the inputs a, b, and cin
         self.a: Optional[int] = None
         self.b: Optional[int] = None
+        self.cin: Optional[int] = None
 
         # Create outputs s (result) and cout (carry out)
         self.s: Optional[int] = None
@@ -44,52 +45,83 @@ class ALU():
 
         bools: list[bool] = []
         for index in range(0, len(s)):
-            bools.append(True) if s[index] == 1 else bools.append(False)
+            if s[index] == '1':
+                bools.append(True)
+            else:
+                bools.append(False)
 
         return bools
-    
+
     @staticmethod
     def boolean_list_to_int(bool_list: list[bool]) -> int:
 
         n = 0
         for index, b in enumerate(bool_list):
-            n &= (b << index)
+            b_int = int(b)
+            mask = (b_int << index)
+            n |= mask
 
         return n
 
     def set_operation(self, op_type: OperationType):
+
+        # Set the overall ALU operation
         self.operation = Operation(op_type)
-        for alu1bit in self.alus:
-            alu1bit.set_operation(op_type)
+
+        # Set each 1 bit ALU operation
+        [alu1bit.set_operation(op_type) for alu1bit in self.alus]
 
     def eval(self):
+
+        # Invert inputs
+        if self.invert_a: self.a = ~self.a
+        if self.invert_b: self.b = ~self.b
 
         # Create a boolean input list
         a_bool_list = ALU.int_to_boolean_list(self.a)
         b_bool_list = ALU.int_to_boolean_list(self.b)
+        cin_bool_list = ALU.int_to_boolean_list(self.cin)
+
+        s_bool_list = []
+        cout_bool_list = []
 
         # For ever bit in the inputs
-        for index in reversed(range(0, 32)):
-            (self.s, self.cout) = self.operation.eval(a_bool_list[index], b_bool_list[index])
+        for index in reversed(range(0, len(a_bool_list))):
+            (a, b, cin) = (a_bool_list[index], b_bool_list[index], cin_bool_list[index])
+            (s, cout) = self.operation.eval(a, b, cin)
+            s_bool_list.append(s)
+            cout_bool_list.append(cout)
+
+        # s_bool_list = list(reversed(s_bool_list))
+        # cout_bool_list = list(reversed(cout_bool_list))
+
+        self.s = ALU.boolean_list_to_int(s_bool_list)
+        self.cout = ALU.boolean_list_to_int(cout_bool_list)
 
     def get_a(self) -> int:
         return self.a
-    
-    def set_a(self, a: int) -> int:
+
+    def set_a(self, a: int) -> None:
         self.a = a
 
     def get_b(self) -> int:
         return self.b
     
-    def set_b(self, b: int) -> int:
+    def set_b(self, b: int) -> None:
         self.b = b
 
-    def get_r(self) -> int:
-        return self.r
+    def get_cin(self) -> int:
+        return self.cin
     
-    def get_c(self) -> int:
-        return self.c
-    
+    def set_cin(self, cin: int) -> None:
+        self.cin = cin
+
+    def get_s(self) -> int:
+        return self.s
+
+    def get_cout(self) -> int:
+        return self.cout
+
     def set_invert_a(self) -> None:
         self.invert_a = True
 
@@ -110,4 +142,15 @@ class ALU():
 
 if __name__ == '__main__':
 
+    a = 3427
+    b = 16892
+
     alu = ALU()
+    alu.set_operation(OperationType.Add)
+    alu.set_a(a)
+    alu.set_b(b)
+    alu.set_cin(0)
+    alu.eval()
+    print(f"{alu.get_s()} ?= {a + b}")
+
+    # TODO: Make ALU tests!!
