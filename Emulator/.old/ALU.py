@@ -85,22 +85,17 @@ class ALU():
 
         s_bool_list = []
 
-        # TODO: Make this a single bit! This doesn't make sense
-        # as a full number.
-        cout_bool_list = [] 
+        cout = False
 
         # For ever bit in the inputs
         for index in range(0, len(a_bool_list)):
             (a, b, cin) = (a_bool_list[index], b_bool_list[index], cin_bool_list[index])
             (s, cout) = self.operation.eval(a, b, cin)
             s_bool_list.append(s)
-            cout_bool_list.append(cout)
-
-        # s_bool_list = list(reversed(s_bool_list))
-        # cout_bool_list = list(reversed(cout_bool_list))
+            
 
         self.s = ALU.boolean_list_to_int(s_bool_list)
-        self.cout = ALU.boolean_list_to_int(cout_bool_list)
+        self.cout = cout
 
     def get_a(self) -> int:
         return self.a
