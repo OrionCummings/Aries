@@ -6,9 +6,10 @@ class ALU1Bit():
     
     def __init__(self):
 
-        # Create the inputs a and b
+        # Create the inputs a, b, and cin
         self.a: Optional[int] = None
         self.b: Optional[int] = None
+        self.cin: Optional[int] = None
 
         # Create outputs s (result) and cout (carry out)
         self.s: Optional[int] = None
@@ -28,8 +29,9 @@ class ALU1Bit():
         pass
 
     def eval(self) -> tuple[bool, bool]:
-        return self.operation.eval(self.a, self.b, self.cin)
-
+        (self.s, self.cout) = self.operation.eval(self.a, self.b, self.cin)
+        return (self.s, self.cout)
+    
     def set_operation(self, op_type: OperationType):
         self.operation = Operation(op_type)
 
@@ -51,11 +53,11 @@ class ALU1Bit():
     def set_cin(self, cin: bool) -> bool:
         self.cin = cin
 
-    def get_r(self) -> bool:
-        return self.r
+    def get_s(self) -> bool:
+        return self.s
     
-    def get_c(self) -> bool:
-        return self.c
+    def get_cout(self) -> bool:
+        return self.cout
     
     def set_invert_a(self) -> None:
         self.invert_a = True

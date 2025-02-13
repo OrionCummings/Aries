@@ -43,18 +43,19 @@ class ALU():
         # Convert the int to a binary string
         s = format(n, "032b")
 
-        bools: list[bool] = []
+        bools: list[bool] = [False] * 32
         for index in range(0, len(s)):
             if s[index] == '1':
-                bools.append(True)
+                bools[index] = True
             else:
-                bools.append(False)
+                bools[index] = False
 
         return bools
 
     @staticmethod
     def boolean_list_to_int(bool_list: list[bool]) -> int:
 
+        bool_list = list(reversed(bool_list))
         n = 0
         for index, b in enumerate(bool_list):
             b_int = int(b)
@@ -83,10 +84,13 @@ class ALU():
         cin_bool_list = ALU.int_to_boolean_list(self.cin)
 
         s_bool_list = []
-        cout_bool_list = []
+
+        # TODO: Make this a single bit! This doesn't make sense
+        # as a full number.
+        cout_bool_list = [] 
 
         # For ever bit in the inputs
-        for index in reversed(range(0, len(a_bool_list))):
+        for index in range(0, len(a_bool_list)):
             (a, b, cin) = (a_bool_list[index], b_bool_list[index], cin_bool_list[index])
             (s, cout) = self.operation.eval(a, b, cin)
             s_bool_list.append(s)
@@ -151,6 +155,9 @@ if __name__ == '__main__':
     alu.set_b(b)
     alu.set_cin(0)
     alu.eval()
-    print(f"{alu.get_s()} ?= {a + b}")
+    x = alu.get_s()
+    y = a + b
+    assert x == y
 
     # TODO: Make ALU tests!!
+    
