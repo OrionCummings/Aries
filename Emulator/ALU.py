@@ -3,6 +3,8 @@ from Utilities import trace
 
 from option import Ok, Result
 
+# NOTE: This does not work!
+
 class OperationType(Enum):
     NONE = 0,
     AND = 1,
@@ -142,7 +144,7 @@ class ALU2:
 
         for (index, alu) in enumerate(self.alus):
 
-            a = 0
+            a = (self.a << index) & 1
             b = 0
             c = 0
 
