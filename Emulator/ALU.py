@@ -1,46 +1,10 @@
 from enum import Enum
+from BinaryOperation import OperationType
 from Utilities import trace
 
 from option import Ok, Result
 
 # NOTE: This does not work!
-
-class OperationType(Enum):
-    NONE = 0,
-    AND = 1,
-    OR = 2,
-    ADD = 3,
-
-    # TODO: Refactor; why does an enumeration have
-    # static methods lmao.
-    @staticmethod
-    def no_operation(a, b, cin):
-        assert False
-
-    @staticmethod
-    def and_operation(a, b, cin) -> tuple[int, int]:
-        return (a & b, 0)
-
-    @staticmethod
-    def or_operation(a, b, cin) -> tuple[int, int]:
-        return (a | b, 0)
-    
-    @staticmethod
-    def xor_operation(a, b, cin) -> tuple[int, int]:
-        return (a ^ b, 0)
-
-    @staticmethod
-    def half_add_operation(a, b, cin) -> tuple[int, int]:
-        s = a ^ b
-        c = a and b
-        return (s, c)
-    
-    @staticmethod
-    def full_add_operation(a, b, cin) -> tuple[int, int]:
-        s1, c1 = OperationType.half_add_operation(cin, a, 0)
-        s2, c2 = OperationType.half_add_operation(s1, b, 0)
-        c = c1 or c2
-        return (s2, c)
 
 class ALU:
 
