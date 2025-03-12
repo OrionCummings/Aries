@@ -25,7 +25,7 @@ class HCPU():
 
     def __eq__(self, other: HCPU) -> bool:
 
-        if not isinstance(other, HarvardCPU):
+        if not isinstance(other, HCPU):
             return False
         
         register_file_equal = self.register_file == other.register_file
@@ -49,16 +49,16 @@ class HCPU():
         builder += str(self.register_file)
 
         # Append the cache
-        builder += "\nCache\n"
-        builder += str(self.cache)
+        # builder += "\nCache\n"
+        # builder += str(self.cache)
 
         # Append the ALU
-        builder += "\nALU\n"
-        builder += str(self.alu)
+        # builder += "\nALU\n"
+        # builder += str(self.alu)
 
         # Append the FPU
-        builder += "\nFPU\n"
-        builder += str(self.fpu)
+        # builder += "\nFPU\n"
+        # builder += str(self.fpu)
         
         return builder
 

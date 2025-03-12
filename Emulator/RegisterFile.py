@@ -1,7 +1,5 @@
 from __future__ import annotations
-from enum import Enum
-from Types import RegisterValue
-from option import Err, Ok, Result
+from option import Ok, Result
 from BitManipulation import get_bit, reset_bit, set_bit, toggle_bit
 from Constants import CONSTANT_REGISTER_MAP, BP_INC, FL_ZERO, PC_INC, SP_INC, TextRenderTarget
 from Utilities import trace

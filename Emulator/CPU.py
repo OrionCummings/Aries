@@ -1,14 +1,10 @@
 from __future__ import annotations
-import struct
 from enum import Enum
 from option import Err, Ok, Result
-from Types import Program
-from Assembler import Assembler, AssemblerSettings, AssemblerSettingsSource
 from Stack import Stack
-from Memory import Memory
 from RegisterFile import RegisterFile
 from Transformations import decode
-from PrettyPrinting import PrintMode, green_bold, info, warning
+from PrettyPrinting import green_bold
 from Utilities import abc_not_implemented, panic, debug, range_overlap, trace
 from Constants import CONSTANT_REGISTER_MAP, DEFAULT_DATA_MEMORY_BASE_ADDRESS, DEFAULT_DATA_MEMORY_SIZE_IN_BYTES, DEFAULT_INSTRUCTION_MEMORY_BASE_ADDRESS, DEFAULT_INSTRUCTION_MEMORY_SIZE_IN_BYTES, DEFAULT_STACK_MEMORY_BASE_ADDRESS, DEFAULT_STACK_MEMORY_SIZE_IN_BYTES, DEFAULT_VIDEO_MEMORY_BASE_ADDRESS, DEFAULT_VIDEO_MEMORY_SIZE_IN_BYTES, FL_ZERO, PC_INC, EC_PC_OVERRUN, TextRenderTarget
 
@@ -28,7 +24,6 @@ class MemoryLayout(Enum):
     
     # Place the stack at the end of memory
     StackBack = 3
-    
 
 # TODO: Implement these as subclasses of CPU! Otherwise every function
 # will be an if statement that changes behavior between the two types:
@@ -197,8 +192,26 @@ class CPUSettings():
         return Ok(None)
 
 class CPU():
-    """A CPU that supports the Aires Assembly Language."""
+    """A CPU that supports the Aries Assembly Language."""
     
+    @staticmethod
+    def create_default_cpu_settings() -> Result[CPUSettings, str]:
+
+        r_settings = (CPUSettings()
+            .set_architecture(DEFAULT_CPU_ARCHITECTURE)
+            .set_memory_layout(DEFAULT_MEMORY_LAYOUT)
+            .set_instruction_memory_size(DEFAULT_INSTRUCTION_MEMORY_SIZE_IN_BYTES)
+            .set_data_memory_size(DEFAULT_DATA_MEMORY_SIZE_IN_BYTES)
+            .set_video_memory_size(DEFAULT_VIDEO_MEMORY_SIZE_IN_BYTES)
+            .set_stack_memory_size(DEFAULT_STACK_MEMORY_SIZE_IN_BYTES)
+            .validate()
+        )
+
+        if r_settings.is_err:
+            return trace("failed to create default settings")
+
+        return r_settings
+
     def __init__(self, settings: CPUSettings) -> None:
         """Initializes a CPU instance with a the given settings."""
         
@@ -216,7 +229,7 @@ class CPU():
         
         return Err(abc_not_implemented())
     
-    def load_program(self, program: Program, program_name: str) -> Result[bool, str]:
+    def load_program(self, program, program_name: str) -> Result[bool, str]:
         """Loads a program into memory at the given address.
         Can accept a list of instructions or a string as a program.
         """
@@ -600,3 +613,9 @@ if __name__ == '__main__':
 
     c.clock()
     print(c)
+
+# Default CPU architecture
+DEFAULT_CPU_ARCHITECTURE = CPUArchitecture.Harvard
+
+# Default memory layout
+DEFAULT_MEMORY_LAYOUT = MemoryLayout.Sequential

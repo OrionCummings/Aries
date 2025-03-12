@@ -1,60 +1,60 @@
 from __future__ import annotations
-from option import Ok, Err, Result
-from CPU import CPU, CPUArchitecture, CPUSettings, MemoryLayout
-from Constants import DEFAULT_DATA_MEMORY_SIZE_IN_BYTES, DEFAULT_INSTRUCTION_MEMORY_SIZE_IN_BYTES, DEFAULT_STACK_MEMORY_SIZE_IN_BYTES, DEFAULT_VIDEO_MEMORY_SIZE_IN_BYTES
-from HarvardCPU import HCPU
+from option import Ok, Result
+from CPU import CPU, CPUArchitecture, CPUSettings
+from HCPU import HCPU
 from Utilities import panic, trace
 
 class Computer():
 
     @staticmethod
-    def create_cpu_settings(architecture: CPUArchitecture) -> Result[CPU, str]:
+    def create_default_cpu() -> Result[CPU, str]:
 
-        r_settings = (CPUSettings()
-                    .set_architecture(architecture)
-                    .set_memory_layout(MemoryLayout.Sequential)
-                    .set_instruction_memory_size(DEFAULT_INSTRUCTION_MEMORY_SIZE_IN_BYTES)
-                    .set_data_memory_size(DEFAULT_DATA_MEMORY_SIZE_IN_BYTES)
-                    .set_video_memory_size(DEFAULT_VIDEO_MEMORY_SIZE_IN_BYTES)
-                    .set_stack_memory_size(DEFAULT_STACK_MEMORY_SIZE_IN_BYTES)
-                    .validate()
-        )
+        r_settings = Computer.create_default_cpu_settings()
 
         if r_settings.is_err:
-            return trace("failed to create default settings")
+            return trace("failed to create default cpu settings", r_settings.unwrap_err())
 
-        return r_settings
+        cpu = HCPU(r_settings.unwrap())
 
-    @staticmethod
-    def create_cpu(settings: CPUSettings) -> Result[CPU, str]:
+
+
+        return Ok(cpu)
+
+    def create_cpu(self, settings: CPUSettings) -> Result[None, str]:
 
         match settings.architecture:
             case CPUArchitecture.Harvard:
-                cpu = HCPU(settings)
+                self.cpu = HCPU(settings)
 
             case _:
                 return trace(f"unsupported cpu architecture '{settings.architecture}'")
 
-        return Ok(cpu)
+        return Ok(None)
 
-    def __init__(self, settings: CPUSettings):
+    def __init__(self, settings: CPUSettings = None):
 
-        # Create default CPU settings
-        r_cpu = Computer.create_cpu(settings)
-        if r_cpu.is_err:
-            panic("failed to create cpu")
-        self.cpu = r_cpu.unwrap()
+        if settings is None:
+
+            # Create default CPU settings
+            r_cpu: Result[None, str] = Computer.create_default_cpu()
+            if r_cpu.is_err:
+                panic("failed to create cpu")
+            self.cpu = r_cpu.unwrap()
+
+        else:
+            panic("custom cpu settings are not currently supported")
 
     def __str__(self) -> str:
-        return str(self.cpu)
+
+        builder: str = "Computer:\n"
+        builder += "CPU:\n"
+        builder += str(self.cpu)
+        builder += "\n"
+
+        return builder
 
 if __name__ == '__main__':
 
-    r_settings = Computer.create_cpu_settings(CPUArchitecture.Harvard)
-    if r_settings.is_err:
-        panic("failed to create CPU settings", depth=1)
-    settings = r_settings.unwrap()
-
-    c = Computer(settings)
+    c = Computer()
 
     print(c)

@@ -1,23 +1,20 @@
 from __future__ import annotations
 from Memory import Memory
-from Types import Instruction
-from enum import Enum
-from option import Err, Ok, Result
-from ByteBank import ByteBank
-from Constants import HEX_FORMAT, PC_INC, TextRenderTarget
-from PrettyPrinting import blue, bold, green, orange, red, red_bold, yellow
+from option import Ok, Result
+from Constants import HEX_FORMAT, PC_INC
+from PrettyPrinting import red_bold
 from Utilities import trace
 
-class HarvardMemory(Memory):
+class HMemory(Memory):
     """A byte-addressable block of memory.
     """
     
     def __init__(self, capacity_in_bytes: int):
         super().__init__(capacity_in_bytes)
     
-    def __eq__(self, other: HarvardMemory) -> bool:
+    def __eq__(self, other: HMemory) -> bool:
 
-        return isinstance(other, HarvardMemory) and \
+        return isinstance(other, HMemory) and \
             (self.capacity, self.content) == (other.capacity, other.content)
     
     def __str__(self) -> str:
@@ -57,7 +54,7 @@ class HarvardMemory(Memory):
 
         return builder
        
-    def get_instruction(self, index: int) -> Result[Instruction, str]:
+    def get_instruction(self, index: int) -> Result[int, str]:
         
         if index not in range(0, self.capacity): return trace(f"index '{index}' out of range")
         if index % 4 != 0: return trace(f"index '{index}' is not aligned with four byte boundary")
@@ -68,7 +65,7 @@ class HarvardMemory(Memory):
         if r_get_bytes.is_err:
             return trace("failed to get bytes", r_get_bytes.unwrap_err())
         
-        instruction: Instruction = int.from_bytes(r_get_bytes.unwrap(), byteorder='little')
+        instruction = int.from_bytes(r_get_bytes.unwrap(), byteorder='little')
 
         return Ok(instruction)
 
