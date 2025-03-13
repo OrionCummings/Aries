@@ -1,57 +1,14 @@
 from __future__ import annotations
-from enum import Enum
 from option import Err, Ok, Result
-from Stack import Stack
 from RegisterFile import RegisterFile
 from Transformations import decode
 from PrettyPrinting import green_bold
-from Utilities import abc_not_implemented, panic, debug, range_overlap, trace
+from Utilities import panic, debug, range_overlap, trace
 from Constants import CONSTANT_REGISTER_MAP, DEFAULT_DATA_MEMORY_BASE_ADDRESS, DEFAULT_DATA_MEMORY_SIZE_IN_BYTES, DEFAULT_INSTRUCTION_MEMORY_BASE_ADDRESS, DEFAULT_INSTRUCTION_MEMORY_SIZE_IN_BYTES, DEFAULT_STACK_MEMORY_BASE_ADDRESS, DEFAULT_STACK_MEMORY_SIZE_IN_BYTES, DEFAULT_VIDEO_MEMORY_BASE_ADDRESS, DEFAULT_VIDEO_MEMORY_SIZE_IN_BYTES, FL_ZERO, PC_INC, EC_PC_OVERRUN, TextRenderTarget
-
-class MemoryLayout(Enum):
-    
-    # Specify no layout. Bases and sizes are expected to be configured
-    # via CPUSettings setters.
-    NoLayout = 0
-    
-    # Place memory contigiously in order of instruction,
-    # data, video, and stack memory.
-    Sequential = 1
-    
-    # Place memory contigiously in order of instruction,
-    # data, video, and stack memory with 16 bytes of padding
-    Padded16B = 2
-    
-    # Place the stack at the end of memory
-    StackBack = 3
-
-# TODO: Implement these as subclasses of CPU! Otherwise every function
-# will be an if statement that changes behavior between the two types:
-# it's stupid!
-class CPUArchitecture(Enum):
-    """An enum for different types of CPU architectures."""
-
-    # Harvard contains seperate memory banks for each type 
-    # of stored data. Traditionally, this divides instruction
-    # memory (your program) and data memory (RAM). In this 
-    # project, the call stack, stack, and video memory are
-    # also seperate memory banks to ease any conflicts.
-    Harvard = 0
-
-    # VonNeumann has a single memory bank for (traditionally)
-    # instruction and data. Regions of memory can be mapped to
-    # perform a specific purpose (like a stack or video memory),
-    # but that is not an architecture decision.
-    VonNeumann = 1
-
-    # OnlyMemory has a single memory bank and no registers.
-    OnlyMemory = 2
 
 class CPUSettings():
 
     def __init__(self):
-        self.architecture = None
-        self.memory_layout = None
         self.memory_size = 0
         self.instruction_memory_base = 0
         self.instruction_memory_size = 0
@@ -62,13 +19,28 @@ class CPUSettings():
         self.stack_memory_base = 0
         self.stack_memory_size = 0
 
-    def set_architecture(self, architecture: CPUArchitecture) -> CPUSettings:
-        self.architecture = architecture
-        return self
-    
-    def set_memory_layout(self, layout: MemoryLayout) -> CPUSettings:
-        self.memory_layout = layout
-        return self
+    @staticmethod
+    def create_default_cpu_settings() -> Result[CPUSettings, str]:
+
+        # Create a new instance of CPUSettings, set the defaults, 
+        # and then validate it
+        r_settings = (CPUSettings()
+            .set_instruction_memory_size(DEFAULT_INSTRUCTION_MEMORY_SIZE_IN_BYTES)
+            .set_instruction_memory_base(0)
+            .set_data_memory_size(DEFAULT_DATA_MEMORY_SIZE_IN_BYTES)
+            .set_data_memory_base(DEFAULT_INSTRUCTION_MEMORY_SIZE_IN_BYTES)
+            .set_video_memory_size(DEFAULT_VIDEO_MEMORY_SIZE_IN_BYTES)
+            .set_video_memory_base(DEFAULT_DATA_MEMORY_SIZE_IN_BYTES + DEFAULT_INSTRUCTION_MEMORY_SIZE_IN_BYTES)
+            .set_stack_memory_size(DEFAULT_STACK_MEMORY_SIZE_IN_BYTES)
+            .set_stack_memory_base(DEFAULT_DATA_MEMORY_SIZE_IN_BYTES + DEFAULT_INSTRUCTION_MEMORY_SIZE_IN_BYTES + DEFAULT_STACK_MEMORY_SIZE_IN_BYTES)
+            .validate()
+        )
+
+        # If this failed, propagate the error
+        if r_settings.is_err:
+            return trace("failed to create default settings")
+
+        return r_settings
 
     def set_instruction_memory_base(self, base_address: int) -> CPUSettings:
         self.instruction_memory_base = base_address
@@ -104,36 +76,12 @@ class CPUSettings():
 
     def validate(self) -> Result[CPU, str]:
 
-        # TODO: Make this actually work
-        # self.set_default_values()
-
-        # Apply the requested layout
-        self.apply_layout()
-
-        r_valid = self.memory_layout_is_valid()
-        if r_valid.is_err:
-            return trace("memory layout is not valid", r_valid.unwrap_err())
-
         r_total_memory_size = self.calculate_total_memory_size()
         if r_total_memory_size.is_err:
             return trace("failed to calculate total memory size", r_total_memory_size.unwrap_err())
         self.memory_size = r_total_memory_size.unwrap()
 
         return Ok(self)
-    
-    def apply_layout(self) -> None:
-        
-        match self.memory_layout:
-            
-            case MemoryLayout.Sequential:
-                
-                self.set_instruction_memory_base(0)
-                self.set_data_memory_base(self.instruction_memory_base + self.instruction_memory_size)
-                self.set_video_memory_base(self.data_memory_base + self.data_memory_size)
-                self.set_stack_memory_base(self.video_memory_base + self.video_memory_size)
-            
-            case _:
-                panic("invalid memory layout")
 
     # TODO: Make this real; fields are never None
     def set_default_values(self) -> None:
@@ -149,81 +97,35 @@ class CPUSettings():
     def calculate_total_memory_size(self) -> Result[int, str] | int:
         return Ok(sum([self.instruction_memory_size, self.data_memory_size, self.video_memory_size, self.stack_memory_size]))
 
-    def memory_layout_is_valid(self) -> Result[None, str]:
-        """Checks if the current layout of memory has any overlapping regions. 
-        Returns True if there is a layout issue and False if not.
-        """
-        
-        # Get the base pointers and the size of each region to determine the ranges
-        range_instruction_memory = range(self.instruction_memory_base, self.instruction_memory_base + self.instruction_memory_size)
-        range_data_memory = range(self.data_memory_base, self.data_memory_base + self.data_memory_size)
-        range_video_memory = range(self.video_memory_base, self.video_memory_base + self.video_memory_size)
-        range_stack = range(self.stack_memory_base, self.stack_memory_base + self.stack_memory_size)
-        
-        # I understand that there are cleaner ways to do this,
-        # but I wan't to have unique outputs for each case. (4 C 2 = 6)
-        
-        # Check if instruction memory and data memory overlap
-        if range_overlap(range_instruction_memory, range_data_memory):
-            return trace(f"instruction memory ({range_instruction_memory.start}, {range_instruction_memory.stop}) and data memory ({range_data_memory.start}, {range_data_memory.stop}) overlap")
-        
-        # Check if data memory and video memory overlap
-        if range_overlap(range_data_memory, range_video_memory):
-            return trace(f"data memory ({range_data_memory.start}, {range_data_memory.stop}) and video memory ({range_video_memory.start}, {range_video_memory.stop}) overlap")
-        
-        # Check if video memory and the stack overlap
-        if range_overlap(range_data_memory, range_stack):
-            return trace(f"video memory ({range_video_memory.start}, {range_video_memory.stop}) and stack memory ({range_stack.start}, {range_stack.stop}) overlap")
-        
-        # Check if instruction memory and the stack overlap
-        if range_overlap(range_instruction_memory, range_stack):
-            return trace(f"instruction memory ({range_instruction_memory.start}, {range_instruction_memory.stop}) and stack memory ({range_stack.start}, {range_stack.stop}) overlap")
-        
-        # Check if instruction memory and video memory overlap
-        if range_overlap(range_instruction_memory, range_video_memory):
-            return trace(f"instruction memory ({range_instruction_memory.start}, {range_instruction_memory.stop}) and video memory ({range_video_memory.start}, {range_video_memory.stop}) overlap")
-        
-        # Check if data memory and stack memory overlap
-        if range_overlap(range_data_memory, range_stack):
-            return trace(f"data memory ({range_data_memory.start}, {range_data_memory.stop}) and stack memory ({range_stack.start}, {range_stack.stop}) overlap")
-        
-        # TODO: Add more checks as memory complexity grows
-        
-        return Ok(None)
-
 class CPU():
     """A CPU that supports the Aries Assembly Language."""
     
-    @staticmethod
-    def create_default_cpu_settings() -> Result[CPUSettings, str]:
+    
 
-        r_settings = (CPUSettings()
-            .set_architecture(DEFAULT_CPU_ARCHITECTURE)
-            .set_memory_layout(DEFAULT_MEMORY_LAYOUT)
-            .set_instruction_memory_size(DEFAULT_INSTRUCTION_MEMORY_SIZE_IN_BYTES)
-            .set_data_memory_size(DEFAULT_DATA_MEMORY_SIZE_IN_BYTES)
-            .set_video_memory_size(DEFAULT_VIDEO_MEMORY_SIZE_IN_BYTES)
-            .set_stack_memory_size(DEFAULT_STACK_MEMORY_SIZE_IN_BYTES)
-            .validate()
-        )
-
-        if r_settings.is_err:
-            return trace("failed to create default settings")
-
-        return r_settings
-
-    def __init__(self, settings: CPUSettings) -> None:
+    def __init__(self, settings: CPUSettings = None) -> None:
         """Initializes a CPU instance with a the given settings."""
         
-        # Save the cpu settings
-        self.settings = settings
+        if settings is None:
+            self.settings = CPU.create_default_cpu_settings()
+        else:
+            self.settings = settings
 
         # All CPUs have a notion of a halted state
         self.halted: bool = False
 
-    def __eq__(self, other):
+        # 
+        self.register_file = RegisterFile()
+
+        # TODO: Add cache, ALU, and FPU
+
+    def __eq__(self, other: CPU):
+
+        if not isinstance(other, CPU):
+            return False
         
-        return Err(abc_not_implemented())
+        register_file_equality = self.register_file == other.register_file
+
+        return register_file_equality
 
     def __str__(self) -> str:
         
@@ -591,31 +493,3 @@ CONSTANT_INSTRUCTION_FUNCTIONS = {
     "ret":      i_ret,
 }
 
-if __name__ == '__main__':
-
-    settings = CPUSettings()
-    settings.architecture = CPUArchitecture.Harvard
-    settings.data_memory = (16, 0)
-    settings.instruction_memory = (16, 0)
-    settings.video_memory = (16, 0)
-    settings.stack = (16, 0)
-    r_memory_size = settings.calculate_memory_size()
-
-    if r_memory_size.is_err:
-        panic(f"{debug()}: failed to calculate total memory size:\n{r_memory_size.unwrap_err()}")
-    settings.memory_size
-
-    c = CPU(settings)
-
-    program = "ldi 255 A\nhlt\n"
-
-    c.load_program(program, "test_program")
-
-    c.clock()
-    print(c)
-
-# Default CPU architecture
-DEFAULT_CPU_ARCHITECTURE = CPUArchitecture.Harvard
-
-# Default memory layout
-DEFAULT_MEMORY_LAYOUT = MemoryLayout.Sequential

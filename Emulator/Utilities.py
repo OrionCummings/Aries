@@ -2,7 +2,7 @@ import inspect
 import os
 from option import Result, Ok, Err
 from Constants import CONSTANT_OPCODE_MAP
-from PrettyPrinting import bold, print_red, red, yellow
+from PrettyPrinting import red, yellow
 
 def get_current_filename() -> str:
     return str(inspect.stack()[1][1])
@@ -12,9 +12,6 @@ def get_current_line() -> str:
 
 def get_current_function_name() -> str:
     return str(inspect.stack()[1][3])
-
-def abc_not_implemented() -> str:
-    return debug(2, "not implemented for abstract base classes")
 
 def debug(function_depth: int = 1, message: str = "") -> str:
     stack = inspect.stack()[function_depth]
