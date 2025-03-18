@@ -67,6 +67,8 @@ class InstructionFormat(Enum):
     Jump = 3,
 
 # All valid opcodes and their information tuple (ID, ARGC, FORMAT, ALU?)
+# TODO: Remove ID field: we can decide if ALL arguments are used 
+# inside the instruction function! Don't add unnecessary information here!
 # NOTE: ID is added later! This dict contains (ARGC, FORMAT, ALU?)
 CONSTANT_OPCODE_MAP = {
     "nop":  (0, InstructionFormat.Simple, False),
