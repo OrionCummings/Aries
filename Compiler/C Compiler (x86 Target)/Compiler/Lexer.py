@@ -178,14 +178,6 @@ operatorDictionary: Dict[str, TokenType] = {
     "--":           TokenType.OP_DEC,
 }
 
-primitiveTypeDictionary: Dict[str, TokenType] = {
-    "int":      TokenType.TYPE_INT,
-    "char":     TokenType.TYPE_CHAR,
-    "string":   TokenType.TYPE_STRING,
-    "bool":     TokenType.TYPE_BOOL,
-    "float":    TokenType.TYPE_FLOAT,
-}
-
 @dataclass
 class Token:
     type: TokenType      = TokenType.NONE,
@@ -258,11 +250,7 @@ class Tokenizer():
     # TODO: This doesn't need to be in this class. Static maybe? 
     def tokenize_keywords(self, buffer: str) -> Optional[TokenType]:
         return keywordDictionary[buffer] if buffer in keywordDictionary else None
-    
-    # TODO: This doesn't need to be in this class. Static maybe? 
-    def tokenize_primitive_types(self, buffer: str) -> Optional[TokenType]:
-        return primitiveTypeDictionary[buffer] if buffer in primitiveTypeDictionary else None
-    
+
     def parse_operators(self) -> Optional[str]:
         """Parses an operator at the current parsing head. Returns None on failure."""
         
@@ -290,8 +278,6 @@ class Tokenizer():
 
             if keyword := self.tokenize_keywords(buffer):
                 self.tokens.append(keyword)
-            elif prim_type := self.tokenize_primitive_types(buffer):
-                self.tokens.append(prim_type)
             else:
                 self.tokens.append(Token(TokenType.IDENTIFIER, None, buffer))
 
