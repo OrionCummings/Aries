@@ -12,5 +12,6 @@
         "./Emulator",
         "-p",
         "test_*.py"
-    ]
+    ],
+    "C_Cpp.default.compilerPath": "C:/msys64/ucrt64/bin/gcc.exe"
 }
