@@ -32,6 +32,8 @@ class TokenType(Enum):
     SYM_AMPERSAND           = auto(), # &
     SYM_PIPE                = auto(), # |
     SYM_CARRET              = auto(), # ^
+    SYM_SQUOTE              = auto(), # '
+    SYM_DQUOTE              = auto(), # "
     KEYWORD_IF              = auto(), # if
     KEYWORD_ELIF            = auto(), # elif
     KEYWORD_ELSE            = auto(), # else
@@ -104,28 +106,30 @@ keyword_dictionary: Dict[str, TokenType] = {
 }
 
 symbol_dictionary: Dict[str, TokenType] = {
-    ";": TokenType.SYM_SEMICOLON,
-    ":": TokenType.SYM_COLON,
-    ",": TokenType.SYM_COMMA,
-    "?": TokenType.SYM_QUESTION,
-    "(": TokenType.SYM_PAREN_OPEN,
-    ")": TokenType.SYM_PAREN_CLOSE,
-    "{": TokenType.SYM_BRACE_OPEN,
-    "}": TokenType.SYM_BRACE_CLOSE,
-    "[": TokenType.SYM_BRACKET_OPEN,
-    "]": TokenType.SYM_BRACKET_CLOSE,
-    "=": TokenType.SYM_EQUAL,
-    "+": TokenType.SYM_PLUS,
-    "-": TokenType.SYM_DASH,
-    "/": TokenType.SYM_SLASH,
-    "*": TokenType.SYM_STAR,
-    "%": TokenType.SYM_PERCENT,
-    "!": TokenType.SYM_EXCLAIM,
-    "<": TokenType.SYM_LT,
-    ">": TokenType.SYM_GT,
-    "&": TokenType.SYM_AMPERSAND,
-    "|": TokenType.SYM_PIPE,
-    "^": TokenType.SYM_CARRET,
+    ";":  TokenType.SYM_SEMICOLON,
+    ":":  TokenType.SYM_COLON,
+    ",":  TokenType.SYM_COMMA,
+    "?":  TokenType.SYM_QUESTION,
+    "(":  TokenType.SYM_PAREN_OPEN,
+    ")":  TokenType.SYM_PAREN_CLOSE,
+    "{":  TokenType.SYM_BRACE_OPEN,
+    "}":  TokenType.SYM_BRACE_CLOSE,
+    "[":  TokenType.SYM_BRACKET_OPEN,
+    "]":  TokenType.SYM_BRACKET_CLOSE,
+    "=":  TokenType.SYM_EQUAL,
+    "+":  TokenType.SYM_PLUS,
+    "-":  TokenType.SYM_DASH,
+    "/":  TokenType.SYM_SLASH,
+    "*":  TokenType.SYM_STAR,
+    "%":  TokenType.SYM_PERCENT,
+    "!":  TokenType.SYM_EXCLAIM,
+    "<":  TokenType.SYM_LT,
+    ">":  TokenType.SYM_GT,
+    "&":  TokenType.SYM_AMPERSAND,
+    "|":  TokenType.SYM_PIPE,
+    "^":  TokenType.SYM_CARRET,
+    "\'": TokenType.SYM_SQUOTE,
+    "\"": TokenType.SYM_DQUOTE,
 }
 
 pair_symbol_list = [
@@ -367,23 +371,24 @@ class Tokenizer():
             pass
 
             # DEBUG:
-            if buffer == "*":
+            if buffer == "\"":
                 pass
 
-            if buffer.isspace():
+            # If the buffer is a space or it's empty, then
+            # we can't do anything.
+            if buffer.isspace() or buffer == '':
                 continue
 
             # Is the buffer a single quote?
             elif buffer == "\'":
-                
+                    
                 full_char_sequence = "\'" + self.peek(2)
 
                 if is_literal_char(full_char_sequence):
 
-                    # Remove the quotes
+                    # Remove the quotes and add to the token list
                     buffer = full_char_sequence.replace("\'", "", 2)
                     self.tokens.append(Token(TokenType.LITERAL, None, buffer))
-
 
             # Is the buffer a double quote?
             elif buffer == "\"":
@@ -394,9 +399,18 @@ class Tokenizer():
                     # Consume everything
                     buffer += self.pop()
 
+                # If the next character doesn't exist, then we failed to
+                # close this string literal!
+                if self.peek() == None:
+                    print("failed to close string literal!")
+                    exit(123)
+
+                buffer += self.pop()
+
                 # Remove the first character (which should be a double quote)
                 buffer = buffer[1:-1]
 
+                # Add the literal token to the token list
                 self.tokens.append(Token(TokenType.LITERAL, None, buffer))
 
             # Is the buffer a valid symbol?
@@ -460,10 +474,7 @@ if __name__ == "__main__":
         Token(TokenType.SYM_PAREN_CLOSE, None, None),
         Token(TokenType.SYM_BRACE_OPEN, None, None),
         Token(TokenType.KEYWORD_RETURN, None, None),
-        Token(TokenType.LITERAL, None, "test"),
-        Token(TokenType.LITERAL, None, "string"),
-        Token(TokenType.LITERAL, None, "@"),
-        Token(TokenType.LITERAL, None, "$#**()}!"),
+        Token(TokenType.LITERAL, None, "test string @ $#**()}!"),
         Token(TokenType.SYM_SEMICOLON, None, None),
         Token(TokenType.SYM_BRACE_CLOSE, None, None),
         Token(TokenType.EOF, None, None),
