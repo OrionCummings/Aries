@@ -382,12 +382,12 @@ class Tokenizer():
             # Is the buffer a single quote?
             elif buffer == "\'":
                     
-                full_char_sequence = "\'" + self.peek(2)
+                full_char_sequence = "\'" + self.pop(2)
 
                 if is_literal_char(full_char_sequence):
 
                     # Remove the quotes and add to the token list
-                    buffer = full_char_sequence.replace("\'", "", 2)
+                    buffer = full_char_sequence[1:-1]
                     self.tokens.append(Token(TokenType.LITERAL, None, buffer))
 
             # Is the buffer a double quote?
@@ -442,11 +442,12 @@ class Tokenizer():
 if __name__ == "__main__":
 
     source_file_dir = "C:\\Users\\Orion\\Stash\\PersonalProjects\\Aries\\Compiler\\C Compiler (x86 Target)\\Source Files"
-    # source_file_name = "ReturnZero.c"
-    source_file_name = "ReturnLiteralString.c"
+    # source_file_name = "ReturnLiteralInteger.c"
+    # source_file_name = "ReturnLiteralString.c"
+    source_file_name = "ReturnLiteralCharacter.c"
     source_file_path = source_file_dir + "\\" + source_file_name
 
-    expected_token_list_return_zero = [
+    expected_token_list_return_literal_integer = [
         Token(TokenType.KEYWORD_INT, None, None),
         Token(TokenType.IDENTIFIER, None, "main"),
         Token(TokenType.SYM_PAREN_OPEN, None, None),
@@ -480,13 +481,26 @@ if __name__ == "__main__":
         Token(TokenType.EOF, None, None),
     ]
 
+    expected_token_list_return_literal_character = [
+        Token(TokenType.KEYWORD_CHAR, None, None),
+        Token(TokenType.IDENTIFIER, None, "test"),
+        Token(TokenType.SYM_PAREN_OPEN, None, None),
+        Token(TokenType.SYM_PAREN_CLOSE, None, None),
+        Token(TokenType.SYM_BRACE_OPEN, None, None),
+        Token(TokenType.KEYWORD_RETURN, None, None),
+        Token(TokenType.LITERAL, None, "g"),
+        Token(TokenType.SYM_SEMICOLON, None, None),
+        Token(TokenType.SYM_BRACE_CLOSE, None, None),
+        Token(TokenType.EOF, None, None),
+    ]
+
     t = Tokenizer(source_file_path)
     t.setup()
     t.tokenize()
     
     print()
     
-    t.test(expected_token_list_return_literal_string)
+    t.test(expected_token_list_return_literal_character)
 
 
 

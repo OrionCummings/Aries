@@ -1,0 +1,3 @@
+char test() {
+    return 'g';
+}
