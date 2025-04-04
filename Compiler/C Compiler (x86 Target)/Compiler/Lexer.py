@@ -207,8 +207,16 @@ def is_literal_float(sequence: str) -> Optional[TokenType]:
 
 def is_literal_char(sequence: str) -> Optional[TokenType]:
 
-    # TODO: This will fail because of a lack of short circuit evaluation!
-    # What if len(sequence) < 3?
+    # If any of these conditions are true, then this cannot be
+    # a character literal. Furthermore, the more general 'rules'
+    # will fail if these disqualifying rules are not checked first!
+    disqualifying_rules = [
+        len(sequence) < 3,
+    ]
+
+    if any(disqualifying_rules):
+        return None
+
     rules = [
 
         # Must be three characters total (' x ')
@@ -339,8 +347,46 @@ class Tokenizer():
             elif peek.isalnum():
 
                 # While this character is alphanumeric, 
-                # build a buffer out of it.
-                while self.peek().isalnum():
+                # build a buffer out of it. If the next character
+                # is a period, then we are looking at one of two things:
+                # 1) A float literal
+                #   - We need to continue consuming the buffer
+                #     until an 'f' character is found
+                # 2) A field access
+                #   - We need to stop!
+                while self.peek().isalnum() or self.peek() == '.':
+
+                    # If the next character is a period...
+                    if self.peek() == '.':
+                        
+                        # ...and the following character is...
+                        # TODO: This will fail on suffciently incorrect inputs!
+                        next_two = self.peek(2)
+                        potential_character = next_two[-1]
+
+                        # ...alphabetical...
+                        if potential_character.isalpha():
+
+                            # ... then assume it's a field access and we
+                            # need to stop!
+                            raise NotImplementedError
+                        
+                        # ...numeric...
+                        elif potential_character.isnumeric():
+
+                            # ...then assume it's a float literal and
+                            # keep tokenizing it.
+
+                            # Consume the period
+                            buffer += self.pop()
+
+                            while self.peek().isnumeric() or self.peek() == 'f':
+
+                                if self.peek() == 'f':
+
+                                    # Consume the 'f' and continue
+                                    buffer += self.pop()
+
                     buffer += self.pop()
 
             # If this character is not alphanumeric
@@ -444,7 +490,8 @@ if __name__ == "__main__":
     source_file_dir = "C:\\Users\\Orion\\Stash\\PersonalProjects\\Aries\\Compiler\\C Compiler (x86 Target)\\Source Files"
     # source_file_name = "ReturnLiteralInteger.c"
     # source_file_name = "ReturnLiteralString.c"
-    source_file_name = "ReturnLiteralCharacter.c"
+    # source_file_name = "ReturnLiteralCharacter.c"
+    source_file_name = "ReturnLiteralFloat.c"
     source_file_path = source_file_dir + "\\" + source_file_name
 
     expected_token_list_return_literal_integer = [
@@ -494,13 +541,26 @@ if __name__ == "__main__":
         Token(TokenType.EOF, None, None),
     ]
 
+    expected_token_list_return_literal_float = [
+        Token(TokenType.KEYWORD_FLOAT, None, None),
+        Token(TokenType.IDENTIFIER, None, "test"),
+        Token(TokenType.SYM_PAREN_OPEN, None, None),
+        Token(TokenType.SYM_PAREN_CLOSE, None, None),
+        Token(TokenType.SYM_BRACE_OPEN, None, None),
+        Token(TokenType.KEYWORD_RETURN, None, None),
+        Token(TokenType.LITERAL, None, "4.2f"),
+        Token(TokenType.SYM_SEMICOLON, None, None),
+        Token(TokenType.SYM_BRACE_CLOSE, None, None),
+        Token(TokenType.EOF, None, None),
+    ]
+
     t = Tokenizer(source_file_path)
     t.setup()
     t.tokenize()
     
     print()
     
-    t.test(expected_token_list_return_literal_character)
+    t.test(expected_token_list_return_literal_float)
 
 
 
