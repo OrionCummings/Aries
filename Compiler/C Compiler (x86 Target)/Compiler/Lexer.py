@@ -132,11 +132,6 @@ symbol_dictionary: Dict[str, TokenType] = {
     "\"": TokenType.SYM_DQUOTE,
 }
 
-pair_symbol_list = [
-    "\'",
-    "\"",
-]
-
 def is_keyword(sequence: str) -> Optional[TokenType]:
     return keyword_dictionary[sequence] if sequence in keyword_dictionary else None
 
@@ -251,9 +246,6 @@ def is_literal_bool(sequence: str) -> Optional[TokenType]:
     ]
     
     return TokenType.LITERAL if any(rules) else None
-
-def is_pair_symbol(sequence: str) -> bool:
-    return bool(sequence in pair_symbol_list)
 
 @dataclass
 class Token:
