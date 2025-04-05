@@ -7,7 +7,6 @@ class TokenType(Enum):
     NONE                    = auto(),
     EXIT                    = auto(),
     IDENTIFIER              = auto(),
-    LITERAL                 = auto(),
     EOF                     = auto(),
     SYM_SEMICOLON           = auto(), # ;
     SYM_COLON               = auto(), # :
@@ -34,6 +33,11 @@ class TokenType(Enum):
     SYM_CARRET              = auto(), # ^
     SYM_SQUOTE              = auto(), # '
     SYM_DQUOTE              = auto(), # "
+    LIT_INT                 = auto(), # integers
+    LIT_UINT                = auto(), # unsigned integers
+    LIT_FLOAT               = auto(), # floats
+    LIT_CHAR                = auto(), # characters
+    LIT_STRING              = auto(), # strings
     KEYWORD_IF              = auto(), # if
     KEYWORD_ELIF            = auto(), # elif
     KEYWORD_ELSE            = auto(), # else
@@ -44,6 +48,7 @@ class TokenType(Enum):
     KEYWORD_RETURN          = auto(), # return
     KEYWORD_CONST           = auto(), # const
     KEYWORD_STATIC          = auto(), # static
+    KEYWORD_MUTABLE         = auto(), # mutable
     KEYWORD_MATCH           = auto(), # match
     KEYWORD_SWITCH          = auto(), # switch
     KEYWORD_CASE            = auto(), # case
@@ -59,6 +64,7 @@ class TokenType(Enum):
     KEYWORD_NEW             = auto(), # new
     KEYWORD_TRUE            = auto(), # true
     KEYWORD_FALSE           = auto(), # false
+    KEYWORD_BOOL            = auto(), # boolean
     KEYWORD_INT             = auto(), # int
     KEYWORD_UINT            = auto(), # uint
     KEYWORD_FLOAT           = auto(), # float
@@ -89,6 +95,7 @@ keyword_dictionary: Dict[str, TokenType] = {
     "overload":     TokenType.KEYWORD_OVERLOAD,
     "const":        TokenType.KEYWORD_CONST,
     "static":       TokenType.KEYWORD_STATIC,
+    "mut":          TokenType.KEYWORD_MUTABLE,
     "return":       TokenType.KEYWORD_RETURN,
     "sizeof":       TokenType.KEYWORD_SIZEOF,
     "typeof":       TokenType.KEYWORD_TYPEOF,
@@ -97,6 +104,7 @@ keyword_dictionary: Dict[str, TokenType] = {
     "new":          TokenType.KEYWORD_NEW,
     "true":         TokenType.KEYWORD_TRUE,
     "false":        TokenType.KEYWORD_FALSE,
+    "bool":         TokenType.KEYWORD_BOOL,
     "int":          TokenType.KEYWORD_INT,
     "uint":         TokenType.KEYWORD_UINT,
     "float":        TokenType.KEYWORD_FLOAT,
@@ -185,7 +193,7 @@ def is_literal_integer(sequence: str) -> Optional[TokenType]:
         sequence.isnumeric()
     ]
 
-    return TokenType.LITERAL if all(rules) else None
+    return TokenType.LIT_INT if all(rules) else None
 
 def is_literal_float(sequence: str) -> Optional[TokenType]:
 
@@ -198,7 +206,7 @@ def is_literal_float(sequence: str) -> Optional[TokenType]:
         sequence.replace('f', '', count=1).replace('.', '', count=1).isnumeric()
     ]
     
-    return TokenType.LITERAL if any(rules) else None
+    return TokenType.LIT_FLOAT if any(rules) else None
 
 def is_literal_char(sequence: str) -> Optional[TokenType]:
 
@@ -224,7 +232,7 @@ def is_literal_char(sequence: str) -> Optional[TokenType]:
         sequence[1].isalpha()
     ]
 
-    return TokenType.LITERAL if all(rules) else None
+    return TokenType.LIT_CHAR if all(rules) else None
 
 def is_literal_string(sequence: str) -> Optional[TokenType]:
 
@@ -245,7 +253,7 @@ def is_literal_bool(sequence: str) -> Optional[TokenType]:
         sequence == "false",
     ]
     
-    return TokenType.LITERAL if any(rules) else None
+    return TokenType.LIT_BOOL if any(rules) else None
 
 @dataclass
 class Token:
@@ -255,13 +263,19 @@ class Token:
 
 class Tokenizer():
     
-    def __init__(self, file_path: str):
-        self.file_path: str                   = file_path
-        self.index: int                       = 0
-        self.line_count: int                  = 1
-        self.tokens: List[Token]              = []
-        self.source_file_contents: str        = None
-        self.source_file_contents_length: int = None
+    def __init__(self, file_path: str = None, contents: str = None):
+        
+        self.file_path: str                      = file_path
+        self.source_file_contents: str           = contents
+        
+        self.index: int                          = 0
+        self.line_count: int                     = 1
+        self.tokens: List[Token]                 = []
+        
+        self.source_file_contents_length:   int  = None
+        self.source_file_contents_num_lines: int = None
+        
+        self.setup()
     
     def __str__(self) -> str:
 
@@ -272,34 +286,27 @@ class Tokenizer():
 
         return ", \n".join(intermediate)
     
-    def test(self, expected_tokens):
-
-        equal = True
-
-        for i in range(0, len(self.tokens)):
-
-            print(self.tokens[i], end=" ")
-
-            if i < len(expected_tokens) and self.tokens[i] != expected_tokens[i]:
-                print(f"!= {expected_tokens[i]}")
-                equal = False
-            else:
-                print()
-
-        print()
-        print("equal") if equal else print("not equal")
-
     def setup(self):
 
-        # Open the source file
-        with open(self.file_path) as source_file:
-            self.source_file_contents = source_file.read()
-        
-        # Save the length for future calculations
-        self.source_file_contents_length: int = len(self.source_file_contents)
+        if self.file_path is not None:
+            
+            # Open the source file
+            with open(self.file_path) as source_file:
+                self.source_file_contents = source_file.read()
+            
+            # Save the length for future calculations
+            self.source_file_contents_length: int = len(self.source_file_contents)
 
-        # Save the total number of lines for future calculations
-        self.source_file_contents_num_lines: int = len(self.source_file_contents.splitlines())
+            # Save the total number of lines for future calculations
+            self.source_file_contents_num_lines: int = len(self.source_file_contents.splitlines())
+
+        elif self.source_file_contents is not None:
+            
+            # Save the length for future calculations
+            self.source_file_contents_length: int = len(self.source_file_contents)
+
+            # Save the total number of lines for future calculations
+            self.source_file_contents_num_lines: int = len(self.source_file_contents.splitlines())
 
     def peek(self, num_characters: int = 1) -> Optional[str]:
         
@@ -397,7 +404,7 @@ class Tokenizer():
     def process_newline(self, buffer: str) -> int:
         return self.line_count + 1 if buffer == "\n" else self.line_count
     
-    def tokenize(self) -> Result[None, str]:
+    def tokenize(self) -> Result[None, list[Token]]:
         
         # Intermediate buffer for building multi-character tokens
         buffer: str = ""
@@ -426,7 +433,7 @@ class Tokenizer():
 
                     # Remove the quotes and add to the token list
                     buffer = full_char_sequence[1:-1]
-                    self.tokens.append(Token(TokenType.LITERAL, None, buffer))
+                    self.tokens.append(Token(TokenType.LIT_CHAR, None, buffer))
 
             # Is the buffer a double quote?
             elif buffer == "\"":
@@ -449,7 +456,7 @@ class Tokenizer():
                 buffer = buffer[1:-1]
 
                 # Add the literal token to the token list
-                self.tokens.append(Token(TokenType.LITERAL, None, buffer))
+                self.tokens.append(Token(TokenType.LIT_STRING, None, buffer))
 
             # Is the buffer a valid symbol?
             elif token_type := is_symbol(buffer):
@@ -476,84 +483,4 @@ class Tokenizer():
         self.tokens.append(Token(TokenType.EOF, None, None))
 
         return Ok(self.tokens)
-
-if __name__ == "__main__":
-
-    source_file_dir = "C:\\Users\\Orion\\Stash\\PersonalProjects\\Aries\\Compiler\\C Compiler (x86 Target)\\Source Files"
-    # source_file_name = "ReturnLiteralInteger.c"
-    # source_file_name = "ReturnLiteralString.c"
-    # source_file_name = "ReturnLiteralCharacter.c"
-    source_file_name = "ReturnLiteralFloat.c"
-    source_file_path = source_file_dir + "\\" + source_file_name
-
-    expected_token_list_return_literal_integer = [
-        Token(TokenType.KEYWORD_INT, None, None),
-        Token(TokenType.IDENTIFIER, None, "main"),
-        Token(TokenType.SYM_PAREN_OPEN, None, None),
-        Token(TokenType.KEYWORD_INT, None, None),
-        Token(TokenType.IDENTIFIER, None, "argc"),
-        Token(TokenType.SYM_COMMA, None, None),
-        Token(TokenType.KEYWORD_CHAR, None, None),
-        Token(TokenType.SYM_STAR, None, None),
-        Token(TokenType.SYM_STAR, None, None),
-        Token(TokenType.IDENTIFIER, None, "argv"),
-        Token(TokenType.SYM_PAREN_CLOSE, None, None),
-        Token(TokenType.SYM_BRACE_OPEN, None, None),
-        Token(TokenType.KEYWORD_RETURN, None, None),
-        Token(TokenType.LITERAL, None, "0"),
-        Token(TokenType.SYM_SEMICOLON, None, None),
-        Token(TokenType.SYM_BRACE_CLOSE, None, None),
-        Token(TokenType.EOF, None, None),
-    ]
-
-    expected_token_list_return_literal_string = [
-        Token(TokenType.KEYWORD_CHAR, None, None),
-        Token(TokenType.SYM_STAR, None, None),
-        Token(TokenType.IDENTIFIER, None, "test"),
-        Token(TokenType.SYM_PAREN_OPEN, None, None),
-        Token(TokenType.SYM_PAREN_CLOSE, None, None),
-        Token(TokenType.SYM_BRACE_OPEN, None, None),
-        Token(TokenType.KEYWORD_RETURN, None, None),
-        Token(TokenType.LITERAL, None, "test string @ $#**()}!"),
-        Token(TokenType.SYM_SEMICOLON, None, None),
-        Token(TokenType.SYM_BRACE_CLOSE, None, None),
-        Token(TokenType.EOF, None, None),
-    ]
-
-    expected_token_list_return_literal_character = [
-        Token(TokenType.KEYWORD_CHAR, None, None),
-        Token(TokenType.IDENTIFIER, None, "test"),
-        Token(TokenType.SYM_PAREN_OPEN, None, None),
-        Token(TokenType.SYM_PAREN_CLOSE, None, None),
-        Token(TokenType.SYM_BRACE_OPEN, None, None),
-        Token(TokenType.KEYWORD_RETURN, None, None),
-        Token(TokenType.LITERAL, None, "g"),
-        Token(TokenType.SYM_SEMICOLON, None, None),
-        Token(TokenType.SYM_BRACE_CLOSE, None, None),
-        Token(TokenType.EOF, None, None),
-    ]
-
-    expected_token_list_return_literal_float = [
-        Token(TokenType.KEYWORD_FLOAT, None, None),
-        Token(TokenType.IDENTIFIER, None, "test"),
-        Token(TokenType.SYM_PAREN_OPEN, None, None),
-        Token(TokenType.SYM_PAREN_CLOSE, None, None),
-        Token(TokenType.SYM_BRACE_OPEN, None, None),
-        Token(TokenType.KEYWORD_RETURN, None, None),
-        Token(TokenType.LITERAL, None, "4.2f"),
-        Token(TokenType.SYM_SEMICOLON, None, None),
-        Token(TokenType.SYM_BRACE_CLOSE, None, None),
-        Token(TokenType.EOF, None, None),
-    ]
-
-    t = Tokenizer(source_file_path)
-    t.setup()
-    t.tokenize()
-    
-    print()
-    
-    t.test(expected_token_list_return_literal_float)
-
-
-
 
