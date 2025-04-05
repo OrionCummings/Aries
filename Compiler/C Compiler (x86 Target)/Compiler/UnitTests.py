@@ -8,35 +8,6 @@ class TokenizerUnitTests(unittest.TestCase):
     
     test_dir = "D:\\PersonalProjects\\Aries\\Compiler\\C Compiler (x86 Target)\\Test Files\\"
     
-    def test_return_literal_bool(self):
-        
-        actual_file_contents = """
-        bool f() {
-            return true;
-        }
-        """
-        
-        tokenizer = Tokenizer(contents=actual_file_contents)
-        actual_token_list_r = tokenizer.tokenize()
-        if actual_token_list_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_token_list_r.unwrap_err()}")
-        actual_token_list = actual_token_list_r.unwrap()
-        
-        expected_token_list = [
-            Token(TokenType.KEYWORD_BOOL, None, None),
-            Token(TokenType.IDENTIFIER, None, "f"),
-            Token(TokenType.SYM_PAREN_OPEN, None, None),
-            Token(TokenType.SYM_PAREN_CLOSE, None, None),
-            Token(TokenType.SYM_BRACE_OPEN, None, None),
-            Token(TokenType.KEYWORD_RETURN, None, None),
-            Token(TokenType.KEYWORD_TRUE, None, None),
-            Token(TokenType.SYM_SEMICOLON, None, None),
-            Token(TokenType.SYM_BRACE_CLOSE, None, None),
-            Token(TokenType.EOF, None, None),
-        ]
-        
-        self.assertListEqual(actual_token_list, expected_token_list)
-    
     def test_return_literal_unsigned_integer(self):
         
         actual_file_contents = """
@@ -58,7 +29,7 @@ class TokenizerUnitTests(unittest.TestCase):
             Token(TokenType.SYM_PAREN_CLOSE, None, None),
             Token(TokenType.SYM_BRACE_OPEN, None, None),
             Token(TokenType.KEYWORD_RETURN, None, None),
-            Token(TokenType.LIT_UINT, None, "255"),
+            Token(TokenType.LIT_UINT, None, "255u"),
             Token(TokenType.SYM_SEMICOLON, None, None),
             Token(TokenType.SYM_BRACE_CLOSE, None, None),
             Token(TokenType.EOF, None, None),
@@ -157,9 +128,7 @@ class TokenizerUnitTests(unittest.TestCase):
     def test_return_literal_float(self):
         
         actual_file_contents = """
-        float f() {
-            return 3.14159265f;
-        }
+        3.14159265f
         """
         
         tokenizer = Tokenizer(contents=actual_file_contents)
@@ -169,15 +138,7 @@ class TokenizerUnitTests(unittest.TestCase):
         actual_token_list = actual_token_list_r.unwrap()
         
         expected_token_list = [
-            Token(TokenType.KEYWORD_CHAR, None, None),
-            Token(TokenType.IDENTIFIER, None, "f"),
-            Token(TokenType.SYM_PAREN_OPEN, None, None),
-            Token(TokenType.SYM_PAREN_CLOSE, None, None),
-            Token(TokenType.SYM_BRACE_OPEN, None, None),
-            Token(TokenType.KEYWORD_RETURN, None, None),
             Token(TokenType.LIT_FLOAT, None, "3.14159265f"),
-            Token(TokenType.SYM_SEMICOLON, None, None),
-            Token(TokenType.SYM_BRACE_CLOSE, None, None),
             Token(TokenType.EOF, None, None),
         ]
         

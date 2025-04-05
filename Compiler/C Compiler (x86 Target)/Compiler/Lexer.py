@@ -174,14 +174,14 @@ def is_literal(sequence: str) -> Optional[TokenType]:
 
     if is_literal_integer_token_type := is_literal_integer(sequence):
         return is_literal_integer_token_type
-    if is_literal_float_token_type   :=  is_literal_float(sequence):
+    if is_literal_unsigned_integer_token_type :=  is_literal_unsigned_integer(sequence):
+        return is_literal_unsigned_integer_token_type
+    if is_literal_float_token_type :=  is_literal_float(sequence):
         return is_literal_float_token_type
-    if is_literal_char_token_type    :=  is_literal_char(sequence):
+    if is_literal_char_token_type :=  is_literal_char(sequence):
         return is_literal_char_token_type
-    if is_literal_string_token_type  :=  is_literal_string(sequence):
+    if is_literal_string_token_type :=  is_literal_string(sequence):
         return is_literal_string_token_type
-    if is_literal_bool_token_type    :=  is_literal_bool(sequence):
-        return is_literal_bool_token_type
     
     return None
 
@@ -194,6 +194,21 @@ def is_literal_integer(sequence: str) -> Optional[TokenType]:
     ]
 
     return TokenType.LIT_INT if all(rules) else None
+
+def is_literal_unsigned_integer(sequence: str) -> Optional[TokenType]:
+
+    disqualifying_rules = [
+        len(sequence) == 0
+    ]
+    
+    if any(disqualifying_rules): return None
+
+    rules = [
+        sequence[0:-1].isdecimal(),
+        sequence[-1] == 'u'
+    ]
+    
+    return TokenType.LIT_UINT if any(rules) else None
 
 def is_literal_float(sequence: str) -> Optional[TokenType]:
 
@@ -244,17 +259,6 @@ def is_literal_string(sequence: str) -> Optional[TokenType]:
 
     return TokenType.LITERAL if all(rules) else None
     
-def is_literal_bool(sequence: str) -> Optional[TokenType]:
-
-    rules = [
-        sequence == "0",
-        sequence == "1",
-        sequence == "true",
-        sequence == "false",
-    ]
-    
-    return TokenType.LIT_BOOL if any(rules) else None
-
 @dataclass
 class Token:
     type: TokenType      = TokenType.NONE,
@@ -338,7 +342,7 @@ class Tokenizer():
         # If there is a character to read
         if peek := self.peek():
 
-            # If this character is a space, consume it
+            # If this character is a space (or newline!), consume it
             if peek.isspace():
                 self.pop()
 
@@ -416,7 +420,7 @@ class Tokenizer():
             pass
 
             # DEBUG:
-            if buffer == "\"":
+            if not buffer == '':
                 pass
 
             # If the buffer is a space or it's empty, then
