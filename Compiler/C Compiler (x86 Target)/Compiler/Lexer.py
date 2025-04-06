@@ -30,7 +30,7 @@ class TokenType(Enum):
     SYM_GT                  = auto(), # >
     SYM_AMPERSAND           = auto(), # &
     SYM_PIPE                = auto(), # |
-    SYM_CARRET              = auto(), # ^
+    SYM_CARET              = auto(), # ^
     SYM_SQUOTE              = auto(), # '
     SYM_DQUOTE              = auto(), # "
     LIT_INT                 = auto(), # integers
@@ -127,7 +127,7 @@ symbol_dictionary: Dict[str, TokenType] = {
     "=":  TokenType.SYM_EQUAL,
     "+":  TokenType.SYM_PLUS,
     "-":  TokenType.SYM_DASH,
-    "/":  TokenType.SYM_SLASH,
+    "/":  TokenType.SYM_FSLASH,
     "*":  TokenType.SYM_STAR,
     "%":  TokenType.SYM_PERCENT,
     "!":  TokenType.SYM_EXCLAIM,
@@ -135,7 +135,7 @@ symbol_dictionary: Dict[str, TokenType] = {
     ">":  TokenType.SYM_GT,
     "&":  TokenType.SYM_AMPERSAND,
     "|":  TokenType.SYM_PIPE,
-    "^":  TokenType.SYM_CARRET,
+    "^":  TokenType.SYM_CARET,
     "\'": TokenType.SYM_SQUOTE,
     "\"": TokenType.SYM_DQUOTE,
 }
