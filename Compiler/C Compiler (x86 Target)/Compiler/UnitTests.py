@@ -3,6 +3,196 @@ import unittest
 
 from Lexer import Token, Tokenizer, TokenType
 
+class TokenizerIntegrationTests(unittest.TestCase):
+
+    def test_minimal_program(self):
+
+        contents = """
+        int main(int argc, char** argv) {
+            return 0;
+        }
+        """
+
+        expected_tokens = [
+            Token(TokenType.KEYWORD_INT, None, None),
+            Token(TokenType.IDENTIFIER, None, "main"),
+            Token(TokenType.SYM_PAREN_OPEN, None, None),
+            Token(TokenType.KEYWORD_INT, None, None),
+            Token(TokenType.IDENTIFIER, None, "argc"),
+            Token(TokenType.SYM_COMMA, None, None),
+            Token(TokenType.KEYWORD_CHAR, None, None),
+            Token(TokenType.SYM_STAR, None, None),
+            Token(TokenType.SYM_STAR, None, None),
+            Token(TokenType.IDENTIFIER, None, "argv"),
+            Token(TokenType.SYM_PAREN_CLOSE, None, None),
+            Token(TokenType.SYM_BRACE_OPEN, None, None),
+            Token(TokenType.KEYWORD_RETURN, None, None),
+            Token(TokenType.LIT_INT, None, "0"),
+            Token(TokenType.SYM_SEMICOLON, None, None),
+            Token(TokenType.SYM_BRACE_CLOSE, None, None),
+            Token(TokenType.EOF, None, None),
+        ]
+
+        tokenizer = Tokenizer(contents=contents)
+        actual_tokens_r = tokenizer.tokenize()
+        if actual_tokens_r.is_err:
+            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
+        
+        actual_tokens = actual_tokens_r.unwrap()
+
+        self.assertListEqual(expected_tokens, actual_tokens)
+
+    def test_expression_parsing1(self):
+
+        contents = """
+        int main(int argc, char** argv) {
+            return (a * 29) / (204 - 5) - variable;
+        }
+        """
+
+        expected_tokens = [
+            Token(TokenType.KEYWORD_INT, None, None),
+            Token(TokenType.IDENTIFIER, None, "main"),
+            Token(TokenType.SYM_PAREN_OPEN, None, None),
+            Token(TokenType.KEYWORD_INT, None, None),
+            Token(TokenType.IDENTIFIER, None, "argc"),
+            Token(TokenType.SYM_COMMA, None, None),
+            Token(TokenType.KEYWORD_CHAR, None, None),
+            Token(TokenType.SYM_STAR, None, None),
+            Token(TokenType.SYM_STAR, None, None),
+            Token(TokenType.IDENTIFIER, None, "argv"),
+            Token(TokenType.SYM_PAREN_CLOSE, None, None),
+            Token(TokenType.SYM_BRACE_OPEN, None, None),
+            Token(TokenType.KEYWORD_RETURN, None, None),
+            Token(TokenType.SYM_PAREN_OPEN, None, None),
+            Token(TokenType.IDENTIFIER, None, "a"),
+            Token(TokenType.SYM_STAR, None, None),
+            Token(TokenType.LIT_INT, None, "29"),
+            Token(TokenType.SYM_PAREN_CLOSE, None, None),
+            Token(TokenType.SYM_FSLASH, None, None),
+            Token(TokenType.SYM_PAREN_OPEN, None, None),
+            Token(TokenType.LIT_INT, None, "204"),
+            Token(TokenType.SYM_DASH, None, None),
+            Token(TokenType.LIT_INT, None, "5"),
+            Token(TokenType.SYM_PAREN_CLOSE, None, None),
+            Token(TokenType.SYM_DASH, None, None),
+            Token(TokenType.IDENTIFIER, None, "variable"),
+            Token(TokenType.SYM_SEMICOLON, None, None),
+            Token(TokenType.SYM_BRACE_CLOSE, None, None),
+            Token(TokenType.EOF, None, None),
+        ]
+
+        tokenizer = Tokenizer(contents=contents)
+        actual_tokens_r = tokenizer.tokenize()
+        if actual_tokens_r.is_err:
+            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
+        
+        actual_tokens = actual_tokens_r.unwrap()
+
+        self.assertListEqual(expected_tokens, actual_tokens)
+
+    def test_functions1(self):
+
+        contents = """
+        int function2(int a, int b, int c) {
+            return a + b + c;
+        }
+        int f(int a, int b, int c) {
+            return a * b + c;
+        }
+        int main(int argc, char** argv) {
+            return f(1, variable1, function2(27, arg2, argv[4]));
+        }
+        """
+
+        expected_tokens = [
+            Token(TokenType.KEYWORD_INT, None, None),
+            Token(TokenType.IDENTIFIER, None, "function2"),
+            Token(TokenType.SYM_PAREN_OPEN, None, None),
+            Token(TokenType.KEYWORD_INT, None, None),
+            Token(TokenType.IDENTIFIER, None, "a"),
+            Token(TokenType.SYM_COMMA, None, None),
+            Token(TokenType.KEYWORD_INT, None, None),
+            Token(TokenType.IDENTIFIER, None, "b"),
+            Token(TokenType.SYM_COMMA, None, None),
+            Token(TokenType.KEYWORD_INT, None, None),
+            Token(TokenType.IDENTIFIER, None, "c"),
+            Token(TokenType.SYM_PAREN_CLOSE, None, None),
+            Token(TokenType.SYM_BRACE_OPEN, None, None),
+            Token(TokenType.KEYWORD_RETURN, None, None),
+            Token(TokenType.IDENTIFIER, None, "a"),
+            Token(TokenType.SYM_PLUS, None, None),
+            Token(TokenType.IDENTIFIER, None, "b"),
+            Token(TokenType.SYM_PLUS, None, None),
+            Token(TokenType.IDENTIFIER, None, "c"),
+            Token(TokenType.SYM_SEMICOLON, None, None),
+            Token(TokenType.SYM_BRACE_CLOSE, None, None),
+            Token(TokenType.KEYWORD_INT, None, None),
+            Token(TokenType.IDENTIFIER, None, "f"),
+            Token(TokenType.SYM_PAREN_OPEN, None, None),
+            Token(TokenType.KEYWORD_INT, None, None),
+            Token(TokenType.IDENTIFIER, None, "a"),
+            Token(TokenType.SYM_COMMA, None, None),
+            Token(TokenType.KEYWORD_INT, None, None),
+            Token(TokenType.IDENTIFIER, None, "b"),
+            Token(TokenType.SYM_COMMA, None, None),
+            Token(TokenType.KEYWORD_INT, None, None),
+            Token(TokenType.IDENTIFIER, None, "c"),
+            Token(TokenType.SYM_PAREN_CLOSE, None, None),
+            Token(TokenType.SYM_BRACE_OPEN, None, None),
+            Token(TokenType.KEYWORD_RETURN, None, None),
+            Token(TokenType.IDENTIFIER, None, "a"),
+            Token(TokenType.SYM_STAR, None, None),
+            Token(TokenType.IDENTIFIER, None, "b"),
+            Token(TokenType.SYM_PLUS, None, None),
+            Token(TokenType.IDENTIFIER, None, "c"),
+            Token(TokenType.SYM_SEMICOLON, None, None),
+            Token(TokenType.SYM_BRACE_CLOSE, None, None),
+            Token(TokenType.KEYWORD_INT, None, None),
+            Token(TokenType.IDENTIFIER, None, "main"),
+            Token(TokenType.SYM_PAREN_OPEN, None, None),
+            Token(TokenType.KEYWORD_INT, None, None),
+            Token(TokenType.IDENTIFIER, None, "argc"),
+            Token(TokenType.SYM_COMMA, None, None),
+            Token(TokenType.KEYWORD_CHAR, None, None),
+            Token(TokenType.SYM_STAR, None, None),
+            Token(TokenType.SYM_STAR, None, None),
+            Token(TokenType.IDENTIFIER, None, "argv"),
+            Token(TokenType.SYM_PAREN_CLOSE, None, None),
+            Token(TokenType.SYM_BRACE_OPEN, None, None),
+            Token(TokenType.KEYWORD_RETURN, None, None),
+            Token(TokenType.IDENTIFIER, None, "f"),
+            Token(TokenType.SYM_PAREN_OPEN, None, None),
+            Token(TokenType.LIT_INT, None, "1"),
+            Token(TokenType.SYM_COMMA, None, None),
+            Token(TokenType.IDENTIFIER, None, "variable1"),
+            Token(TokenType.SYM_COMMA, None, None),
+            Token(TokenType.IDENTIFIER, None, "function2"),
+            Token(TokenType.SYM_PAREN_OPEN, None, None),
+            Token(TokenType.LIT_INT, None, "27"),
+            Token(TokenType.SYM_COMMA, None, None),
+            Token(TokenType.IDENTIFIER, None, "arg2"),
+            Token(TokenType.SYM_COMMA, None, None),
+            Token(TokenType.IDENTIFIER, None, "argv"),
+            Token(TokenType.SYM_BRACKET_OPEN, None, None),
+            Token(TokenType.LIT_INT, None, "4"),
+            Token(TokenType.SYM_BRACKET_CLOSE, None, None),
+            Token(TokenType.SYM_PAREN_CLOSE, None, None),
+            Token(TokenType.SYM_PAREN_CLOSE, None, None),
+            Token(TokenType.SYM_SEMICOLON, None, None),
+            Token(TokenType.SYM_BRACE_CLOSE, None, None),
+            Token(TokenType.EOF, None, None),
+        ]
+
+        tokenizer = Tokenizer(contents=contents)
+        actual_tokens_r = tokenizer.tokenize()
+        if actual_tokens_r.is_err:
+            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
+        
+        actual_tokens = actual_tokens_r.unwrap()
+
+        self.assertListEqual(expected_tokens, actual_tokens)
+
 class TokenizerUnitTestsForSymbols(unittest.TestCase):
     
     def test_symbol_semicolon(self):

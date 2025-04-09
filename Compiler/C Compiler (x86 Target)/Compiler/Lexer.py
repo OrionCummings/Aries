@@ -30,7 +30,7 @@ class TokenType(Enum):
     SYM_GT                  = auto(), # >
     SYM_AMPERSAND           = auto(), # &
     SYM_PIPE                = auto(), # |
-    SYM_CARET              = auto(), # ^
+    SYM_CARET               = auto(), # ^
     SYM_SQUOTE              = auto(), # '
     SYM_DQUOTE              = auto(), # "
     LIT_INT                 = auto(), # integers
@@ -344,7 +344,8 @@ class Tokenizer():
 
             # If this character is a space (or newline!), consume it
             if peek.isspace():
-                self.pop()
+                while self.peek() is not None and self.peek().isspace():
+                    buffer += self.pop()
 
             # If this character is alphanumeric
             elif peek.isalnum():
@@ -416,11 +417,12 @@ class Tokenizer():
         # While there are characters to read
         while self.peek() is not None:
 
+            buffer: str = ""
             buffer = self.parse_next()
             pass
 
             # DEBUG:
-            if not buffer == '':
+            if buffer == ')':
                 pass
 
             # If the buffer is a space or it's empty, then
