@@ -1347,7 +1347,7 @@ class TokenizerUnitTestsForLiterals(unittest.TestCase):
 
     def test_literal_float3(self):
         
-        actual_file_contents = """278f"""
+        actual_file_contents = """-278f"""
         
         tokenizer = Tokenizer(contents=actual_file_contents)
         actual_token_list_r = tokenizer.tokenize()
@@ -1356,6 +1356,7 @@ class TokenizerUnitTestsForLiterals(unittest.TestCase):
         actual_token_list = actual_token_list_r.unwrap()
         
         expected_token_list = [
+            Token(TokenType.SYM_DASH, None, None),
             Token(TokenType.LIT_FLOAT, None, "278f"),
             Token(TokenType.EOF, None, None),
         ]

@@ -208,7 +208,7 @@ def is_literal_unsigned_integer(sequence: str) -> Optional[TokenType]:
         sequence[-1] == 'u'
     ]
     
-    return TokenType.LIT_UINT if any(rules) else None
+    return TokenType.LIT_UINT if all(rules) else None
 
 def is_literal_float(sequence: str) -> Optional[TokenType]:
 
@@ -221,26 +221,22 @@ def is_literal_float(sequence: str) -> Optional[TokenType]:
         sequence.replace('f', '', count=1).replace('.', '', count=1).isnumeric()
     ]
     
-    return TokenType.LIT_FLOAT if any(rules) else None
+    return TokenType.LIT_FLOAT if all(rules) else None
 
 def is_literal_char(sequence: str) -> Optional[TokenType]:
 
-    # If any of these conditions are true, then this cannot be
-    # a character literal. Furthermore, the more general 'rules'
-    # will fail if these disqualifying rules are not checked first!
     disqualifying_rules = [
-        len(sequence) < 3,
+        len(sequence) < 3
     ]
-
-    if any(disqualifying_rules):
-        return None
+    
+    if any(disqualifying_rules): return None
 
     rules = [
 
-        # Must be three characters total (' x ')
+        # Must be three characters
         len(sequence) == 3,
 
-        # Must start and end with single quotes
+        # The first and third characters must be single quotes
         sequence[0] == "\'" and sequence[2] == "\'",
 
         # The center symbol must be a valid character
@@ -257,7 +253,7 @@ def is_literal_string(sequence: str) -> Optional[TokenType]:
         sequence[0] == "\"" and sequence[-1] == "\"" 
     ]
 
-    return TokenType.LITERAL if all(rules) else None
+    return TokenType.LIT_STRING if all(rules) else None
     
 @dataclass
 class Token:
@@ -335,6 +331,43 @@ class Tokenizer():
         self.index += num_characters
         return characters
     
+    def parse_space(self) -> str:
+
+        space_buffer = ""
+        while self.peek() is not None and self.peek().isspace():
+            space_buffer += self.pop()
+
+        return space_buffer
+
+    def parse_char(self) -> str:
+
+        # Consume the first single quote
+        char_buffer = self.pop()
+
+        # While we don't see another single quote, build the buffer
+        while self.peek() is not None and self.peek() != '\'':
+            char_buffer += self.pop()
+
+        # Add the second single quote!
+        char_buffer += self.pop()
+
+        return char_buffer
+    
+    def parse_string(self) -> str:
+
+        # Consume the first single quote
+        string_buffer = self.pop()
+
+        # While we don't see another double quote, build the buffer
+        while self.peek() is not None and self.peek() != '\"':
+            string_buffer += self.pop()
+
+        # If there are more characters, add the second single quote!
+        if self.peek() is not None:
+            string_buffer += self.pop()
+
+        return string_buffer
+
     def parse_next(self) -> str:
 
         buffer: str = ""
@@ -403,7 +436,15 @@ class Tokenizer():
             elif not peek.isalnum():
 
                 if is_symbol(peek):
-                    buffer += self.pop()
+
+                    # If this is a single quote
+                    if peek == "\'":
+                        buffer = self.parse_char()
+                    elif peek == "\"":
+                        buffer = self.parse_string()
+                    else:
+                        buffer += self.pop()
+                
                 else:
                     # TODO: Make this a real error!
                     print(f"ERROR: '{peek}' not identifiable!")
@@ -429,43 +470,18 @@ class Tokenizer():
             if buffer == ')':
                 pass
 
-            # If the buffer is a space or it's empty, then
-            # we can't do anything.
+            # If the buffer is a space or it's empty, then parse space
             if buffer.isspace() or buffer == '':
-                continue
+                self.parse_space()
 
-            # Is the buffer a single quote?
-            elif buffer == "\'":
-                    
-                full_char_sequence = "\'" + self.pop(2)
-
-                if is_literal_char(full_char_sequence):
-
-                    # Remove the quotes and add to the token list
-                    buffer = full_char_sequence[1:-1]
-                    self.tokens.append(Token(TokenType.LIT_CHAR, None, buffer))
-
-            # Is the buffer a double quote?
-            elif buffer == "\"":
-
-                # Find the right hand double quote
-                while self.peek() != "\"":
-
-                    # Consume everything
-                    buffer += self.pop()
-
-                # If the next character doesn't exist, then we failed to
-                # close this string literal!
-                if self.peek() == None:
-                    print("failed to close string literal!")
-                    exit(123)
-
-                buffer += self.pop()
-
-                # Remove the first character (which should be a double quote)
+            # Is the buffer a character literal?
+            elif is_literal_char(buffer):
                 buffer = buffer[1:-1]
+                self.tokens.append(Token(TokenType.LIT_CHAR, None, buffer))
 
-                # Add the literal token to the token list
+            # Is the buffer a string literal?
+            elif is_literal_string(buffer):
+                buffer = buffer[1:-1]
                 self.tokens.append(Token(TokenType.LIT_STRING, None, buffer))
 
             # Is the buffer a valid symbol?
@@ -487,7 +503,7 @@ class Tokenizer():
             # Otherwise, ...?
             else:
 
-                pass
+                return Err("Invalid token!")
         
         # Add an EOF to the end
         self.tokens.append(Token(TokenType.EOF, None, None))
