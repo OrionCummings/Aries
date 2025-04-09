@@ -368,6 +368,76 @@ class Tokenizer():
 
         return string_buffer
 
+    def parse_alphanum(self) -> str:
+
+        buffer = ""
+
+        # While this character is alphanumeric, 
+        # build a buffer out of it. If the next character
+        # is a period, then we are looking at one of two things:
+        # 1) A float literal
+        #   - We need to continue consuming the buffer
+        #     until an 'f' character is found
+        # 2) A field access
+        #   - We need to stop!
+        while self.peek() is not None and (self.peek().isalnum() or self.peek() == '.'):
+
+            # If the next character is a period...
+            if self.peek() == '.':
+                
+                # ...and the following character is...
+                # TODO: This will fail on suffciently incorrect inputs!
+                next_two = self.peek(2)
+                potential_character = next_two[-1]
+
+                # ...alphabetical...
+                if potential_character.isalpha():
+
+                    # ... then assume it's a field access and we
+                    # need to stop!
+                    raise NotImplementedError
+                
+                # ...numeric...
+                elif potential_character.isnumeric():
+
+                    # ...then assume it's a float literal and
+                    # keep tokenizing it.
+
+                    # Consume the period
+                    buffer += self.pop()
+
+                    while self.peek() is not None and self.peek().isnumeric() or self.peek() == 'f':
+
+                        # Consume the character
+                        buffer += self.pop()
+
+                        if self.peek() == 'f':
+
+                            # Consume the 'f' and break out of this loop
+                            buffer += self.pop()
+                            break
+                            
+
+            if self.peek() is not None:
+                buffer += self.pop()
+
+        return buffer
+
+    def parse_nonalphanum(self) -> str:
+
+        buffer = ""
+        peek = self.peek()
+
+        # If this is a single quote
+        if peek == "\'":
+            buffer = self.parse_char()
+        elif peek == "\"":
+            buffer = self.parse_string()
+        else:
+            buffer += self.pop()
+        
+        return buffer
+
     def parse_next(self) -> str:
 
         buffer: str = ""
@@ -377,78 +447,15 @@ class Tokenizer():
 
             # If this character is a space (or newline!), consume it
             if peek.isspace():
-                while self.peek() is not None and self.peek().isspace():
-                    buffer += self.pop()
+                buffer = self.parse_space()
 
             # If this character is alphanumeric
             elif peek.isalnum():
-
-                # While this character is alphanumeric, 
-                # build a buffer out of it. If the next character
-                # is a period, then we are looking at one of two things:
-                # 1) A float literal
-                #   - We need to continue consuming the buffer
-                #     until an 'f' character is found
-                # 2) A field access
-                #   - We need to stop!
-                while self.peek() is not None and (self.peek().isalnum() or self.peek() == '.'):
-
-                    # If the next character is a period...
-                    if self.peek() == '.':
-                        
-                        # ...and the following character is...
-                        # TODO: This will fail on suffciently incorrect inputs!
-                        next_two = self.peek(2)
-                        potential_character = next_two[-1]
-
-                        # ...alphabetical...
-                        if potential_character.isalpha():
-
-                            # ... then assume it's a field access and we
-                            # need to stop!
-                            raise NotImplementedError
-                        
-                        # ...numeric...
-                        elif potential_character.isnumeric():
-
-                            # ...then assume it's a float literal and
-                            # keep tokenizing it.
-
-                            # Consume the period
-                            buffer += self.pop()
-
-                            while self.peek() is not None and self.peek().isnumeric() or self.peek() == 'f':
-
-                                # Consume the character
-                                buffer += self.pop()
-
-                                if self.peek() == 'f':
-
-                                    # Consume the 'f' and break out of this loop
-                                    buffer += self.pop()
-                                    break
-                                    
-
-                    if self.peek() is not None:
-                        buffer += self.pop()
+                buffer = self.parse_alphanum()
 
             # If this character is not alphanumeric
             elif not peek.isalnum():
-
-                if is_symbol(peek):
-
-                    # If this is a single quote
-                    if peek == "\'":
-                        buffer = self.parse_char()
-                    elif peek == "\"":
-                        buffer = self.parse_string()
-                    else:
-                        buffer += self.pop()
-                
-                else:
-                    # TODO: Make this a real error!
-                    print(f"ERROR: '{peek}' not identifiable!")
-                    self.pop()
+                buffer = self.parse_nonalphanum()
 
         return buffer
 
@@ -464,25 +471,20 @@ class Tokenizer():
             # Intermediate buffer for building multi-character tokens
             buffer: str = ""
             buffer = self.parse_next()
-            pass
-
-            # DEBUG:
-            if buffer == ')':
-                pass
 
             # If the buffer is a space or it's empty, then parse space
             if buffer.isspace() or buffer == '':
                 self.parse_space()
 
             # Is the buffer a character literal?
-            elif is_literal_char(buffer):
+            elif token_type := is_literal_char(buffer):
                 buffer = buffer[1:-1]
-                self.tokens.append(Token(TokenType.LIT_CHAR, None, buffer))
+                self.tokens.append(Token(token_type, None, buffer))
 
             # Is the buffer a string literal?
-            elif is_literal_string(buffer):
+            elif token_type := is_literal_string(buffer):
                 buffer = buffer[1:-1]
-                self.tokens.append(Token(TokenType.LIT_STRING, None, buffer))
+                self.tokens.append(Token(token_type, None, buffer))
 
             # Is the buffer a valid symbol?
             elif token_type := is_symbol(buffer):
@@ -502,7 +504,6 @@ class Tokenizer():
 
             # Otherwise, ...?
             else:
-
                 return Err("Invalid token!")
         
         # Add an EOF to the end
