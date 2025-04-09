@@ -368,6 +368,25 @@ class Tokenizer():
 
         return string_buffer
 
+    def parse_partial_float(self) -> str:
+
+        """This function parses the 'X' section of a float: AAAAAA.XXXXXXXXf"""
+
+        # Consume the period
+        buffer = self.pop()
+
+        while self.peek() is not None and (self.peek().isnumeric() or self.peek() == 'f'):
+
+            # Consume the character
+            buffer += self.pop()
+
+            if self.peek() == 'f':
+
+                # Consume the 'f' and break out of this loop
+                buffer += self.pop()
+
+        return buffer
+
     def parse_alphanum(self) -> str:
 
         buffer = ""
@@ -386,8 +405,12 @@ class Tokenizer():
             if self.peek() == '.':
                 
                 # ...and the following character is...
-                # TODO: This will fail on suffciently incorrect inputs!
                 next_two = self.peek(2)
+
+                if next_two is None:
+                    print("This shouldn't be possible!")
+                    exit(728)
+                
                 potential_character = next_two[-1]
 
                 # ...alphabetical...
@@ -400,23 +423,9 @@ class Tokenizer():
                 # ...numeric...
                 elif potential_character.isnumeric():
 
-                    # ...then assume it's a float literal and
-                    # keep tokenizing it.
-
-                    # Consume the period
-                    buffer += self.pop()
-
-                    while self.peek() is not None and self.peek().isnumeric() or self.peek() == 'f':
-
-                        # Consume the character
-                        buffer += self.pop()
-
-                        if self.peek() == 'f':
-
-                            # Consume the 'f' and break out of this loop
-                            buffer += self.pop()
-                            break
-                            
+                    # ...then assume it's a float literal and keep tokenizing it.
+                    buffer += self.parse_partial_float()
+                    break
 
             if self.peek() is not None:
                 buffer += self.pop()
@@ -445,17 +454,18 @@ class Tokenizer():
         # If there is a character to read
         if peek := self.peek():
 
-            # If this character is a space (or newline!), consume it
-            if peek.isspace():
-                buffer = self.parse_space()
-
             # If this character is alphanumeric
-            elif peek.isalnum():
+            if peek.isalnum():
                 buffer = self.parse_alphanum()
 
             # If this character is not alphanumeric
-            elif not peek.isalnum():
-                buffer = self.parse_nonalphanum()
+            else:
+
+                # If this character is a space (or newline!), consume it
+                if peek.isspace():
+                    buffer = self.parse_space()
+                else:
+                    buffer = self.parse_nonalphanum()
 
         return buffer
 
