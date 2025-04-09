@@ -384,14 +384,20 @@ class Tokenizer():
                             # Consume the period
                             buffer += self.pop()
 
-                            while self.peek().isnumeric() or self.peek() == 'f':
+                            while self.peek() is not None and self.peek().isnumeric() or self.peek() == 'f':
+
+                                # Consume the character
+                                buffer += self.pop()
 
                                 if self.peek() == 'f':
 
-                                    # Consume the 'f' and continue
+                                    # Consume the 'f' and break out of this loop
                                     buffer += self.pop()
+                                    break
+                                    
 
-                    buffer += self.pop()
+                    if self.peek() is not None:
+                        buffer += self.pop()
 
             # If this character is not alphanumeric
             elif not peek.isalnum():
@@ -411,12 +417,10 @@ class Tokenizer():
     
     def tokenize(self) -> Result[None, list[Token]]:
         
-        # Intermediate buffer for building multi-character tokens
-        buffer: str = ""
-        
         # While there are characters to read
         while self.peek() is not None:
 
+            # Intermediate buffer for building multi-character tokens
             buffer: str = ""
             buffer = self.parse_next()
             pass

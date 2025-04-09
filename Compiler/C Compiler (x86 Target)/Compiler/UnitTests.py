@@ -1192,8 +1192,7 @@ class TokenizerUnitTestsForKeywords(unittest.TestCase):
 
 class TokenizerUnitTestsForLiterals(unittest.TestCase):
     
-    
-    def test_literal_unsigned_integer(self):
+    def test_literal_unsigned_integer1(self):
         
         actual_file_contents = """255u"""
         
@@ -1210,7 +1209,7 @@ class TokenizerUnitTestsForLiterals(unittest.TestCase):
         
         self.assertListEqual(actual_token_list, expected_token_list)
     
-    def test_literal_integer(self):
+    def test_literal_integer1(self):
         
         actual_file_contents = """12378"""
         
@@ -1227,7 +1226,25 @@ class TokenizerUnitTestsForLiterals(unittest.TestCase):
         
         self.assertListEqual(actual_token_list, expected_token_list)
         
-    def test_literal_string(self):
+    def test_literal_integer2(self):
+        
+        actual_file_contents = """-2378"""
+        
+        tokenizer = Tokenizer(contents=actual_file_contents)
+        actual_token_list_r = tokenizer.tokenize()
+        if actual_token_list_r.is_err:
+            self.fail(f"Failed to tokenize: {actual_token_list_r.unwrap_err()}")
+        actual_token_list = actual_token_list_r.unwrap()
+        
+        expected_token_list = [
+            Token(TokenType.SYM_DASH, None, None),
+            Token(TokenType.LIT_INT, None, "2378"),
+            Token(TokenType.EOF, None, None),
+        ]
+        
+        self.assertListEqual(actual_token_list, expected_token_list)
+
+    def test_literal_string1(self):
         
         actual_file_contents = """\"test string @ $#**()}!\""""
         
@@ -1243,8 +1260,33 @@ class TokenizerUnitTestsForLiterals(unittest.TestCase):
         ]
         
         self.assertListEqual(actual_token_list, expected_token_list)
+    
+    def test_literal_string_empty(self):
         
-    def test_literal_character(self):
+        actual_file_contents = """\"\""""
+        
+        tokenizer = Tokenizer(contents=actual_file_contents)
+        actual_token_list_r = tokenizer.tokenize()
+        if actual_token_list_r.is_err:
+            self.fail(f"Failed to tokenize: {actual_token_list_r.unwrap_err()}")
+        actual_token_list = actual_token_list_r.unwrap()
+        
+        expected_token_list = [
+            Token(TokenType.LIT_STRING, None, ""),
+            Token(TokenType.EOF, None, None),
+        ]
+        
+        self.assertListEqual(actual_token_list, expected_token_list)
+
+    def test_literal_string_no_end_quote(self):
+        
+        actual_file_contents = """\"test"""
+        
+        tokenizer = Tokenizer(contents=actual_file_contents)
+        actual_token_list_r = tokenizer.tokenize()
+        self.assertTrue(actual_token_list_r.is_err)
+
+    def test_literal_character1(self):
         
         actual_file_contents = """'s'"""
         
@@ -1261,8 +1303,15 @@ class TokenizerUnitTestsForLiterals(unittest.TestCase):
         
         self.assertListEqual(actual_token_list, expected_token_list)
     
-    @unittest.skip("This test has an infinite loop somewhere!")
-    def test_literal_float(self):
+    def test_literal_character_invalid(self):
+        
+        actual_file_contents = """'too long!'"""
+        
+        tokenizer = Tokenizer(contents=actual_file_contents)
+        actual_token_list_r = tokenizer.tokenize()
+        self.assertTrue(actual_token_list_r.is_err)
+    
+    def test_literal_float1(self):
         
         actual_file_contents = """3.14159265f"""
         
@@ -1279,3 +1328,36 @@ class TokenizerUnitTestsForLiterals(unittest.TestCase):
         
         self.assertListEqual(actual_token_list, expected_token_list)
 
+    def test_literal_float2(self):
+        
+        actual_file_contents = """1.0f"""
+        
+        tokenizer = Tokenizer(contents=actual_file_contents)
+        actual_token_list_r = tokenizer.tokenize()
+        if actual_token_list_r.is_err:
+            self.fail(f"Failed to tokenize: {actual_token_list_r.unwrap_err()}")
+        actual_token_list = actual_token_list_r.unwrap()
+        
+        expected_token_list = [
+            Token(TokenType.LIT_FLOAT, None, "1.0f"),
+            Token(TokenType.EOF, None, None),
+        ]
+        
+        self.assertListEqual(actual_token_list, expected_token_list)
+
+    def test_literal_float3(self):
+        
+        actual_file_contents = """278f"""
+        
+        tokenizer = Tokenizer(contents=actual_file_contents)
+        actual_token_list_r = tokenizer.tokenize()
+        if actual_token_list_r.is_err:
+            self.fail(f"Failed to tokenize: {actual_token_list_r.unwrap_err()}")
+        actual_token_list = actual_token_list_r.unwrap()
+        
+        expected_token_list = [
+            Token(TokenType.LIT_FLOAT, None, "278f"),
+            Token(TokenType.EOF, None, None),
+        ]
+        
+        self.assertListEqual(actual_token_list, expected_token_list)
