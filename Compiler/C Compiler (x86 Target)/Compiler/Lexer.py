@@ -5,7 +5,6 @@ from option import Err, Ok, Result
 
 class TokenType(Enum):
     NONE                    = auto(),
-    EXIT                    = auto(),
     IDENTIFIER              = auto(),
     EOF                     = auto(),
     SYM_SEMICOLON           = auto(), # ;
@@ -38,39 +37,29 @@ class TokenType(Enum):
     LIT_FLOAT               = auto(), # floats
     LIT_CHAR                = auto(), # characters
     LIT_STRING              = auto(), # strings
-    KEYWORD_IF              = auto(), # if
-    KEYWORD_ELIF            = auto(), # elif
-    KEYWORD_ELSE            = auto(), # else
-    KEYWORD_WHILE           = auto(), # while
-    KEYWORD_FOR             = auto(), # for
-    KEYWORD_CONTINUE        = auto(), # continue
-    KEYWORD_OVERLOAD        = auto(), # overload
-    KEYWORD_RETURN          = auto(), # return
-    KEYWORD_CONST           = auto(), # const
-    KEYWORD_STATIC          = auto(), # static
-    KEYWORD_MUTABLE         = auto(), # mutable
-    KEYWORD_MATCH           = auto(), # match
-    KEYWORD_SWITCH          = auto(), # switch
-    KEYWORD_CASE            = auto(), # case
+    KEYWORD_BOOL            = auto(), # bool
     KEYWORD_BREAK           = auto(), # break
-    KEYWORD_DEFAULT         = auto(), # default
-    KEYWORD_ENUM            = auto(), # enum
-    KEYWORD_DEF             = auto(), # def
-    KEYWORD_STRUCT          = auto(), # struct
-    KEYWORD_SIZEOF          = auto(), # sizeof
-    KEYWORD_TYPEOF          = auto(), # typeof
-    KEYWORD_CAST            = auto(), # as
-    KEYWORD_ASM             = auto(), # asm
-    KEYWORD_NEW             = auto(), # new
-    KEYWORD_TRUE            = auto(), # true
-    KEYWORD_FALSE           = auto(), # false
-    KEYWORD_BOOL            = auto(), # boolean
-    KEYWORD_INT             = auto(), # int
-    KEYWORD_UINT            = auto(), # uint
-    KEYWORD_FLOAT           = auto(), # float
+    KEYWORD_CASE            = auto(), # case
     KEYWORD_CHAR            = auto(), # char
-    KEYWORD_STRING          = auto(), # string
+    KEYWORD_CONST           = auto(), # const
+    KEYWORD_CONTINUE        = auto(), # continue
+    KEYWORD_DEFAULT         = auto(), # default
+    KEYWORD_ELSE            = auto(), # else
+    KEYWORD_ENUM            = auto(), # enum
+    KEYWORD_FLOAT           = auto(), # float
+    KEYWORD_FOR             = auto(), # for
+    KEYWORD_IF              = auto(), # ir
+    KEYWORD_INT             = auto(), # int
+    KEYWORD_NULLPTR         = auto(), # nullptr
+    KEYWORD_RETURN          = auto(), # return
+    KEYWORD_SIZEOF          = auto(), # sizeof
+    KEYWORD_STATIC          = auto(), # static
+    KEYWORD_STRUCT          = auto(), # struct
+    KEYWORD_SWITCH          = auto(), # switch
+    KEYWORD_TYPEDEF         = auto(), # typedef
+    KEYWORD_UNSIGNED        = auto(), # unsigned
     KEYWORD_VOID            = auto(), # void
+    KEYWORD_WHILE           = auto(), # while
 
     def __str__(type) -> str:
 
@@ -80,37 +69,29 @@ class TokenType(Enum):
             return "unknown"
 
 keyword_dictionary: Dict[str, TokenType] = {
-    "if":           TokenType.KEYWORD_IF,
-    "while":        TokenType.KEYWORD_WHILE,
-    "for":          TokenType.KEYWORD_FOR,
-    "continue":     TokenType.KEYWORD_CONTINUE,
-    "match":        TokenType.KEYWORD_MATCH,
-    "switch":       TokenType.KEYWORD_SWITCH,
-    "case":         TokenType.KEYWORD_CASE,
+    "bool":         TokenType.KEYWORD_BOOL,
     "break":        TokenType.KEYWORD_BREAK,
-    "default":      TokenType.KEYWORD_DEFAULT,
-    "def":          TokenType.KEYWORD_DEF,
-    "struct":       TokenType.KEYWORD_STRUCT,
-    "enum":         TokenType.KEYWORD_ENUM,
-    "overload":     TokenType.KEYWORD_OVERLOAD,
+    "case":         TokenType.KEYWORD_CASE,
+    "char":         TokenType.KEYWORD_CHAR,
     "const":        TokenType.KEYWORD_CONST,
-    "static":       TokenType.KEYWORD_STATIC,
-    "mut":          TokenType.KEYWORD_MUTABLE,
+    "continue":     TokenType.KEYWORD_CONTINUE,
+    "default":      TokenType.KEYWORD_DEFAULT,
+    "else":         TokenType.KEYWORD_ELSE,
+    "enum":         TokenType.KEYWORD_ENUM,
+    "float":        TokenType.KEYWORD_FLOAT,
+    "for":          TokenType.KEYWORD_FOR,
+    "if":           TokenType.KEYWORD_IF,
+    "int":          TokenType.KEYWORD_INT,
+    "nullptr":      TokenType.KEYWORD_NULLPTR,
     "return":       TokenType.KEYWORD_RETURN,
     "sizeof":       TokenType.KEYWORD_SIZEOF,
-    "typeof":       TokenType.KEYWORD_TYPEOF,
-    "as":           TokenType.KEYWORD_CAST,
-    "asm":          TokenType.KEYWORD_ASM,
-    "new":          TokenType.KEYWORD_NEW,
-    "true":         TokenType.KEYWORD_TRUE,
-    "false":        TokenType.KEYWORD_FALSE,
-    "bool":         TokenType.KEYWORD_BOOL,
-    "int":          TokenType.KEYWORD_INT,
-    "uint":         TokenType.KEYWORD_UINT,
-    "float":        TokenType.KEYWORD_FLOAT,
-    "char":         TokenType.KEYWORD_CHAR,
-    "string":       TokenType.KEYWORD_STRING,
+    "static":       TokenType.KEYWORD_STATIC,
+    "struct":       TokenType.KEYWORD_STRUCT,
+    "switch":       TokenType.KEYWORD_SWITCH,
+    "typedef":      TokenType.KEYWORD_TYPEDEF,
+    "unsigned":     TokenType.KEYWORD_UNSIGNED,
     "void":         TokenType.KEYWORD_VOID,
+    "while":        TokenType.KEYWORD_WHILE,
 }
 
 symbol_dictionary: Dict[str, TokenType] = {
@@ -225,6 +206,10 @@ def is_literal_float(sequence: str) -> Optional[TokenType]:
 
 def is_literal_char(sequence: str) -> Optional[TokenType]:
 
+    # This is a special check for empty character literals!
+    if sequence == "''":
+        return TokenType.LIT_CHAR
+
     disqualifying_rules = [
         len(sequence) < 3
     ]
@@ -254,7 +239,7 @@ def is_literal_string(sequence: str) -> Optional[TokenType]:
     ]
 
     return TokenType.LIT_STRING if all(rules) else None
-    
+
 @dataclass
 class Token:
     type: TokenType      = TokenType.NONE,
@@ -269,7 +254,7 @@ class Tokenizer():
         self.source_file_contents: str           = contents
         
         self.index: int                          = 0
-        self.line_count: int                     = 1
+        self.line_number: int                    = 0
         self.tokens: List[Token]                 = []
         
         self.source_file_contents_length:   int  = None
@@ -464,14 +449,15 @@ class Tokenizer():
                 # If this character is a space (or newline!), consume it
                 if peek.isspace():
                     buffer = self.parse_space()
+                    self.process_newline(buffer)
                 else:
                     buffer = self.parse_nonalphanum()
 
         return buffer
 
-    # TODO: Use later
-    def process_newline(self, buffer: str) -> int:
-        return self.line_count + 1 if buffer == "\n" else self.line_count
+    def process_newline(self, buffer: str) -> None:
+        if buffer.find("\n") != -1:
+            self.line_number += 1
     
     def tokenize(self) -> Result[None, list[Token]]:
         
@@ -484,40 +470,40 @@ class Tokenizer():
 
             # If the buffer is a space or it's empty, then parse space
             if buffer.isspace() or buffer == '':
-                self.parse_space()
+                pass
 
             # Is the buffer a character literal?
             elif token_type := is_literal_char(buffer):
                 buffer = buffer[1:-1]
-                self.tokens.append(Token(token_type, None, buffer))
+                self.tokens.append(Token(token_type, self.line_number, buffer))
 
             # Is the buffer a string literal?
             elif token_type := is_literal_string(buffer):
                 buffer = buffer[1:-1]
-                self.tokens.append(Token(token_type, None, buffer))
+                self.tokens.append(Token(token_type, self.line_number, buffer))
 
             # Is the buffer a valid symbol?
             elif token_type := is_symbol(buffer):
-                self.tokens.append(Token(token_type, None, None))
+                self.tokens.append(Token(token_type, self.line_number, None))
 
             # Is the buffer a valid keyword?
             elif token_type := is_keyword(buffer):
-                self.tokens.append(Token(token_type, None, None))
+                self.tokens.append(Token(token_type, self.line_number, None))
 
             # Is the buffer a valid identifier?
             elif token_type := is_identifier(buffer):
-                self.tokens.append(Token(token_type, None, buffer))
+                self.tokens.append(Token(token_type, self.line_number, buffer))
 
             # Is the buffer a valid literal?
             elif token_type := is_literal(buffer):
-                self.tokens.append(Token(token_type, None, buffer))
+                self.tokens.append(Token(token_type, self.line_number, buffer))
 
             # Otherwise, ...?
             else:
                 return Err("Invalid token!")
         
         # Add an EOF to the end
-        self.tokens.append(Token(TokenType.EOF, None, None))
+        self.tokens.append(Token(TokenType.EOF, self.line_number, None))
 
         return Ok(self.tokens)
 

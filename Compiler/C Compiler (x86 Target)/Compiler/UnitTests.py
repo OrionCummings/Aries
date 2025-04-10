@@ -14,23 +14,23 @@ class TokenizerIntegrationTests(unittest.TestCase):
         """
 
         expected_tokens = [
-            Token(TokenType.KEYWORD_INT, None, None),
-            Token(TokenType.IDENTIFIER, None, "main"),
-            Token(TokenType.SYM_PAREN_OPEN, None, None),
-            Token(TokenType.KEYWORD_INT, None, None),
-            Token(TokenType.IDENTIFIER, None, "argc"),
-            Token(TokenType.SYM_COMMA, None, None),
-            Token(TokenType.KEYWORD_CHAR, None, None),
-            Token(TokenType.SYM_STAR, None, None),
-            Token(TokenType.SYM_STAR, None, None),
-            Token(TokenType.IDENTIFIER, None, "argv"),
-            Token(TokenType.SYM_PAREN_CLOSE, None, None),
-            Token(TokenType.SYM_BRACE_OPEN, None, None),
-            Token(TokenType.KEYWORD_RETURN, None, None),
-            Token(TokenType.LIT_INT, None, "0"),
-            Token(TokenType.SYM_SEMICOLON, None, None),
-            Token(TokenType.SYM_BRACE_CLOSE, None, None),
-            Token(TokenType.EOF, None, None),
+            Token(TokenType.KEYWORD_INT, 1, None),
+            Token(TokenType.IDENTIFIER, 1, "main"),
+            Token(TokenType.SYM_PAREN_OPEN, 1, None),
+            Token(TokenType.KEYWORD_INT, 1, None),
+            Token(TokenType.IDENTIFIER, 1, "argc"),
+            Token(TokenType.SYM_COMMA, 1, None),
+            Token(TokenType.KEYWORD_CHAR, 1, None),
+            Token(TokenType.SYM_STAR, 1, None),
+            Token(TokenType.SYM_STAR, 1, None),
+            Token(TokenType.IDENTIFIER, 1, "argv"),
+            Token(TokenType.SYM_PAREN_CLOSE, 1, None),
+            Token(TokenType.SYM_BRACE_OPEN, 1, None),
+            Token(TokenType.KEYWORD_RETURN, 2, None),
+            Token(TokenType.LIT_INT, 2, "0"),
+            Token(TokenType.SYM_SEMICOLON, 2, None),
+            Token(TokenType.SYM_BRACE_CLOSE, 3, None),
+            Token(TokenType.EOF, 4, None),
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -51,35 +51,35 @@ class TokenizerIntegrationTests(unittest.TestCase):
         """
 
         expected_tokens = [
-            Token(TokenType.KEYWORD_INT, None, None),
-            Token(TokenType.IDENTIFIER, None, "main"),
-            Token(TokenType.SYM_PAREN_OPEN, None, None),
-            Token(TokenType.KEYWORD_INT, None, None),
-            Token(TokenType.IDENTIFIER, None, "argc"),
-            Token(TokenType.SYM_COMMA, None, None),
-            Token(TokenType.KEYWORD_CHAR, None, None),
-            Token(TokenType.SYM_STAR, None, None),
-            Token(TokenType.SYM_STAR, None, None),
-            Token(TokenType.IDENTIFIER, None, "argv"),
-            Token(TokenType.SYM_PAREN_CLOSE, None, None),
-            Token(TokenType.SYM_BRACE_OPEN, None, None),
-            Token(TokenType.KEYWORD_RETURN, None, None),
-            Token(TokenType.SYM_PAREN_OPEN, None, None),
-            Token(TokenType.IDENTIFIER, None, "a"),
-            Token(TokenType.SYM_STAR, None, None),
-            Token(TokenType.LIT_INT, None, "29"),
-            Token(TokenType.SYM_PAREN_CLOSE, None, None),
-            Token(TokenType.SYM_FSLASH, None, None),
-            Token(TokenType.SYM_PAREN_OPEN, None, None),
-            Token(TokenType.LIT_INT, None, "204"),
-            Token(TokenType.SYM_DASH, None, None),
-            Token(TokenType.LIT_INT, None, "5"),
-            Token(TokenType.SYM_PAREN_CLOSE, None, None),
-            Token(TokenType.SYM_DASH, None, None),
-            Token(TokenType.IDENTIFIER, None, "variable"),
-            Token(TokenType.SYM_SEMICOLON, None, None),
-            Token(TokenType.SYM_BRACE_CLOSE, None, None),
-            Token(TokenType.EOF, None, None),
+            Token(TokenType.KEYWORD_INT, 1, None),
+            Token(TokenType.IDENTIFIER, 1, "main"),
+            Token(TokenType.SYM_PAREN_OPEN, 1, None),
+            Token(TokenType.KEYWORD_INT, 1, None),
+            Token(TokenType.IDENTIFIER, 1, "argc"),
+            Token(TokenType.SYM_COMMA, 1, None),
+            Token(TokenType.KEYWORD_CHAR, 1, None),
+            Token(TokenType.SYM_STAR, 1, None),
+            Token(TokenType.SYM_STAR, 1, None),
+            Token(TokenType.IDENTIFIER, 1, "argv"),
+            Token(TokenType.SYM_PAREN_CLOSE, 1, None),
+            Token(TokenType.SYM_BRACE_OPEN, 1, None),
+            Token(TokenType.KEYWORD_RETURN, 2, None),
+            Token(TokenType.SYM_PAREN_OPEN, 2, None),
+            Token(TokenType.IDENTIFIER, 2, "a"),
+            Token(TokenType.SYM_STAR, 2, None),
+            Token(TokenType.LIT_INT, 2, "29"),
+            Token(TokenType.SYM_PAREN_CLOSE, 2, None),
+            Token(TokenType.SYM_FSLASH, 2, None),
+            Token(TokenType.SYM_PAREN_OPEN, 2, None),
+            Token(TokenType.LIT_INT, 2, "204"),
+            Token(TokenType.SYM_DASH, 2, None),
+            Token(TokenType.LIT_INT, 2, "5"),
+            Token(TokenType.SYM_PAREN_CLOSE, 2, None),
+            Token(TokenType.SYM_DASH, 2, None),
+            Token(TokenType.IDENTIFIER, 2, "variable"),
+            Token(TokenType.SYM_SEMICOLON, 2, None),
+            Token(TokenType.SYM_BRACE_CLOSE, 3, None),
+            Token(TokenType.EOF, 4, None),
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -106,82 +106,148 @@ class TokenizerIntegrationTests(unittest.TestCase):
         """
 
         expected_tokens = [
-            Token(TokenType.KEYWORD_INT, None, None),
-            Token(TokenType.IDENTIFIER, None, "function2"),
-            Token(TokenType.SYM_PAREN_OPEN, None, None),
-            Token(TokenType.KEYWORD_INT, None, None),
-            Token(TokenType.IDENTIFIER, None, "a"),
-            Token(TokenType.SYM_COMMA, None, None),
-            Token(TokenType.KEYWORD_INT, None, None),
-            Token(TokenType.IDENTIFIER, None, "b"),
-            Token(TokenType.SYM_COMMA, None, None),
-            Token(TokenType.KEYWORD_INT, None, None),
-            Token(TokenType.IDENTIFIER, None, "c"),
-            Token(TokenType.SYM_PAREN_CLOSE, None, None),
-            Token(TokenType.SYM_BRACE_OPEN, None, None),
-            Token(TokenType.KEYWORD_RETURN, None, None),
-            Token(TokenType.IDENTIFIER, None, "a"),
-            Token(TokenType.SYM_PLUS, None, None),
-            Token(TokenType.IDENTIFIER, None, "b"),
-            Token(TokenType.SYM_PLUS, None, None),
-            Token(TokenType.IDENTIFIER, None, "c"),
-            Token(TokenType.SYM_SEMICOLON, None, None),
-            Token(TokenType.SYM_BRACE_CLOSE, None, None),
-            Token(TokenType.KEYWORD_INT, None, None),
-            Token(TokenType.IDENTIFIER, None, "f"),
-            Token(TokenType.SYM_PAREN_OPEN, None, None),
-            Token(TokenType.KEYWORD_INT, None, None),
-            Token(TokenType.IDENTIFIER, None, "a"),
-            Token(TokenType.SYM_COMMA, None, None),
-            Token(TokenType.KEYWORD_INT, None, None),
-            Token(TokenType.IDENTIFIER, None, "b"),
-            Token(TokenType.SYM_COMMA, None, None),
-            Token(TokenType.KEYWORD_INT, None, None),
-            Token(TokenType.IDENTIFIER, None, "c"),
-            Token(TokenType.SYM_PAREN_CLOSE, None, None),
-            Token(TokenType.SYM_BRACE_OPEN, None, None),
-            Token(TokenType.KEYWORD_RETURN, None, None),
-            Token(TokenType.IDENTIFIER, None, "a"),
-            Token(TokenType.SYM_STAR, None, None),
-            Token(TokenType.IDENTIFIER, None, "b"),
-            Token(TokenType.SYM_PLUS, None, None),
-            Token(TokenType.IDENTIFIER, None, "c"),
-            Token(TokenType.SYM_SEMICOLON, None, None),
-            Token(TokenType.SYM_BRACE_CLOSE, None, None),
-            Token(TokenType.KEYWORD_INT, None, None),
-            Token(TokenType.IDENTIFIER, None, "main"),
-            Token(TokenType.SYM_PAREN_OPEN, None, None),
-            Token(TokenType.KEYWORD_INT, None, None),
-            Token(TokenType.IDENTIFIER, None, "argc"),
-            Token(TokenType.SYM_COMMA, None, None),
-            Token(TokenType.KEYWORD_CHAR, None, None),
-            Token(TokenType.SYM_STAR, None, None),
-            Token(TokenType.SYM_STAR, None, None),
-            Token(TokenType.IDENTIFIER, None, "argv"),
-            Token(TokenType.SYM_PAREN_CLOSE, None, None),
-            Token(TokenType.SYM_BRACE_OPEN, None, None),
-            Token(TokenType.KEYWORD_RETURN, None, None),
-            Token(TokenType.IDENTIFIER, None, "f"),
-            Token(TokenType.SYM_PAREN_OPEN, None, None),
-            Token(TokenType.LIT_INT, None, "1"),
-            Token(TokenType.SYM_COMMA, None, None),
-            Token(TokenType.IDENTIFIER, None, "variable1"),
-            Token(TokenType.SYM_COMMA, None, None),
-            Token(TokenType.IDENTIFIER, None, "function2"),
-            Token(TokenType.SYM_PAREN_OPEN, None, None),
-            Token(TokenType.LIT_INT, None, "27"),
-            Token(TokenType.SYM_COMMA, None, None),
-            Token(TokenType.IDENTIFIER, None, "arg2"),
-            Token(TokenType.SYM_COMMA, None, None),
-            Token(TokenType.IDENTIFIER, None, "argv"),
-            Token(TokenType.SYM_BRACKET_OPEN, None, None),
-            Token(TokenType.LIT_INT, None, "4"),
-            Token(TokenType.SYM_BRACKET_CLOSE, None, None),
-            Token(TokenType.SYM_PAREN_CLOSE, None, None),
-            Token(TokenType.SYM_PAREN_CLOSE, None, None),
-            Token(TokenType.SYM_SEMICOLON, None, None),
-            Token(TokenType.SYM_BRACE_CLOSE, None, None),
-            Token(TokenType.EOF, None, None),
+            Token(TokenType.KEYWORD_INT, 1, None),
+            Token(TokenType.IDENTIFIER, 1, "function2"),
+            Token(TokenType.SYM_PAREN_OPEN, 1, None),
+            Token(TokenType.KEYWORD_INT, 1, None),
+            Token(TokenType.IDENTIFIER, 1, "a"),
+            Token(TokenType.SYM_COMMA, 1, None),
+            Token(TokenType.KEYWORD_INT, 1, None),
+            Token(TokenType.IDENTIFIER, 1, "b"),
+            Token(TokenType.SYM_COMMA, 1, None),
+            Token(TokenType.KEYWORD_INT, 1, None),
+            Token(TokenType.IDENTIFIER, 1, "c"),
+            Token(TokenType.SYM_PAREN_CLOSE, 1, None),
+            Token(TokenType.SYM_BRACE_OPEN, 1, None),
+            Token(TokenType.KEYWORD_RETURN, 2, None),
+            Token(TokenType.IDENTIFIER, 2, "a"),
+            Token(TokenType.SYM_PLUS, 2, None),
+            Token(TokenType.IDENTIFIER, 2, "b"),
+            Token(TokenType.SYM_PLUS, 2, None),
+            Token(TokenType.IDENTIFIER, 2, "c"),
+            Token(TokenType.SYM_SEMICOLON, 2, None),
+            Token(TokenType.SYM_BRACE_CLOSE, 3, None),
+            Token(TokenType.KEYWORD_INT, 4, None),
+            Token(TokenType.IDENTIFIER, 4, "f"),
+            Token(TokenType.SYM_PAREN_OPEN, 4, None),
+            Token(TokenType.KEYWORD_INT, 4, None),
+            Token(TokenType.IDENTIFIER, 4, "a"),
+            Token(TokenType.SYM_COMMA, 4, None),
+            Token(TokenType.KEYWORD_INT, 4, None),
+            Token(TokenType.IDENTIFIER, 4, "b"),
+            Token(TokenType.SYM_COMMA, 4, None),
+            Token(TokenType.KEYWORD_INT, 4, None),
+            Token(TokenType.IDENTIFIER, 4, "c"),
+            Token(TokenType.SYM_PAREN_CLOSE, 4, None),
+            Token(TokenType.SYM_BRACE_OPEN, 4, None),
+            Token(TokenType.KEYWORD_RETURN, 5, None),
+            Token(TokenType.IDENTIFIER, 5, "a"),
+            Token(TokenType.SYM_STAR, 5, None),
+            Token(TokenType.IDENTIFIER, 5, "b"),
+            Token(TokenType.SYM_PLUS, 5, None),
+            Token(TokenType.IDENTIFIER, 5, "c"),
+            Token(TokenType.SYM_SEMICOLON, 5, None),
+            Token(TokenType.SYM_BRACE_CLOSE, 6, None),
+            Token(TokenType.KEYWORD_INT, 7, None),
+            Token(TokenType.IDENTIFIER, 7, "main"),
+            Token(TokenType.SYM_PAREN_OPEN, 7, None),
+            Token(TokenType.KEYWORD_INT, 7, None),
+            Token(TokenType.IDENTIFIER, 7, "argc"),
+            Token(TokenType.SYM_COMMA, 7, None),
+            Token(TokenType.KEYWORD_CHAR, 7, None),
+            Token(TokenType.SYM_STAR, 7, None),
+            Token(TokenType.SYM_STAR, 7, None),
+            Token(TokenType.IDENTIFIER, 7, "argv"),
+            Token(TokenType.SYM_PAREN_CLOSE, 7, None),
+            Token(TokenType.SYM_BRACE_OPEN, 7, None),
+            Token(TokenType.KEYWORD_RETURN, 8, None),
+            Token(TokenType.IDENTIFIER, 8, "f"),
+            Token(TokenType.SYM_PAREN_OPEN, 8, None),
+            Token(TokenType.LIT_INT, 8, "1"),
+            Token(TokenType.SYM_COMMA, 8, None),
+            Token(TokenType.IDENTIFIER, 8, "variable1"),
+            Token(TokenType.SYM_COMMA, 8, None),
+            Token(TokenType.IDENTIFIER, 8, "function2"),
+            Token(TokenType.SYM_PAREN_OPEN, 8, None),
+            Token(TokenType.LIT_INT, 8, "27"),
+            Token(TokenType.SYM_COMMA, 8, None),
+            Token(TokenType.IDENTIFIER, 8, "arg2"),
+            Token(TokenType.SYM_COMMA, 8, None),
+            Token(TokenType.IDENTIFIER, 8, "argv"),
+            Token(TokenType.SYM_BRACKET_OPEN, 8, None),
+            Token(TokenType.LIT_INT, 8, "4"),
+            Token(TokenType.SYM_BRACKET_CLOSE, 8, None),
+            Token(TokenType.SYM_PAREN_CLOSE, 8, None),
+            Token(TokenType.SYM_PAREN_CLOSE, 8, None),
+            Token(TokenType.SYM_SEMICOLON, 8, None),
+            Token(TokenType.SYM_BRACE_CLOSE, 9, None),
+            Token(TokenType.EOF, 10, None),
+        ]
+
+        tokenizer = Tokenizer(contents=contents)
+        actual_tokens_r = tokenizer.tokenize()
+        if actual_tokens_r.is_err:
+            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
+        
+        actual_tokens = actual_tokens_r.unwrap()
+
+        self.assertListEqual(expected_tokens, actual_tokens)
+
+    def test_structs(self):
+
+        contents = """
+        struct point {
+            int x;
+            int y;
+        }; 
+        """
+
+        expected_tokens = [
+            Token(TokenType.KEYWORD_STRUCT, 1, None),
+            Token(TokenType.IDENTIFIER, 1, "point"),
+            Token(TokenType.SYM_BRACE_OPEN, 1, None),
+            Token(TokenType.KEYWORD_INT, 2, None),
+            Token(TokenType.IDENTIFIER, 2, "x"),
+            Token(TokenType.SYM_SEMICOLON, 2, None),
+            Token(TokenType.KEYWORD_INT, 3, None),
+            Token(TokenType.IDENTIFIER, 3, "y"),
+            Token(TokenType.SYM_SEMICOLON, 3, None),
+            Token(TokenType.SYM_BRACE_CLOSE, 4, None),
+            Token(TokenType.SYM_SEMICOLON, 4, None),
+            Token(TokenType.EOF, 5, None),
+        ]
+
+        tokenizer = Tokenizer(contents=contents)
+        actual_tokens_r = tokenizer.tokenize()
+        if actual_tokens_r.is_err:
+            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
+        
+        actual_tokens = actual_tokens_r.unwrap()
+
+        self.assertListEqual(expected_tokens, actual_tokens)
+
+    def test_typedefs(self):
+
+        contents = """
+        struct point {
+            int x;
+            int y;
+        }; 
+        """
+
+        expected_tokens = [
+            Token(TokenType.KEYWORD_STRUCT, 1, None),
+            Token(TokenType.IDENTIFIER, 1, "point"),
+            Token(TokenType.SYM_BRACE_OPEN, 1, None),
+            Token(TokenType.KEYWORD_INT, 2, None),
+            Token(TokenType.IDENTIFIER, 2, "x"),
+            Token(TokenType.SYM_SEMICOLON, 2, None),
+            Token(TokenType.KEYWORD_INT, 3, None),
+            Token(TokenType.IDENTIFIER, 3, "y"),
+            Token(TokenType.SYM_SEMICOLON, 3, None),
+            Token(TokenType.SYM_BRACE_CLOSE, 4, None),
+            Token(TokenType.SYM_SEMICOLON, 4, None),
+            Token(TokenType.EOF, 5, None),
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -200,8 +266,8 @@ class TokenizerUnitTestsForSymbols(unittest.TestCase):
         contents = """;"""
 
         expected_tokens = [
-            Token(TokenType.SYM_SEMICOLON, None, None),
-            Token(TokenType.EOF, None, None)
+            Token(TokenType.SYM_SEMICOLON, 0, None),
+            Token(TokenType.EOF, 0, None)
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -218,8 +284,8 @@ class TokenizerUnitTestsForSymbols(unittest.TestCase):
         contents = """:"""
 
         expected_tokens = [
-            Token(TokenType.SYM_COLON, None, None),
-            Token(TokenType.EOF, None, None)
+            Token(TokenType.SYM_COLON, 0, None),
+            Token(TokenType.EOF, 0, None)
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -236,8 +302,8 @@ class TokenizerUnitTestsForSymbols(unittest.TestCase):
         contents = ""","""
 
         expected_tokens = [
-            Token(TokenType.SYM_COMMA, None, None),
-            Token(TokenType.EOF, None, None)
+            Token(TokenType.SYM_COMMA, 0, None),
+            Token(TokenType.EOF, 0, None)
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -254,8 +320,8 @@ class TokenizerUnitTestsForSymbols(unittest.TestCase):
         contents = """?"""
 
         expected_tokens = [
-            Token(TokenType.SYM_QUESTION, None, None),
-            Token(TokenType.EOF, None, None)
+            Token(TokenType.SYM_QUESTION, 0, None),
+            Token(TokenType.EOF, 0, None)
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -272,8 +338,8 @@ class TokenizerUnitTestsForSymbols(unittest.TestCase):
         contents = """("""
 
         expected_tokens = [
-            Token(TokenType.SYM_PAREN_OPEN, None, None),
-            Token(TokenType.EOF, None, None)
+            Token(TokenType.SYM_PAREN_OPEN, 0, None),
+            Token(TokenType.EOF, 0, None)
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -290,8 +356,8 @@ class TokenizerUnitTestsForSymbols(unittest.TestCase):
         contents = """)"""
 
         expected_tokens = [
-            Token(TokenType.SYM_PAREN_CLOSE, None, None),
-            Token(TokenType.EOF, None, None)
+            Token(TokenType.SYM_PAREN_CLOSE, 0, None),
+            Token(TokenType.EOF, 0, None)
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -308,8 +374,8 @@ class TokenizerUnitTestsForSymbols(unittest.TestCase):
         contents = """{"""
 
         expected_tokens = [
-            Token(TokenType.SYM_BRACE_OPEN, None, None),
-            Token(TokenType.EOF, None, None)
+            Token(TokenType.SYM_BRACE_OPEN, 0, None),
+            Token(TokenType.EOF, 0, None)
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -326,8 +392,8 @@ class TokenizerUnitTestsForSymbols(unittest.TestCase):
         contents = """}"""
 
         expected_tokens = [
-            Token(TokenType.SYM_BRACE_CLOSE, None, None),
-            Token(TokenType.EOF, None, None)
+            Token(TokenType.SYM_BRACE_CLOSE, 0, None),
+            Token(TokenType.EOF, 0, None)
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -344,8 +410,8 @@ class TokenizerUnitTestsForSymbols(unittest.TestCase):
         contents = """["""
 
         expected_tokens = [
-            Token(TokenType.SYM_BRACKET_OPEN, None, None),
-            Token(TokenType.EOF, None, None)
+            Token(TokenType.SYM_BRACKET_OPEN, 0, None),
+            Token(TokenType.EOF, 0, None)
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -362,8 +428,8 @@ class TokenizerUnitTestsForSymbols(unittest.TestCase):
         contents = """]"""
 
         expected_tokens = [
-            Token(TokenType.SYM_BRACKET_CLOSE, None, None),
-            Token(TokenType.EOF, None, None)
+            Token(TokenType.SYM_BRACKET_CLOSE, 0, None),
+            Token(TokenType.EOF, 0, None)
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -380,8 +446,8 @@ class TokenizerUnitTestsForSymbols(unittest.TestCase):
         contents = """="""
 
         expected_tokens = [
-            Token(TokenType.SYM_EQUAL, None, None),
-            Token(TokenType.EOF, None, None)
+            Token(TokenType.SYM_EQUAL, 0, None),
+            Token(TokenType.EOF, 0, None)
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -398,8 +464,8 @@ class TokenizerUnitTestsForSymbols(unittest.TestCase):
         contents = """+"""
 
         expected_tokens = [
-            Token(TokenType.SYM_PLUS, None, None),
-            Token(TokenType.EOF, None, None)
+            Token(TokenType.SYM_PLUS, 0, None),
+            Token(TokenType.EOF, 0, None)
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -416,8 +482,8 @@ class TokenizerUnitTestsForSymbols(unittest.TestCase):
         contents = """-"""
 
         expected_tokens = [
-            Token(TokenType.SYM_DASH, None, None),
-            Token(TokenType.EOF, None, None)
+            Token(TokenType.SYM_DASH, 0, None),
+            Token(TokenType.EOF, 0, None)
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -434,8 +500,8 @@ class TokenizerUnitTestsForSymbols(unittest.TestCase):
         contents = """/"""
 
         expected_tokens = [
-            Token(TokenType.SYM_FSLASH, None, None),
-            Token(TokenType.EOF, None, None)
+            Token(TokenType.SYM_FSLASH, 0, None),
+            Token(TokenType.EOF, 0, None)
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -452,8 +518,8 @@ class TokenizerUnitTestsForSymbols(unittest.TestCase):
         contents = """*"""
 
         expected_tokens = [
-            Token(TokenType.SYM_STAR, None, None),
-            Token(TokenType.EOF, None, None)
+            Token(TokenType.SYM_STAR, 0, None),
+            Token(TokenType.EOF, 0, None)
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -470,8 +536,8 @@ class TokenizerUnitTestsForSymbols(unittest.TestCase):
         contents = """%"""
 
         expected_tokens = [
-            Token(TokenType.SYM_PERCENT, None, None),
-            Token(TokenType.EOF, None, None)
+            Token(TokenType.SYM_PERCENT, 0, None),
+            Token(TokenType.EOF, 0, None)
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -488,8 +554,8 @@ class TokenizerUnitTestsForSymbols(unittest.TestCase):
         contents = """!"""
 
         expected_tokens = [
-            Token(TokenType.SYM_EXCLAIM, None, None),
-            Token(TokenType.EOF, None, None)
+            Token(TokenType.SYM_EXCLAIM, 0, None),
+            Token(TokenType.EOF, 0, None)
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -506,8 +572,8 @@ class TokenizerUnitTestsForSymbols(unittest.TestCase):
         contents = """<"""
 
         expected_tokens = [
-            Token(TokenType.SYM_LT, None, None),
-            Token(TokenType.EOF, None, None)
+            Token(TokenType.SYM_LT, 0, None),
+            Token(TokenType.EOF, 0, None)
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -524,8 +590,8 @@ class TokenizerUnitTestsForSymbols(unittest.TestCase):
         contents = """>"""
 
         expected_tokens = [
-            Token(TokenType.SYM_GT, None, None),
-            Token(TokenType.EOF, None, None)
+            Token(TokenType.SYM_GT, 0, None),
+            Token(TokenType.EOF, 0, None)
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -542,8 +608,8 @@ class TokenizerUnitTestsForSymbols(unittest.TestCase):
         contents = """&"""
 
         expected_tokens = [
-            Token(TokenType.SYM_AMPERSAND, None, None),
-            Token(TokenType.EOF, None, None)
+            Token(TokenType.SYM_AMPERSAND, 0, None),
+            Token(TokenType.EOF, 0, None)
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -560,8 +626,8 @@ class TokenizerUnitTestsForSymbols(unittest.TestCase):
         contents = """|"""
 
         expected_tokens = [
-            Token(TokenType.SYM_PIPE, None, None),
-            Token(TokenType.EOF, None, None)
+            Token(TokenType.SYM_PIPE, 0, None),
+            Token(TokenType.EOF, 0, None)
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -578,8 +644,8 @@ class TokenizerUnitTestsForSymbols(unittest.TestCase):
         contents = """^"""
 
         expected_tokens = [
-            Token(TokenType.SYM_CARET, None, None),
-            Token(TokenType.EOF, None, None)
+            Token(TokenType.SYM_CARET, 0, None),
+            Token(TokenType.EOF, 0, None)
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -631,564 +697,77 @@ class TokenizerUnitTestsForSymbols(unittest.TestCase):
         self.assertListEqual(expected_tokens, actual_tokens)
     
 class TokenizerUnitTestsForKeywords(unittest.TestCase):
-    
-    def test_keyword_if(self):
 
-        contents = """if"""
+    def test_all_keywords(self):
 
-        expected_tokens = [
-            Token(TokenType.KEYWORD_IF, None, None),
-            Token(TokenType.EOF, None, None)
+        # A list of all supported C keywords
+        all_keywords = [
+            "bool",
+            "break",
+            "case",
+            "char",
+            "const",
+            "continue",
+            "default",
+            "else",
+            "enum",
+            "float",
+            "for",
+            "if",
+            "int",
+            "nullptr",
+            "return",
+            "sizeof",
+            "static",
+            "struct",
+            "switch",
+            "typedef",
+            "unsigned",
+            "void",
+            "while",
         ]
 
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-    
-    def test_keyword_while(self):
-
-        contents = """while"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_WHILE, None, None),
-            Token(TokenType.EOF, None, None)
+        all_keywords_token_types = [
+            TokenType.KEYWORD_BOOL,
+            TokenType.KEYWORD_BREAK,
+            TokenType.KEYWORD_CASE,
+            TokenType.KEYWORD_CHAR,
+            TokenType.KEYWORD_CONST,
+            TokenType.KEYWORD_CONTINUE,
+            TokenType.KEYWORD_DEFAULT,
+            TokenType.KEYWORD_ELSE,
+            TokenType.KEYWORD_ENUM,
+            TokenType.KEYWORD_FLOAT,
+            TokenType.KEYWORD_FOR,
+            TokenType.KEYWORD_IF,
+            TokenType.KEYWORD_INT,
+            TokenType.KEYWORD_NULLPTR,
+            TokenType.KEYWORD_RETURN,
+            TokenType.KEYWORD_SIZEOF,
+            TokenType.KEYWORD_STATIC,
+            TokenType.KEYWORD_STRUCT,
+            TokenType.KEYWORD_SWITCH,
+            TokenType.KEYWORD_TYPEDEF,
+            TokenType.KEYWORD_UNSIGNED,
+            TokenType.KEYWORD_VOID,
+            TokenType.KEYWORD_WHILE,
         ]
 
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-
-    def test_keyword_for(self):
-
-        contents = """for"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_FOR, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-    
-    def test_keyword_continue(self):
-
-        contents = """continue"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_CONTINUE, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-    
-    def test_keyword_match(self):
-
-        contents = """match"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_MATCH, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-    
-    def test_keyword_switch(self):
-
-        contents = """switch"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_SWITCH, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-    
-    def test_keyword_case(self):
-
-        contents = """case"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_CASE, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-    
-    def test_keyword_break(self):
-
-        contents = """break"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_BREAK, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-    
-    def test_keyword_default(self):
-
-        contents = """default"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_DEFAULT, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-    
-    def test_keyword_def(self):
-
-        contents = """def"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_DEF, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-
-    def test_keyword_struct(self):
-
-        contents = """struct"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_STRUCT, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-
-    def test_keyword_enum(self):
-
-        contents = """enum"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_ENUM, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-
-    def test_keyword_overload(self):
-
-        contents = """overload"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_OVERLOAD, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-
-    def test_keyword_const(self):
-
-        contents = """const"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_CONST, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-
-    def test_keyword_static(self):
-
-        contents = """static"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_STATIC, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-
-    def test_keyword_mut(self):
-
-        contents = """mut"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_MUTABLE, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-
-    def test_keyword_return(self):
-
-        contents = """return"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_RETURN, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-
-    def test_keyword_sizeof(self):
-
-        contents = """sizeof"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_SIZEOF, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-
-    def test_keyword_typeof(self):
-
-        contents = """typeof"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_TYPEOF, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-
-    def test_keyword_as(self):
-
-        contents = """as"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_CAST, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-
-    def test_keyword_asm(self):
-
-        contents = """asm"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_ASM, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-
-    def test_keyword_new(self):
-
-        contents = """new"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_NEW, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-
-    def test_keyword_true(self):
-
-        contents = """true"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_TRUE, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-
-    def test_keyword_false(self):
-
-        contents = """false"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_FALSE, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-
-    def test_keyword_bool(self):
-
-        contents = """bool"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_BOOL, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-
-    def test_keyword_int(self):
-
-        contents = """int"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_INT, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-
-    def test_keyword_uint(self):
-
-        contents = """uint"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_UINT, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-
-    def test_keyword_float(self):
-
-        contents = """float"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_FLOAT, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-
-    def test_keyword_char(self):
-
-        contents = """char"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_CHAR, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-
-    def test_keyword_string(self):
-
-        contents = """string"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_STRING, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
-
-    def test_keyword_void(self):
-
-        contents = """void"""
-
-        expected_tokens = [
-            Token(TokenType.KEYWORD_VOID, None, None),
-            Token(TokenType.EOF, None, None)
-        ]
-
-        tokenizer = Tokenizer(contents=contents)
-        actual_tokens_r = tokenizer.tokenize()
-        if actual_tokens_r.is_err:
-            self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
-        
-        actual_tokens = actual_tokens_r.unwrap()
-
-        self.assertListEqual(expected_tokens, actual_tokens)
+        for (index, keyword) in enumerate(all_keywords):
+
+            expected_tokens = [
+                Token(all_keywords_token_types[index], 0, None),
+                Token(TokenType.EOF, 0, None)
+            ]
+
+            tokenizer = Tokenizer(contents=keyword)
+            actual_tokens_r = tokenizer.tokenize()
+            if actual_tokens_r.is_err:
+                self.fail(f"Failed to tokenize: {actual_tokens_r.unwrap_err()}")
+            
+            actual_tokens = actual_tokens_r.unwrap()
+
+            self.assertListEqual(expected_tokens, actual_tokens)
 
 class TokenizerUnitTestsForLiterals(unittest.TestCase):
     
@@ -1203,8 +782,8 @@ class TokenizerUnitTestsForLiterals(unittest.TestCase):
         actual_token_list = actual_token_list_r.unwrap()
         
         expected_token_list = [
-            Token(TokenType.LIT_UINT, None, "255u"),
-            Token(TokenType.EOF, None, None),
+            Token(TokenType.LIT_UINT, 0, "255u"),
+            Token(TokenType.EOF, 0, None),
         ]
         
         self.assertListEqual(actual_token_list, expected_token_list)
@@ -1220,8 +799,8 @@ class TokenizerUnitTestsForLiterals(unittest.TestCase):
         actual_token_list = actual_token_list_r.unwrap()
         
         expected_token_list = [
-            Token(TokenType.LIT_INT, None, "12378"),
-            Token(TokenType.EOF, None, None),
+            Token(TokenType.LIT_INT, 0, "12378"),
+            Token(TokenType.EOF, 0, None),
         ]
         
         self.assertListEqual(actual_token_list, expected_token_list)
@@ -1237,9 +816,9 @@ class TokenizerUnitTestsForLiterals(unittest.TestCase):
         actual_token_list = actual_token_list_r.unwrap()
         
         expected_token_list = [
-            Token(TokenType.SYM_DASH, None, None),
-            Token(TokenType.LIT_INT, None, "2378"),
-            Token(TokenType.EOF, None, None),
+            Token(TokenType.SYM_DASH, 0, None),
+            Token(TokenType.LIT_INT, 0, "2378"),
+            Token(TokenType.EOF, 0, None),
         ]
         
         self.assertListEqual(actual_token_list, expected_token_list)
@@ -1255,8 +834,8 @@ class TokenizerUnitTestsForLiterals(unittest.TestCase):
         actual_token_list = actual_token_list_r.unwrap()
         
         expected_token_list = [
-            Token(TokenType.LIT_STRING, None, "test string @ $#**()}!"),
-            Token(TokenType.EOF, None, None),
+            Token(TokenType.LIT_STRING, 0, "test string @ $#**()}!"),
+            Token(TokenType.EOF, 0, None),
         ]
         
         self.assertListEqual(actual_token_list, expected_token_list)
@@ -1272,8 +851,8 @@ class TokenizerUnitTestsForLiterals(unittest.TestCase):
         actual_token_list = actual_token_list_r.unwrap()
         
         expected_token_list = [
-            Token(TokenType.LIT_STRING, None, ""),
-            Token(TokenType.EOF, None, None),
+            Token(TokenType.LIT_STRING, 0, ""),
+            Token(TokenType.EOF, 0, None),
         ]
         
         self.assertListEqual(actual_token_list, expected_token_list)
@@ -1297,12 +876,29 @@ class TokenizerUnitTestsForLiterals(unittest.TestCase):
         actual_token_list = actual_token_list_r.unwrap()
         
         expected_token_list = [
-            Token(TokenType.LIT_CHAR, None, "s"),
-            Token(TokenType.EOF, None, None),
+            Token(TokenType.LIT_CHAR, 0, "s"),
+            Token(TokenType.EOF, 0, None),
         ]
         
         self.assertListEqual(actual_token_list, expected_token_list)
     
+    def test_literal_character_empty(self):
+        
+        actual_file_contents = """''"""
+        
+        tokenizer = Tokenizer(contents=actual_file_contents)
+        actual_token_list_r = tokenizer.tokenize()
+        if actual_token_list_r.is_err:
+            self.fail(f"Failed to tokenize: {actual_token_list_r.unwrap_err()}")
+        actual_token_list = actual_token_list_r.unwrap()
+        
+        expected_token_list = [
+            Token(TokenType.LIT_CHAR, 0, ""),
+            Token(TokenType.EOF, 0, None),
+        ]
+        
+        self.assertListEqual(actual_token_list, expected_token_list)
+
     def test_literal_character_invalid(self):
         
         actual_file_contents = """'too long!'"""
@@ -1322,8 +918,8 @@ class TokenizerUnitTestsForLiterals(unittest.TestCase):
         actual_token_list = actual_token_list_r.unwrap()
         
         expected_token_list = [
-            Token(TokenType.LIT_FLOAT, None, "3.14159265f"),
-            Token(TokenType.EOF, None, None),
+            Token(TokenType.LIT_FLOAT, 0, "3.14159265f"),
+            Token(TokenType.EOF, 0, None),
         ]
         
         self.assertListEqual(actual_token_list, expected_token_list)
@@ -1339,8 +935,8 @@ class TokenizerUnitTestsForLiterals(unittest.TestCase):
         actual_token_list = actual_token_list_r.unwrap()
         
         expected_token_list = [
-            Token(TokenType.LIT_FLOAT, None, "1.0f"),
-            Token(TokenType.EOF, None, None),
+            Token(TokenType.LIT_FLOAT, 0, "1.0f"),
+            Token(TokenType.EOF, 0, None),
         ]
         
         self.assertListEqual(actual_token_list, expected_token_list)
@@ -1356,9 +952,9 @@ class TokenizerUnitTestsForLiterals(unittest.TestCase):
         actual_token_list = actual_token_list_r.unwrap()
         
         expected_token_list = [
-            Token(TokenType.SYM_DASH, None, None),
-            Token(TokenType.LIT_FLOAT, None, "278f"),
-            Token(TokenType.EOF, None, None),
+            Token(TokenType.SYM_DASH, 0, None),
+            Token(TokenType.LIT_FLOAT, 0, "278f"),
+            Token(TokenType.EOF, 0, None),
         ]
         
         self.assertListEqual(actual_token_list, expected_token_list)
