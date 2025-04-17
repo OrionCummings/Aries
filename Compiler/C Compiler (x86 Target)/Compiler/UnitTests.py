@@ -193,28 +193,18 @@ class TokenizerIntegrationTests(unittest.TestCase):
 
         self.assertListEqual(expected_tokens, actual_tokens)
 
-    def test_structs(self):
+    def test_typedefs(self):
 
         contents = """
-        struct point {
-            int x;
-            int y;
-        }; 
+        typedef int test_type;
         """
 
         expected_tokens = [
-            Token(TokenType.KEYWORD_STRUCT, 1, None),
-            Token(TokenType.IDENTIFIER, 1, "point"),
-            Token(TokenType.SYM_BRACE_OPEN, 1, None),
-            Token(TokenType.KEYWORD_INT, 2, None),
-            Token(TokenType.IDENTIFIER, 2, "x"),
-            Token(TokenType.SYM_SEMICOLON, 2, None),
-            Token(TokenType.KEYWORD_INT, 3, None),
-            Token(TokenType.IDENTIFIER, 3, "y"),
-            Token(TokenType.SYM_SEMICOLON, 3, None),
-            Token(TokenType.SYM_BRACE_CLOSE, 4, None),
-            Token(TokenType.SYM_SEMICOLON, 4, None),
-            Token(TokenType.EOF, 5, None),
+            Token(TokenType.KEYWORD_TYPEDEF, 1, None),
+            Token(TokenType.KEYWORD_INT, 1, None),
+            Token(TokenType.IDENTIFIER, 1, "test_type"),
+            Token(TokenType.SYM_SEMICOLON, 1, None),
+            Token(TokenType.EOF, 2, None),
         ]
 
         tokenizer = Tokenizer(contents=contents)
@@ -226,13 +216,13 @@ class TokenizerIntegrationTests(unittest.TestCase):
 
         self.assertListEqual(expected_tokens, actual_tokens)
 
-    def test_typedefs(self):
+    def test_structs(self):
 
         contents = """
         struct point {
             int x;
             int y;
-        }; 
+        } point;
         """
 
         expected_tokens = [
@@ -246,6 +236,7 @@ class TokenizerIntegrationTests(unittest.TestCase):
             Token(TokenType.IDENTIFIER, 3, "y"),
             Token(TokenType.SYM_SEMICOLON, 3, None),
             Token(TokenType.SYM_BRACE_CLOSE, 4, None),
+            Token(TokenType.IDENTIFIER, 4, "point"),
             Token(TokenType.SYM_SEMICOLON, 4, None),
             Token(TokenType.EOF, 5, None),
         ]

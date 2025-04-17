@@ -384,7 +384,10 @@ class Tokenizer():
         #     until an 'f' character is found
         # 2) A field access
         #   - We need to stop!
-        while self.peek() is not None and (self.peek().isalnum() or self.peek() == '.'):
+        #
+        # Underscores also need to be accounted for here because they
+        # may appear in valid identifiers!
+        while self.peek() is not None and (self.peek().isalnum() or self.peek() == '.' or self.peek() == '_'):
 
             # If the next character is a period...
             if self.peek() == '.':
