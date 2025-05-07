@@ -85,6 +85,11 @@ class DependencyTreeNode:
         # on which they are included 
         self.children: List[(DependencyTreeNode, int)] = []
 
+    def __str__(self) -> str:
+        builder = f"Node Path: {self.file_path.parent}\n"
+        builder += self.recursive_to_string(0)
+        return builder
+
     def recursive_to_string(self, depth) -> str:
 
         builder = str(" " * depth) + self.file_path.name + "\n"
@@ -92,7 +97,7 @@ class DependencyTreeNode:
             builder += c.recursive_to_string(depth + 1)
         return builder
     
-    def append(self, file_name: str | List[str]) -> None:
+    def append(self, file_name: str | List[str]) -> None: 
         if isinstance(file_name, str):
             self.children.append(file_name)
         elif isinstance(file_name, List[str]):
@@ -138,12 +143,13 @@ class DependencyTree:
         self.root.explore()
 
     def __str__(self):
-        builder = self.root.file_path.name + "\n"
+        builder = f"Root Path: {self.root.file_path.parent}\n"
+        builder += self.root.file_path.name + "\n"
         for c in self.root.children:
             builder += c.recursive_to_string(1)
         return builder
 
-    def find_entry_point(self) -> Result[str, str]:
+    def find_entry_point(self) -> Result[Path, str]:
         """Find a function with a signature of 'int main(int argc, char** argv)'. Fails if
         anything other than one function with that signature exists."""
 
