@@ -9,6 +9,12 @@
     "python.testing.pytestEnabled": false,
     "python.testing.unittestEnabled": true,
     "files.associations": {
-        "matrix.h": "c"
+        "matrix.h": "c",
+        "point.h": "c",
+        "a.h": "c",
+        "b.h": "c",
+        "c.h": "c",
+        "d.h": "c",
+        "line.h": "c"
     },
 }
