@@ -4,6 +4,7 @@ from option import Err, Ok, Result
 from TranslationUnit import TranslationUnit
 from DependencyTree import DependencyTree
 from Directives import DirectiveType, Definition
+from Utils import parse_file_from_include_statement
 
 class Preprocessor:
 
@@ -27,11 +28,14 @@ class Preprocessor:
         self.translation_unit = None
 
         # Create the include paths set
-        self.include_paths = set(include_paths)
+        self.include_paths = set()
 
-        # If the no include path is given, default to the directory in which this Preprocessor acts
-        if include_paths is None:
-            self.add_include_path(self.path.parent)
+        # If include paths are provided, add them
+        if include_paths is not None:
+            self.add_include_path(include_paths)
+
+        # By default, add the directory in which this Preprocessor acts
+        self.add_include_path(self.path)
 
     def __str__(self):
         builder = ""
@@ -55,26 +59,82 @@ class Preprocessor:
         if isinstance(path, Path):
             self.include_paths.add(path)
 
-    def resolve(self):
+    def resolve(self) -> Result[None, str]:
 
         # For every node in the tree
         for n in self.tree.root:
-            file_name = n.file_path.resolve()
-            print(file_name)
 
+            path = n.file_path
+            file_name = path.resolve()
+            print(f"Attempting to resolve '{path.name}'")
+
+            # If the path has already been resolved, then stop!
             if n.file_path in self.resolved_paths:
                 print(f"File '{file_name}' is already resolved!")
-                return Ok(None)
-            
-            resolution_r = n.resolve(self.include_paths, self.definitions)
-            if resolution_r.is_err:
-                return Err(f"Failed to resolve file '{n.name}'")
+                continue
+
+            # Attempt to resolve the node!
+
+            # Populate the ITF
+            reading_r = n.itf.read(path)
+            if reading_r.is_err:
+                return Err(f"Failed to read file '{path}':\n{reading_r.unwrap_err()}")
+
+            # Iterate through every line
+            for (line_number, line) in enumerate(n.itf.lines):
+                
+                if not line.startswith("#include"):
+                    continue
+
+                file_name_r = parse_file_from_include_statement(line)
+                if file_name_r.is_err:
+                    return Err(f"Failed to parse include statement from line '{line}':\n{file_name_r.unwrap_err()}")
+                file_name = file_name_r.unwrap()
+
+                found_included_file = False
+
+                # Search include paths for this file
+                for p in self.include_paths:
+
+                    # Create a full path
+                    potential_included_file_path = Path.joinpath(p, file_name)
+                    print(f"Potential included file: {potential_included_file_path.resolve()}")
+
+                    # Check if that file exists
+                    if potential_included_file_path.exists():
+
+                        # If it does, then note that it's been found
+                        found_included_file = True
+                        print(f"Found appropriate include candidate '{potential_included_file_path.resolve()}'")
+
+                        # Replace the current line with the contents of the file
+                        print(f"Inserting '{potential_included_file_path}' on line {line_number}")
+                        replacement_r = n.itf.insert(potential_included_file_path, line_number)
+                        if replacement_r.is_err:
+                            return Err(f"Failed to replace line {line_number} with '{file_name}':\n{replacement_r.unwrap_err()}")
+                        
+                        n.itf.to_file()
+
+                # If, at the end of the loop, we have not found any files that match, return an error!
+                if not found_included_file:
+                    return Err(f"Failed to find file '{file_name}' in include directories!")
+
+
+            # Add the file path to the list of resolved paths
+            self.resolved_paths.add(path)
+
+        return Ok(None)
 
 if __name__ == "__main__":
 
     root_dir = Path("C:\\Users\\Orion\\Stash\\PersonalProjects\\Aries\\Compiler\\C Compiler (x86 Target)\\Source Files\\DependencyTreeTest\\")
 
     p = Preprocessor(root_dir)
-    p.resolve()
+    print(p.tree)
+    resolution_r = p.resolve()
+    if resolution_r.is_err:
+        print(resolution_r.unwrap_err())
+
+
     # print(p)
 

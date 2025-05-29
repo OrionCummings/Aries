@@ -1,1 +1,0 @@
-#define TEST_VALUE 278

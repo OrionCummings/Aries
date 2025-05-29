@@ -1,29 +1,51 @@
 from pathlib import Path
-from typing import Iterable, List, Set
+from typing import Iterable, List, Optional, Set
 from option import Result, Err, Ok
 from itertools import chain
 from PrettyPrinting import blue
-from Directives import DirectiveType, Definition
+from Directives import DirectiveType, Definition, DirectiveInstance
+from Utils import get_included_files, parse_file_from_include_statement
 
 class InsertableTextFile:
     """
     An InsertableTextFile is a line-by-line representation of a text file. Added functionality to better support preprocessing functions like inline insertions required to support the include directive.
     """
 
-    def __init__(self, name: str = "DEFAULT ITF"):
+    def __init__(self, name: Optional[str] = None):
         self.name: str = name
         self.lines: List[str] = []
+        self.directives: List[DirectiveInstance] = []
 
     def __str__(self):
-        builder = f"{self.name}\n"
+        builder = f"{self.name}\nContent:"
         for line in self.lines:
-            builder += blue(line + "\n")
+            builder += line + "\n"
+        builder += "\nDirectives:\n"
+        for directive in self.directives:
+            builder += str(directive)
         return builder
     
-    def to_file(self) -> str:
+    def to_strings(self) -> str:
+        """
+        Returns the contents of the ITF as a single newline seperated string.
+        """
         return "\n".join(self.lines)
+    
+    def to_file(self, file_name: Optional[str] = None):
+        """
+        Writes the ITF to a file.
+        """
+        if file_name is None:
+            with open(f"{self.name}.itftest", 'w') as file:
+                file.writelines(self.to_strings())
+        else:
+            with open(f"{file_name}.itftest", 'w') as file:
+                file.writelines(self.to_strings())
 
     def read(self, file_path: Path) -> Result[None, str]:
+        """
+        Reads the given file into the internal line buffer.
+        """
         try:
             with open(file_path, 'r') as file:
                 self.lines = list(map(str.rstrip, file))
@@ -32,51 +54,65 @@ class InsertableTextFile:
         
         self.name = file_path.name
         return Ok(None)
-
-    def replace(self, new_file: Path, line_number: int) -> Result[None, str]:
-        """
-        Replace the given line number with the contents of a new file
-        """
-
-        itf = InsertableTextFile()
-        text_file_read_r = itf.read(new_file)
-        if text_file_read_r.is_err:
-            return Err(f"Failed to read file '{new_file}'")
-        
-        # TODO: Remove these debug statements!
-        self.lines.insert(line_number-1, f"// Start of file {new_file.name}")
-        self.lines.insert(line_number, f"// End of file {new_file.name}")
-
-        self.lines = list(chain(self.lines[:line_number], itf.lines, self.lines[line_number:]))
-
-        return Ok(None)
     
-    def remove(self, start_line_number: int, end_line_number: int) -> Result[None, str]:
+    def analyze(self) -> Result[None, str]:
         """
-        Removes the lines including both the start and end line numbers.
+        Analyzes the file contents and marks where preprocessor directives exist by line number and type
         """
 
-        self.lines = list(chain(self.lines[:start_line_number], self.lines[end_line_number:]))
+        for (line_number, line) in enumerate(self.lines):
+
+            # If the line does not start with a '#', then it's not a directive
+            if not line.startswith("#"):
+                continue
+
+            if line.startswith("#include"):
+                parse_r = parse_file_from_include_statement(line)
+                if parse_r.is_err:
+                    return Err(f"Failed to parse file from include statement:\n{parse_r.unwrap_err()}")
+                file_name = parse_r.unwrap()
+
+                directive = DirectiveInstance(DirectiveType.INCLUDE, line_number, file_name, None)
+                self.directives.append(directive)
+
+            else:
+                return Err(f"Non-include directives are not implemented yet; failed to parse line '{line}'")
+
+    def insert(self, new_file: Path, line_number: int) -> Result[None, str]:
+        """
+        Insert the contents of a new file at the given line number
+        """
+
+        new_itf = InsertableTextFile()
+        read_r = new_itf.read(new_file)
+        if read_r.is_err:
+            return Err(f"Failed to read:\n{read_r.unwrap_err()}")
+
+        before = self.lines[0:max(line_number-1, 0)]
+        after = self.lines[max(line_number, 1) - 1:]
+
+        self.lines = list(chain(before, new_itf.lines[:-1], after))
 
         return Ok(None)
-
-    def resolve_directives(self) -> Result[None, str]:
-
-        # TODO: General directive resolution cannot be done line-by-line!
-        # There must be the ability to push/pop/peek to look ahead.
-
-        self.new_lines: List[str] = []
-        
-        # TODO: Resolve include statements
-
 
 if __name__ == "__main__":
 
     test_file1_path = Path("C:\\Users\\Orion\\Stash\\PersonalProjects\\Aries\\Compiler\\C Compiler (x86 Target)\\Source Files\\Tests\\test_file1.test")
     test_file2_path = Path("C:\\Users\\Orion\\Stash\\PersonalProjects\\Aries\\Compiler\\C Compiler (x86 Target)\\Source Files\\Tests\\test_file2.test")
 
-    f = InsertableTextFile(test_file1_path.name)
-    f.read(test_file1_path)
-    print(f"File 1 before replacement:\n{f}\n")
-    f.replace(test_file2_path, 2)
-    print(f"File 1 after replacement:\n{f}\n")
+    f1 = InsertableTextFile(test_file1_path.name)
+    f2 = InsertableTextFile(test_file2_path.name)
+    f1.read(test_file1_path)
+    f2.read(test_file2_path)
+
+    f2.insert(test_file1_path, 3)
+
+    f2.to_file()
+
+    # f1.analyze()
+    # f2.analyze()
+    # print("--------------------------------------------------------------------------------------")
+    # print(f1)
+    # print("--------------------------------------------------------------------------------------")
+    # print(f2)
+    # print("--------------------------------------------------------------------------------------")
