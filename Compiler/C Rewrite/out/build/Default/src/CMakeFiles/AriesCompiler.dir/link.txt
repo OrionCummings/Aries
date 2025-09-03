@@ -1,0 +1,1 @@
+/usr/bin/gcc -g -Wl,--dependency-file=CMakeFiles/AriesCompiler.dir/link.d CMakeFiles/AriesCompiler.dir/main.c.o CMakeFiles/AriesCompiler.dir/debug.c.o CMakeFiles/AriesCompiler.dir/arena.c.o CMakeFiles/AriesCompiler.dir/list.c.o -o AriesCompiler
