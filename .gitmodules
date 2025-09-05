@@ -1,0 +1,6 @@
+[submodule "Compiler/C Rewrite/out/build/Default/src/modules/external/unity_cmake/Unity"]
+	path = Compiler/C Rewrite/out/build/Default/src/modules/external/unity_cmake/Unity
+	url = https://github.com/ThrowTheSwitch/Unity.git
+[submodule "Compiler/C Rewrite/modules/external/unity_cmake/Unity"]
+	path = Compiler/C Rewrite/modules/external/unity_cmake/Unity
+	url = https://github.com/ThrowTheSwitch/Unity.git
