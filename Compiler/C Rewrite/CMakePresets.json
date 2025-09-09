@@ -2,15 +2,16 @@
     "version": 8,
     "configurePresets": [
         {
-            "name": "Default",
-            "displayName": "GCC 13.3.0 x86_64-linux-gnu",
+            "name": "Test",
+            "displayName": "Test",
             "description": "Using compilers: C = /usr/bin/gcc, CXX = /usr/bin/g++",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "binaryDir": "${sourceDir}/build/${presetName}",
             "cacheVariables": {
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
                 "CMAKE_C_COMPILER": "/usr/bin/gcc",
                 "CMAKE_CXX_COMPILER": "/usr/bin/g++",
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "TARGET_GROUP": "test"
             }
         }
     ]

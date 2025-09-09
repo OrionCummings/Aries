@@ -1,12 +1,7 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <stdint.h>
+#include "debug.h"
 
 int main(int argc, char** argv) {
-    printf("test\n");
+    A_TRACE();
     return 0;
 }
-
-
-

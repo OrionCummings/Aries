@@ -1,0 +1,5 @@
+def main(void) -> int {
+    return 0;
+}
+
+//@@@tokens[KEYWORD.DEF, IDENTIFIER("main"), LPAREN, KEYWORD.VOID, RPAREN, RARROW, KEYWORD.INT, LBRACE, KEYWORD.RETURN, IDENTIFIER("0"), SEMI, RBRACE, EOF]

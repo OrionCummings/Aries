@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "arena.h": "c",
+        "random": "c",
+        "list": "c",
+        "stdlib.h": "c",
+        "stdbool.h": "c",
+        "debug.h": "c",
+        "string.h": "c",
+        "example.h": "c",
+        "stdio.h": "c"
+    }
+}

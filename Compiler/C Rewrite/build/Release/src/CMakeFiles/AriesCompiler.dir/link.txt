@@ -1,1 +1,0 @@
-/usr/bin/gcc -g -Wl,--dependency-file=CMakeFiles/AriesCompiler.dir/link.d CMakeFiles/AriesCompiler.dir/main.c.o -o AriesCompiler  ../example/liba_lib.a

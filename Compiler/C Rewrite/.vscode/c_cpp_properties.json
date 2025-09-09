@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/modules/utils",
+                "${workspaceFolder}/modules/parser",
+                "${workspaceFolder}/modules/lexer",
+                "${workspaceFolder}/modules/generator",
+                "${workspaceFolder}/modules/external/unity_cmake/Unity/src"
+            ],
+            "defines": [
+                "true=1",
+                "false=1"
+            ],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c23",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64",
+            "configurationProvider": "ms-vscode.cmake-tools"
+        }
+    ],
+    "version": 4
+}
