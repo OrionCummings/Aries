@@ -8,6 +8,11 @@
         "debug.h": "c",
         "string.h": "c",
         "example.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "utils.h": "c",
+        "array": "c",
+        "string": "c",
+        "string_view": "c",
+        "initializer_list": "c"
     }
 }
