@@ -71,6 +71,10 @@ void test_str_concat_nominal_success() {
 
     TEST_ASSERT_EQUAL_STRING(expected_string, actual_string->data);
     TEST_ASSERT_EQUAL(strlen(expected_string), str_len(actual_string));
+
+    str_free(s1);
+    str_free(s2);
+    str_free(actual_string);
 }
 
 void test_str_concat_null_parameter() {
@@ -80,6 +84,9 @@ void test_str_concat_null_parameter() {
     str* actual_string = str_concat(s1, NULL);
 
     TEST_ASSERT_NULL(actual_string);
+
+    str_free(s1);
+    str_free(actual_string);
 }
 
 void test_str_concat_malformed_parameter() {
@@ -91,6 +98,9 @@ void test_str_concat_malformed_parameter() {
     str* actual_string = str_concat(s1, NULL);
 
     TEST_ASSERT_NULL(actual_string);
+
+    str_free(s1);
+    str_free(actual_string);
 }
 
 void test_str_find_success() {
@@ -102,6 +112,8 @@ void test_str_find_success() {
     int actual_pos = str_find(s, c);
 
     TEST_ASSERT_EQUAL(expected_pos, actual_pos);
+
+    str_free(s);
 }
 
 void test_str_find_failure_not_present() {
@@ -113,6 +125,8 @@ void test_str_find_failure_not_present() {
     int actual_pos = str_find(s, c);
 
     TEST_ASSERT_EQUAL(expected_pos, actual_pos);
+
+    str_free(s);
 }
 
 void test_str_find_failure_empty_str() {
@@ -124,6 +138,8 @@ void test_str_find_failure_empty_str() {
     int actual_pos = str_find(s, c);
 
     TEST_ASSERT_EQUAL(expected_pos, actual_pos);
+
+    str_free(s);
 }
 
 void test_str_find_failure_null_str() {
@@ -135,6 +151,8 @@ void test_str_find_failure_null_str() {
     int actual_pos = str_find(s, c);
 
     TEST_ASSERT_EQUAL(expected_pos, actual_pos);
+
+    str_free(s);
 }
 
 void test_str_find_failure_empty_str_null_char() {
@@ -146,39 +164,47 @@ void test_str_find_failure_empty_str_null_char() {
     int actual_pos = str_find(s, c);
 
     TEST_ASSERT_EQUAL(expected_pos, actual_pos);
+
+    str_free(s);
 }
 
 void test_str_at_success() {
 
     const char expected_char = 'i';
     const int index = 2;
-    const str* s = str_new("this is a test!");
+    str* s = str_new("this is a test!");
 
     char actual_char = str_at(s, index);
 
     TEST_ASSERT_EQUAL(expected_char, actual_char);
+
+    str_free(s);
 }
 
 void test_str_at_failure_index_too_big() {
 
     const char expected_char = '\0';
     const int index = 23;
-    const str* s = str_new("this is a test!");
+    str* s = str_new("this is a test!");
 
     char actual_char = str_at(s, index);
 
     TEST_ASSERT_EQUAL(expected_char, actual_char);
+
+    str_free(s);
 }
 
 void test_str_at_failure_null_str() {
 
     const char expected_char = '\0';
     const int index = 2;
-    const str* s = NULL;
+    str* s = NULL;
 
     char actual_char = str_at(s, index);
 
     TEST_ASSERT_EQUAL(expected_char, actual_char);
+
+    str_free(s);
 }
 
 void test_str_append_success() {
@@ -189,7 +215,15 @@ void test_str_append_success() {
     str* s2 = str_append(s1, c);
 
     TEST_ASSERT_EQUAL_STRING("yee", s1->data);
+    TEST_ASSERT_EQUAL(3, s1->length);
+    TEST_ASSERT_EQUAL(true, s1->heap);
+
     TEST_ASSERT_EQUAL_STRING("yeet", s2->data);
+    TEST_ASSERT_EQUAL(4, s2->length);
+    TEST_ASSERT_EQUAL(true, s2->heap);
+
+    str_free(s1);
+    str_free(s2);
 }
 
 void test_str_append_failure_null_character() {
@@ -201,6 +235,9 @@ void test_str_append_failure_null_character() {
 
     TEST_ASSERT_NULL(n);
     TEST_ASSERT_EQUAL_STRING("yee", s->data);
+
+    str_free(s);
+    str_free(n);
 }
 
 void test_str_append_failure_null_str() {
@@ -211,6 +248,35 @@ void test_str_append_failure_null_str() {
     str* n = str_append(s, c);
 
     TEST_ASSERT_NULL(n);
+
+    str_free(s);
+    str_free(n);
+}
+
+void test_str_len_success() {
+
+    const char* text = "this is a test string!";
+    size_t expected_len = strlen(text);
+    str* s = str_new(text);
+
+    size_t actual_len = str_len(s);
+
+    TEST_ASSERT_EQUAL(expected_len, actual_len);
+
+    str_free(s);
+}
+
+void test_str_len_failure_null_str() {
+
+    const char* text = "this is a test string!";
+    size_t expected_len = 0;
+    str* s = NULL;
+
+    size_t actual_len = str_len(s);
+
+    TEST_ASSERT_EQUAL(expected_len, actual_len);
+
+    str_free(s);
 }
 
 int main(void) {
@@ -235,10 +301,17 @@ int main(void) {
     RUN_TEST(test_str_find_failure_empty_str);
     RUN_TEST(test_str_find_failure_null_str);
     RUN_TEST(test_str_find_failure_empty_str_null_char);
-    
+
     RUN_TEST(test_str_append_success);
     RUN_TEST(test_str_append_failure_null_character);
     RUN_TEST(test_str_append_failure_null_str);
+
+    RUN_TEST(test_str_len_success);
+    RUN_TEST(test_str_len_failure_null_str);
+
+    // RUN_TEST(test_str_split_success);
+    // RUN_TEST(test_str_split_failure_null_char);
+    // RUN_TEST(test_str_split_failure_null_str);
 
     return UNITY_END();
 }
