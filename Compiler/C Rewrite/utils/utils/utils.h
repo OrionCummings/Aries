@@ -5,5 +5,6 @@
 #include "result.h"
 #include "arena.h"
 #include "list.h"
+#include "str.h"
 
 #endif

@@ -2,6 +2,7 @@ add_library(utils_lib STATIC
     debug.c
     arena.c
     list.c
+    str.c
 )
 
 target_include_directories(utils_lib PUBLIC

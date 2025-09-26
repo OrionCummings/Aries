@@ -4,11 +4,9 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/modules/utils",
-                "${workspaceFolder}/modules/parser",
-                "${workspaceFolder}/modules/lexer",
-                "${workspaceFolder}/modules/generator",
-                "${workspaceFolder}/modules/external/unity_cmake/Unity/src"
+                "${workspaceFolder}/utils/utils/",
+                "${workspaceFolder}/lexer/lexer/",
+                // "${workspaceFolder}/parser/parser/"
             ],
             "defines": [
                 "true=1",
