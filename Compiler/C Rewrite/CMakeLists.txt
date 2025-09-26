@@ -7,6 +7,9 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_C_FLAGS_DEBUG "-g -DDEBUG")
 
+add_compile_definitions(false=0)
+add_compile_definitions(true=1)
+
 add_subdirectory(src)
 add_subdirectory(lexer)
 add_subdirectory(utils)

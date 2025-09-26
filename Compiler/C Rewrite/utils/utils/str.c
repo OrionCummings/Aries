@@ -98,6 +98,12 @@ char str_at(const str const* s, size_t index) {
     return s->data[index];
 }
 
+bool str_append(str* s, const char c) {
+    if (s == NULL) { return false; }
+
+    
+}
+
 void str_print(const str* const s) {
     if (s != NULL) {
         printf("%s\n", s->data);

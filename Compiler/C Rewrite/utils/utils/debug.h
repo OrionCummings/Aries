@@ -13,8 +13,9 @@
 
 #define static_assert(condition, message) _Static_assert((condition), message)
 
-#define false (0)
-#define true  (1)
+// TODO: Figure out if this is better defined in the top-level CMakeLists.txt or here. It's currently defined by cmake as not *every* file will include debug.h.
+// #define false (0)
+// #define true  (1)
 
 #define __ENABLE_INFO
 #define __ENABLE_WARNING

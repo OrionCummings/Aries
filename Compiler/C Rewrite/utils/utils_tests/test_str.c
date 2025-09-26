@@ -189,6 +189,19 @@ void test_str_append_success() {
     bool success = str_append(s, c);
 
     TEST_ASSERT_TRUE(success);
+    TEST_ASSERT_TRUE(s->heap);
+    TEST_ASSERT_EQUAL(s->data, "yeet");
+}
+
+void test_str_append_success() {
+
+    const char c = 't';
+    const str* s = str_new("yee");
+
+    bool success = str_append(s, c);
+
+    TEST_ASSERT_TRUE(success);
+    TEST_ASSERT_TRUE(s->heap);
     TEST_ASSERT_EQUAL(s->data, "yeet");
 }
 
