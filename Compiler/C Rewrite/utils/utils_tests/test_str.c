@@ -14,8 +14,8 @@ void test_str_new_success(void) {
     str* s = str_new(expected_string);
 
     TEST_ASSERT_EQUAL(length, s->length);
-    TEST_ASSERT_EQUAL_STRING(expected_string, s->data);
-    TEST_ASSERT_EQUAL_STRING(true, s->heap);
+    TEST_ASSERT_EQUAL(expected_string, s->data);
+    TEST_ASSERT_EQUAL(true, s->heap);
 
     str_free(s);
 }
@@ -185,19 +185,26 @@ int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_str_new_success);
     RUN_TEST(test_str_new_null_string);
+
     RUN_TEST(test_str_free_valid_string);
     RUN_TEST(test_str_free_valid_string_null_data);
     RUN_TEST(test_str_free_null_string);
+
     RUN_TEST(test_str_at_success);
     RUN_TEST(test_str_at_failure_index_too_big);
     RUN_TEST(test_str_at_failure_null_str);
+
     RUN_TEST(test_str_concat_nominal_success);
     RUN_TEST(test_str_concat_null_parameter);
     RUN_TEST(test_str_concat_malformed_parameter);
+
     RUN_TEST(test_str_find_success);
     RUN_TEST(test_str_find_failure_not_present);
     RUN_TEST(test_str_find_failure_empty_str);
     RUN_TEST(test_str_find_failure_null_str);
     RUN_TEST(test_str_find_failure_empty_str_null_char);
+
+    
+
     return UNITY_END();
 }
