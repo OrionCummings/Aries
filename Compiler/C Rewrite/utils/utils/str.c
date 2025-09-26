@@ -98,10 +98,16 @@ char str_at(const str const* s, size_t index) {
     return s->data[index];
 }
 
-bool str_append(str* s, const char c) {
-    if (s == NULL) { return false; }
+str* str_append(const str* const s, const char c) {
+    if (s == NULL || !s->heap || c == '\0') { return NULL; }
 
-    
+    size_t length = str_len(s);
+    char buffer[length + 1]; // null byte
+    memset(buffer, 0, length + 1); // null byte
+
+    (void)snprintf(buffer, length + 2, "%s%c", s->data, c); // new char + null byte
+
+    return str_new((char*)buffer); // get that nasty array away!!! Yuck!
 }
 
 void str_print(const str* const s) {

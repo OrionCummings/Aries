@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-/// @brief A heap-allocated immutable string.
+/// @brief An immutable string. Usually allocated on the heap, but this is not always true, especially with string views.
 typedef struct {
     bool heap;
     size_t length;
@@ -76,11 +76,11 @@ size_t str_len(const str* const s);
 /// @return The character at the index in the string. Returns the null character if the index exceeds the size of the given string.
 char str_at(const str* const s, size_t index);
 
-/// @brief Appends `c` to the end of `s`. May reallocate the given string to make room for the new character.
+/// @brief Appends `c` to the end of `s`. This function will always allocate a new string instance to add the new character; therefore, this function cannot append characters to stack-allocated strings.
 /// @param s The string to which `c` is to be appended.
 /// @param c The character to append to `s`. This character cannot be null as that would break compatability with traditional cstrings AND invalidate an assumption with the return value of `str_at` (on failure, return null char).
-/// @return If the character is appended, then true; otherwise, return false.
-bool str_append(str* s, const char c);
+/// @return Returns a new string instance if the character is appended; otherwise, return NULL.
+str* str_append(const str* const s, const char c);
 
 /// @brief Returns a view of `s`. Does not free `s`! The returned string has the `heap` field set to false! The return value of this function should never be passed as an argument to `str_free`
 /// @param s The underlying string.

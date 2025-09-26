@@ -14,7 +14,7 @@ void test_str_new_success(void) {
     str* s = str_new(expected_string);
 
     TEST_ASSERT_EQUAL(length, s->length);
-    TEST_ASSERT_EQUAL(expected_string, s->data);
+    TEST_ASSERT_EQUAL_STRING(expected_string, s->data);
     TEST_ASSERT_EQUAL(true, s->heap);
 
     str_free(s);
@@ -184,25 +184,33 @@ void test_str_at_failure_null_str() {
 void test_str_append_success() {
 
     const char c = 't';
-    const str* s = str_new("yee");
+    str* s1 = str_new("yee");
 
-    bool success = str_append(s, c);
+    str* s2 = str_append(s1, c);
 
-    TEST_ASSERT_TRUE(success);
-    TEST_ASSERT_TRUE(s->heap);
-    TEST_ASSERT_EQUAL(s->data, "yeet");
+    TEST_ASSERT_EQUAL_STRING("yee", s1->data);
+    TEST_ASSERT_EQUAL_STRING("yeet", s2->data);
 }
 
-void test_str_append_success() {
+void test_str_append_failure_null_character() {
+
+    const char c = '\0';
+    str* s = str_new("yee");
+
+    str* n = str_append(s, c);
+
+    TEST_ASSERT_NULL(n);
+    TEST_ASSERT_EQUAL_STRING("yee", s->data);
+}
+
+void test_str_append_failure_null_str() {
 
     const char c = 't';
-    const str* s = str_new("yee");
+    str* s = NULL;
 
-    bool success = str_append(s, c);
+    str* n = str_append(s, c);
 
-    TEST_ASSERT_TRUE(success);
-    TEST_ASSERT_TRUE(s->heap);
-    TEST_ASSERT_EQUAL(s->data, "yeet");
+    TEST_ASSERT_NULL(n);
 }
 
 int main(void) {
@@ -229,7 +237,6 @@ int main(void) {
     RUN_TEST(test_str_find_failure_empty_str_null_char);
     
     RUN_TEST(test_str_append_success);
-    RUN_TEST(test_str_append_success_forced_realloc);
     RUN_TEST(test_str_append_failure_null_character);
     RUN_TEST(test_str_append_failure_null_str);
 
