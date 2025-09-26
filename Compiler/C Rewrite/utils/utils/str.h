@@ -41,11 +41,17 @@ void _str_free(str* s);
 /// @return A new string instance of the form s1s2.
 str* str_concat(str* s1, str* s2);
 
-/// @brief Compares two strings s1 and s2 character-wise.
+/// @brief Compares two strings s1 and s2 character-wise. This does not account for differences in length (which shouldn't happen?), capacity, or heap status; this function only checks character content. If strict equality is required, use `str_ident()`
 /// @param s1 A string instance
 /// @param s2 A string instance
-/// @return Returns true if both strings are equal and false otherwise.
+/// @return Returns true if the string data in both strings are equal and false otherwise.
 bool str_cmp(const str* const s1, const str* const s2);
+
+/// @brief Compares two strings s1 and s2 character-wise and accounts for differences in length, capacity, and allocation status. If mear character equality is desired, use `str_cmp()` instead.
+/// @param s1 A string instance
+/// @param s2 A string instance
+/// @return Returns true if both strings are identical and false otherwise.
+bool str_ident(const str* const s1, const str* const s2);
 
 /// @brief Find the index of `c` in `s`.
 /// @param s The string in which to search for `c`.
@@ -72,9 +78,9 @@ char str_at(const str* const s, size_t index);
 
 /// @brief Appends `c` to the end of `s`. May reallocate the given string to make room for the new character.
 /// @param s The string to which `c` is to be appended.
-/// @param c The character to append to `s`.
+/// @param c The character to append to `s`. This character cannot be null as that would break compatability with traditional cstrings AND invalidate an assumption with the return value of `str_at` (on failure, return null char).
 /// @return If the character is appended, then true; otherwise, return false.
-bool str_append(str* s, char c);
+bool str_append(str* s, const char c);
 
 /// @brief Returns a view of `s`. Does not free `s`! The returned string has the `heap` field set to false! The return value of this function should never be passed as an argument to `str_free`
 /// @param s The underlying string.

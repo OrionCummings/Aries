@@ -181,6 +181,17 @@ void test_str_at_failure_null_str() {
     TEST_ASSERT_EQUAL(expected_char, actual_char);
 }
 
+void test_str_append_success() {
+
+    const char c = 't';
+    const str* s = str_new("yee");
+
+    bool success = str_append(s, c);
+
+    TEST_ASSERT_TRUE(success);
+    TEST_ASSERT_EQUAL(s->data, "yeet");
+}
+
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_str_new_success);
@@ -203,8 +214,11 @@ int main(void) {
     RUN_TEST(test_str_find_failure_empty_str);
     RUN_TEST(test_str_find_failure_null_str);
     RUN_TEST(test_str_find_failure_empty_str_null_char);
-
     
+    RUN_TEST(test_str_append_success);
+    RUN_TEST(test_str_append_success_forced_realloc);
+    RUN_TEST(test_str_append_failure_null_character);
+    RUN_TEST(test_str_append_failure_null_str);
 
     return UNITY_END();
 }
