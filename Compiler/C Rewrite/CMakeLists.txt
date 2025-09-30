@@ -15,6 +15,7 @@ add_subdirectory(lexer)
 add_subdirectory(utils)
 
 if(TARGET_GROUP STREQUAL test)
+  set(CTEST_OUTPUT_ON_FAILURE TRUE)
   include(CTest)
   add_subdirectory(external)
   add_subdirectory(utils/utils_tests)

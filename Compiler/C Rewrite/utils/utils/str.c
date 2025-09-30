@@ -60,7 +60,17 @@ str* str_concat(str* s1, str* s2) {
 }
 
 bool str_cmp(const str* const s1, const str* const s2) {
-    return false;
+
+    if (s1 == NULL || s2 == NULL) { return false; }
+    
+    size_t len_s1 = str_len(s1);
+    size_t len_s2 = str_len(s2);
+    size_t len_min = (len_s1 < len_s2) ? len_s1 : len_s2;
+    return (strncmp(s1->data, s2->data, len_min) == 0) ? true : false;
+}
+
+bool str_ident(const str* const s1, const str* const s2) {
+    return (s1 != NULL) && (s2 != NULL) && (s1->heap == s2->heap) && (s1->length == s2->length) && (str_cmp(s1, s2));
 }
 
 int str_find(const str* const s, const char c) {
@@ -108,6 +118,10 @@ str* str_append(const str* const s, const char c) {
     (void)snprintf(buffer, length + 2, "%s%c", s->data, c); // new char + null byte
 
     return str_new((char*)buffer); // get that nasty array away!!! Yuck!
+}
+
+str* str_view(const str* const s, size_t start, size_t end) {
+    return NULL;
 }
 
 void str_print(const str* const s) {

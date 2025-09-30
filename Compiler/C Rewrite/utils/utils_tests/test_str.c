@@ -279,6 +279,202 @@ void test_str_len_failure_null_str() {
     str_free(s);
 }
 
+void test_str_cmp_success_ident_str() {
+
+    const char* text = "this is a test string!";
+    str* s1 = str_new(text);
+    str* s2 = str_new(text);
+
+    bool equal = str_cmp(s1, s2);
+
+    TEST_ASSERT_TRUE(equal);
+
+    str_free(s1);
+    str_free(s2);
+}
+
+void test_str_cmp_success_same_text() {
+
+    const char* text = "this is a test string!";
+    str* s1 = str_new(text);
+    str* s2 = str_new(text);
+
+    size_t len_s1 = str_len(s1);
+    size_t len_s2 = str_len(s2);
+
+    s1->heap = true;
+    s2->heap = false;
+
+    s1->length = 45;
+    
+    bool equal = str_cmp(s1, s2);
+    
+    TEST_ASSERT_TRUE(equal);
+    
+    // Restore the string state so free() works as expected; this test
+    // isn't for free(), so why stress it.
+    s1->heap = true;
+    s2->heap = true;
+
+    s1->length = len_s1;
+    s2->length = len_s2;
+
+    str_free(s1);
+    str_free(s2);
+}
+
+void test_str_cmp_failure_different_str() {
+
+    const char* text1 = "this is a test string!";
+    const char* text2 = "this is a different test string!";
+    str* s1 = str_new(text1);
+    str* s2 = str_new(text2);
+
+    bool equal = str_cmp(s1, s2);
+
+    TEST_ASSERT_FALSE(equal);
+
+    str_free(s1);
+    str_free(s2);
+}
+
+void test_str_cmp_failure_different_text() {
+
+    // different string but otherwise same fields
+    const char* text1 = "this is a test string!";
+    const char* text2 = "this is a XXXX string!";
+    str* s1 = str_new(text1);
+    str* s2 = str_new(text2);
+
+    bool equal = str_cmp(s1, s2);
+    
+    TEST_ASSERT_FALSE(equal);
+    
+    str_free(s1);
+    str_free(s2);
+}
+
+void test_str_cmp_failure_one_null() {
+
+    const char* text = "this is a test string!";
+    str* s1 = str_new(text);
+    str* s2 = NULL;
+
+    bool equal = str_cmp(s1, s2);
+    
+    TEST_ASSERT_FALSE(equal);
+    
+    str_free(s1);
+}
+
+void test_str_cmp_failure_both_null() {
+
+    str* s1 = NULL;
+    str* s2 = NULL;
+
+    bool equal = str_cmp(s1, s2);
+    
+    TEST_ASSERT_FALSE(equal);
+}
+
+void test_str_ident_success_ident_str() {
+
+    const char* text = "this is a test string!";
+    str* s1 = str_new(text);
+    str* s2 = str_new(text);
+
+    bool equal = str_ident(s1, s2);
+
+    TEST_ASSERT_TRUE(equal);
+
+    str_free(s1);
+    str_free(s2);
+}
+
+void test_str_ident_failure_same_text() {
+
+    const char* text = "this is a test string!";
+    str* s1 = str_new(text);
+    str* s2 = str_new(text);
+
+    size_t len_s1 = str_len(s1);
+    size_t len_s2 = str_len(s2);
+
+    s1->heap = true;
+    s2->heap = false;
+
+    s1->length = 45;
+    
+    bool equal = str_ident(s1, s2);
+    
+    TEST_ASSERT_FALSE(equal);
+    
+    // Restore the string state so free() works as expected; this test
+    // isn't for free(), so why stress it.
+    s1->heap = true;
+    s2->heap = true;
+
+    s1->length = len_s1;
+    s2->length = len_s2;
+
+    str_free(s1);
+    str_free(s2);
+}
+
+void test_str_ident_failure_different_str() {
+
+    const char* text1 = "this is a test string!";
+    const char* text2 = "this is a different test string!";
+    str* s1 = str_new(text1);
+    str* s2 = str_new(text2);
+
+    bool equal = str_ident(s1, s2);
+
+    TEST_ASSERT_FALSE(equal);
+
+    str_free(s1);
+    str_free(s2);
+}
+
+void test_str_ident_failure_different_text() {
+
+    // different string but otherwise same fields
+    const char* text1 = "this is a test string!";
+    const char* text2 = "this is a XXXX string!";
+    str* s1 = str_new(text1);
+    str* s2 = str_new(text2);
+
+    bool equal = str_ident(s1, s2);
+    
+    TEST_ASSERT_FALSE(equal);
+    
+    str_free(s1);
+    str_free(s2);
+}
+
+void test_str_ident_failure_one_null() {
+
+    const char* text = "this is a test string!";
+    str* s1 = str_new(text);
+    str* s2 = NULL;
+
+    bool equal = str_ident(s1, s2);
+    
+    TEST_ASSERT_FALSE(equal);
+    
+    str_free(s1);
+}
+
+void test_str_ident_failure_both_null() {
+
+    str* s1 = NULL;
+    str* s2 = NULL;
+
+    bool equal = str_ident(s1, s2);
+    
+    TEST_ASSERT_FALSE(equal);
+}
+
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_str_new_success);
@@ -288,13 +484,23 @@ int main(void) {
     RUN_TEST(test_str_free_valid_string_null_data);
     RUN_TEST(test_str_free_null_string);
 
-    RUN_TEST(test_str_at_success);
-    RUN_TEST(test_str_at_failure_index_too_big);
-    RUN_TEST(test_str_at_failure_null_str);
-
     RUN_TEST(test_str_concat_nominal_success);
     RUN_TEST(test_str_concat_null_parameter);
     RUN_TEST(test_str_concat_malformed_parameter);
+    
+    RUN_TEST(test_str_cmp_success_ident_str);
+    RUN_TEST(test_str_cmp_success_same_text);
+    RUN_TEST(test_str_cmp_failure_different_str);
+    RUN_TEST(test_str_cmp_failure_different_text);
+    RUN_TEST(test_str_cmp_failure_one_null);
+    RUN_TEST(test_str_cmp_failure_both_null);
+
+    RUN_TEST(test_str_ident_success_ident_str);
+    RUN_TEST(test_str_ident_failure_same_text);
+    RUN_TEST(test_str_ident_failure_different_str);
+    RUN_TEST(test_str_ident_failure_different_text);
+    RUN_TEST(test_str_ident_failure_one_null);
+    RUN_TEST(test_str_ident_failure_both_null);
 
     RUN_TEST(test_str_find_success);
     RUN_TEST(test_str_find_failure_not_present);
@@ -302,12 +508,20 @@ int main(void) {
     RUN_TEST(test_str_find_failure_null_str);
     RUN_TEST(test_str_find_failure_empty_str_null_char);
 
+    // str_sub()
+
+    RUN_TEST(test_str_len_success);
+    RUN_TEST(test_str_len_failure_null_str);
+
+    RUN_TEST(test_str_at_success);
+    RUN_TEST(test_str_at_failure_index_too_big);
+    RUN_TEST(test_str_at_failure_null_str);
+
     RUN_TEST(test_str_append_success);
     RUN_TEST(test_str_append_failure_null_character);
     RUN_TEST(test_str_append_failure_null_str);
 
-    RUN_TEST(test_str_len_success);
-    RUN_TEST(test_str_len_failure_null_str);
+    // str_view()
 
     // RUN_TEST(test_str_split_success);
     // RUN_TEST(test_str_split_failure_null_char);

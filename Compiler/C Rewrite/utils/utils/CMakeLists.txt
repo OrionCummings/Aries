@@ -5,6 +5,8 @@ add_library(utils_lib STATIC
     str.c
 )
 
+message("CTEST_FULL_OUTPUT")
+
 target_include_directories(utils_lib PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}
 )
