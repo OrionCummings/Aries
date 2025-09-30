@@ -25,7 +25,7 @@ str* str_new(const char* s) {
 
 void _str_free(str* s) {
 
-    if (s != NULL) {
+    if (s != NULL && s->heap) {
         free(s->data);
     }
 
@@ -62,7 +62,7 @@ str* str_concat(str* s1, str* s2) {
 bool str_cmp(const str* const s1, const str* const s2) {
 
     if (s1 == NULL || s2 == NULL) { return false; }
-    
+
     size_t len_s1 = str_len(s1);
     size_t len_s2 = str_len(s2);
     size_t len_min = (len_s1 < len_s2) ? len_s1 : len_s2;
@@ -86,7 +86,30 @@ int str_find(const str* const s, const char c) {
     return -1;
 }
 
-int str_sub(const str* const s1, const str* const s2) {
+int str_sub(const str* const s, const str* const sub) {
+
+    if (s == NULL || sub == NULL) { return -1; }
+
+    size_t len_s = str_len(s);
+    size_t len_sub = str_len(sub);
+
+    // If the length of the sub string is greater than the string, then there is no way for it to be a sub string
+    if (len_sub > len_s) { return -1; }
+
+    bool possible_sub = false;
+    int possible_sub_index = -1;
+    for (size_t index = 0; index < len_s; index++) {
+        for (size_t sub_index = 0; sub_index < len_sub; sub_index++) {
+            if (str_at(s, index) != str_at(sub, sub_index)) {
+                break;
+            }
+
+            if (sub_index == len_sub) {
+                return index - len_sub;
+            }
+        }
+    }
+
     return -1;
 }
 
@@ -121,7 +144,31 @@ str* str_append(const str* const s, const char c) {
 }
 
 str* str_view(const str* const s, size_t start, size_t end) {
-    return NULL;
+    if (s == NULL) { return NULL; }
+    if (start >= end) { return NULL; }
+
+    size_t len = str_len(s);
+    if (len == 0 || start > len || end > len) { return NULL; }
+
+    size_t len_substring = end - start - 1;
+    char substring[len_substring + 1];
+    memset(substring, 0, len_substring + 1);
+    memcpy(substring, s->data + start, len_substring);
+
+    str* view = str_new((char*)substring);
+    view->heap = false;
+    return view;
+}
+
+char* str_raw(const str* const s) {
+    if (s == NULL || s->data == NULL) { return NULL; }
+
+    size_t len_s = str_len(s);
+    void* ptr = calloc(len_s+1, sizeof(char));
+    if (ptr == NULL) { return NULL; }
+
+    strncpy(ptr, s->data, len_s);
+    return (char*)ptr;
 }
 
 void str_print(const str* const s) {

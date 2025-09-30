@@ -60,10 +60,10 @@ bool str_ident(const str* const s1, const str* const s2);
 int str_find(const str* const s, const char c);
 
 /// @brief Returns
-/// @param s1 The string in which to search for `s2`.
-/// @param s2 The string to search for in `s1`.
-/// @return Returns true if `s2` occurs in `s1`.
-int str_sub(const str* const s1, const str* const s2);
+/// @param s The string in which to search for `sub`.
+/// @param sub The 'sub' string to search for in `s`.
+/// @return Returns the index at which `sub` occurs in `s`. Returns -1 if `sub` does not occur in `s`.
+int str_sub(const str* const s, const str* const sub);
 
 /// @brief Returns the length of `s`.
 /// @param s The target string.
@@ -82,7 +82,7 @@ char str_at(const str* const s, size_t index);
 /// @return Returns a new string instance if the character is appended; otherwise, return NULL.
 str* str_append(const str* const s, const char c);
 
-/// @brief Returns a view of `s`. Does not free `s`! The returned string has the `heap` field set to false! The return value of this function should never be passed as an argument to `str_free`
+/// @brief Returns a view of `s`. Does not free `s`! The returned string has the `heap` field set to false! The return value of this function should never be passed as an argument to `str_free`. The behavior of this function is undefined if the underlying string is freed.
 /// @param s The underlying string.
 /// @param start The starting index of the view (inclusive).
 /// @param end The ending index of the view (exclusive).
@@ -94,6 +94,11 @@ str* str_view(const str* const s, size_t start, size_t end);
 /// @param c The delimiting character.
 /// @return A list of string views.
 list_str* str_split(const str* const s, char c);
+
+/// @brief Returns a copy of the underlying character array.
+/// @param s The string from which to copy.
+/// @return A heap-allocated pointer to a copy of the string.
+char* str_raw(const str* const s);
 
 /// @brief Prints the given string.
 /// @param s The string to print.
