@@ -160,11 +160,72 @@ str* str_view(const str* const s, size_t start, size_t end) {
     return view;
 }
 
+index* str_get_alphanumeric_symbolic_boundaries(const str* const s) {
+
+    if (s == NULL) { return NULL; }
+    if (s->data == NULL) { return NULL; }
+
+    size_t length = 0;
+    size_t capacity = 8;
+    index* boundaries = calloc(capacity, sizeof(*boundaries));
+    if (boundaries == NULL) { return NULL; }
+
+    // Set the first entry to 0
+    boundaries[length++] = 0;
+
+    bool is_alpha = isalnum(s->data[0]);
+    bool was_alpha = is_alpha;
+
+    size_t len = str_len(s);
+    for (size_t index = 1; index < len; index++) {
+
+        // Update state
+        char c = s->data[index];
+        is_alpha = isalnum(c);
+
+        // Did the state change between the current position and the previous position?
+        if (is_alpha != was_alpha) {
+
+            // Expand the boundary list if needed
+            if (length == capacity) {
+                capacity *= 2;
+                void* new_boundaries = realloc(boundaries, capacity * sizeof(*boundaries));
+                if (new_boundaries == NULL) {
+                    return NULL;
+                }
+                boundaries = new_boundaries;
+            }
+
+            boundaries[length++] = index;
+        }
+
+        // Remember the state
+        was_alpha = is_alpha;
+
+    }
+
+    // Expand the boundary list if needed
+    // TODO: Refactor so this is a generic function!
+    if (length == capacity) {
+        capacity *= 2;
+        void* new_boundaries = realloc(boundaries, capacity * sizeof(*boundaries));
+        if (new_boundaries == NULL) {
+            return NULL;
+        }
+        boundaries = new_boundaries;
+    }
+
+    // Add the final index!
+    boundaries[length++] = len;
+
+    return boundaries;
+}
+
 char* str_raw(const str* const s) {
     if (s == NULL || s->data == NULL) { return NULL; }
 
     size_t len_s = str_len(s);
-    void* ptr = calloc(len_s+1, sizeof(char));
+    void* ptr = calloc(len_s + 1, sizeof(char));
     if (ptr == NULL) { return NULL; }
 
     strncpy(ptr, s->data, len_s);

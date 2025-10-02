@@ -306,11 +306,11 @@ void test_str_cmp_success_same_text() {
     s2->heap = false;
 
     s1->length = 45;
-    
+
     bool equal = str_cmp(s1, s2);
-    
+
     TEST_ASSERT_TRUE(equal);
-    
+
     // Restore the string state so free() works as expected; this test
     // isn't for free(), so why stress it.
     s1->heap = true;
@@ -347,9 +347,9 @@ void test_str_cmp_failure_different_text() {
     str* s2 = str_new(text2);
 
     bool equal = str_cmp(s1, s2);
-    
+
     TEST_ASSERT_FALSE(equal);
-    
+
     str_free(s1);
     str_free(s2);
 }
@@ -361,9 +361,9 @@ void test_str_cmp_failure_one_null() {
     str* s2 = NULL;
 
     bool equal = str_cmp(s1, s2);
-    
+
     TEST_ASSERT_FALSE(equal);
-    
+
     str_free(s1);
 }
 
@@ -373,7 +373,7 @@ void test_str_cmp_failure_both_null() {
     str* s2 = NULL;
 
     bool equal = str_cmp(s1, s2);
-    
+
     TEST_ASSERT_FALSE(equal);
 }
 
@@ -404,11 +404,11 @@ void test_str_ident_failure_same_text() {
     s2->heap = false;
 
     s1->length = 45;
-    
+
     bool equal = str_ident(s1, s2);
-    
+
     TEST_ASSERT_FALSE(equal);
-    
+
     // Restore the string state so free() works as expected; this test
     // isn't for free(), so why stress it.
     s1->heap = true;
@@ -445,9 +445,9 @@ void test_str_ident_failure_different_text() {
     str* s2 = str_new(text2);
 
     bool equal = str_ident(s1, s2);
-    
+
     TEST_ASSERT_FALSE(equal);
-    
+
     str_free(s1);
     str_free(s2);
 }
@@ -459,9 +459,9 @@ void test_str_ident_failure_one_null() {
     str* s2 = NULL;
 
     bool equal = str_ident(s1, s2);
-    
+
     TEST_ASSERT_FALSE(equal);
-    
+
     str_free(s1);
 }
 
@@ -471,7 +471,7 @@ void test_str_ident_failure_both_null() {
     str* s2 = NULL;
 
     bool equal = str_ident(s1, s2);
-    
+
     TEST_ASSERT_FALSE(equal);
 }
 
@@ -583,9 +583,9 @@ void test_str_view_success_free() {
     str* view = str_view(s, start, end);
 
     TEST_ASSERT_EQUAL_STRING(expected_text, view->data);
-    
+
     str_free(view);
-    
+
     TEST_ASSERT_EQUAL_STRING(text, s->data);
 
     str_free(s);
@@ -671,14 +671,83 @@ void test_str_raw_failure_null_data() {
     str* s = str_new(text);
     char* real_data = s->data;
     s->data = NULL;
-    
+
     char* raw = str_raw(s);
-    
+
     TEST_ASSERT_NULL(raw);
-    
+
     s->data = real_data;
     str_free(s);
     free(raw);
+}
+
+void test_str_get_alphanumeric_symbolic_boundaries_success_1() {
+    const char* text = "a nice test";
+    const size_t n = 6;
+    index expected_boundaries[] = { 0, 1, 2, 6, 7, 11 };
+    str* s = str_new(text);
+
+    index* actual_boundaries = str_get_alphanumeric_symbolic_boundaries(s);
+
+    for (size_t index = 0; index < n; index++) {
+        // This doesn't check for buffer overruns, but it's probably not an issue rn lol
+        TEST_ASSERT_EQUAL(expected_boundaries[index], actual_boundaries[index]);
+    }
+
+    str_free(s);
+    free(actual_boundaries);
+}
+
+void test_str_get_alphanumeric_symbolic_boundaries_success_2() {
+    const char* text = "def func(i32 param)";
+    const size_t n = 9;
+    index expected_boundaries[] = { 0, 3, 4, 8, 9, 12, 13, 18, 19 };
+    str* s = str_new(text);
+
+    index* actual_boundaries = str_get_alphanumeric_symbolic_boundaries(s);
+
+    for (size_t index = 0; index < n; index++) {
+        // This doesn't check for buffer overruns, but it's probably not an issue rn lol
+        TEST_ASSERT_EQUAL(expected_boundaries[index], actual_boundaries[index]);
+    }
+
+    str_free(s);
+    free(actual_boundaries);
+}
+
+void test_str_get_alphanumeric_symbolic_boundaries_success_3() {
+    const char* text = \
+        "def fact(i32 n) {"
+        "    if (n == 1) {"
+        "        return 1;"
+        "    }"
+        ""
+        "    return fact(n-1) * n;"
+        "};"
+        ""
+        "def main(void) -> int {"
+        "    i32 n = 12;"
+        "    if (fact(n) == 479_001_600) {"
+        "        return 0;"
+        "    } else {"
+        "        return -1;"
+        "    }"
+        "}"
+        ;
+
+    const size_t n = 9;
+    index expected_boundaries[] = {  };
+    str* s = str_new(text);
+
+    index* actual_boundaries = str_get_alphanumeric_symbolic_boundaries(s);
+
+    for (size_t index = 0; index < n; index++) {
+        // This doesn't check for buffer overruns, but it's probably not an issue rn lol
+        TEST_ASSERT_EQUAL(expected_boundaries[index], actual_boundaries[index]);
+    }
+
+    str_free(s);
+    free(actual_boundaries);
 }
 
 int main(void) {
@@ -693,7 +762,7 @@ int main(void) {
     RUN_TEST(test_str_concat_nominal_success);
     RUN_TEST(test_str_concat_null_parameter);
     RUN_TEST(test_str_concat_malformed_parameter);
-    
+
     RUN_TEST(test_str_cmp_success_ident_str);
     RUN_TEST(test_str_cmp_success_same_text);
     RUN_TEST(test_str_cmp_failure_different_str);
@@ -731,21 +800,21 @@ int main(void) {
     RUN_TEST(test_str_append_success);
     RUN_TEST(test_str_append_failure_null_character);
     RUN_TEST(test_str_append_failure_null_str);
-    
+
     RUN_TEST(test_str_view_success);
     RUN_TEST(test_str_view_success_free);
     RUN_TEST(test_str_view_failure_start_greater_than_end);
     RUN_TEST(test_str_view_failure_start_too_large);
     RUN_TEST(test_str_view_failure_end_too_large);
     RUN_TEST(test_str_view_failure_start_equal_to_end);
-    
+
     RUN_TEST(test_str_raw_success);
     RUN_TEST(test_str_raw_failure_null_string);
     RUN_TEST(test_str_raw_failure_null_data);
 
-    // RUN_TEST(test_str_split_success);
-    // RUN_TEST(test_str_split_failure_null_char);
-    // RUN_TEST(test_str_split_failure_null_str);
+    RUN_TEST(test_str_get_alphanumeric_symbolic_boundaries_success_1);
+    RUN_TEST(test_str_get_alphanumeric_symbolic_boundaries_success_2);
+    RUN_TEST(test_str_get_alphanumeric_symbolic_boundaries_success_3);
 
     return UNITY_END();
 }

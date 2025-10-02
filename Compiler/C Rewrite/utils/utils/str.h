@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
 
 /// @brief An immutable string. Usually allocated on the heap, but this is not always true, especially with string views.
 typedef struct {
@@ -13,12 +14,8 @@ typedef struct {
     char* data;
 } str;
 
-/// @brief A list of strings
-typedef struct {
-    size_t size;
-    size_t capacity;
-    str* strings;
-} list_str;
+/// @brief 
+typedef size_t index;
 
 /// @brief Allocates a new string instance based on the given cstring.
 /// @param s The target cstring.
@@ -89,11 +86,24 @@ str* str_append(const str* const s, const char c);
 /// @return A new string instance referencing the characters from `start` to `end`, inclusive.
 str* str_view(const str* const s, size_t start, size_t end);
 
-/// @brief Splits `s` at each instance of `c` and returns a list of string views ... Does not free `s`.
+/// @brief Returns a list of indices at which alphanumeric-symbolic boundaries occur in `s`.
+/// 
+/// Example: 
+/// 
+/// `str_get_alphanumeric_symbolic_boundaries("a nice test")` yields `[0, 1, 2, 6, 7, 11]`
+/// 
+/// [0 -  1] = "a"
+/// [1 -  2] = " "
+/// [2 -  6] = "nice"
+/// [6 -  7] = " "
+/// [7 - 11] = "test"
+/// 
 /// @param s The string to split.
-/// @param c The delimiting character.
-/// @return A list of string views.
-list_str* str_split(const str* const s, char c);
+/// @return A pointer to a 0-terminated list of indices.
+index* str_get_alphanumeric_symbolic_boundaries(const str* const s);
+
+/// @brief NOT IMPLEMENTED; MAY BE USEFUL.
+str** str_split(const str* const s, char c);
 
 /// @brief Returns a copy of the underlying character array.
 /// @param s The string from which to copy.
