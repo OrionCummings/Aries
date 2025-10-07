@@ -3,23 +3,25 @@
 
 #include <stddef.h>
 #include <ctype.h>
+#include "str.h"
 #include "debug.h"
 
 #define MAX_IDENTIFIER_LENGTH (8)
-#define SPACE ((int)32)
 #define TOKEN_LIST_GROWTH_FACTOR (2)
 
 typedef enum {
     INVALID,                // Used for internal errors
     NONE,
-    WHITESPACE,
     IDENTIFIER,
+
+    SYM_SPACE,
     SYM_EOF,
     SYM_SEMICOLON,          // ;
     SYM_COLON,              // :
     SYM_COMMA,              // ,
     SYM_QUESTION,           // ?
     SYM_FSLASH,             // /
+    SYM_BSLASH,             // 
     SYM_PAREN_OPEN,         // (
     SYM_PAREN_CLOSE,        // )
     SYM_BRACKET_OPEN,       // [
@@ -29,7 +31,6 @@ typedef enum {
     SYM_EQUAL,              // =
     SYM_PLUS,               // +
     SYM_DASH,               // -
-    SYM_SLASH,              // /
     SYM_STAR,               // *
     SYM_PERCENT,            // %
     SYM_EXCLAIM,            // !
@@ -79,11 +80,13 @@ typedef enum {
     KEYWORD_OVERLOAD,       // overload
     KEYWORD_ASM,            // asm
     KEYWORD_AS,             // as
+
+    TOKEN_COUNT
 } Token;
 
 typedef struct {
     Token t;
-    char* s;
+    str* s;
 } Symbol;
 
 typedef struct {
@@ -108,7 +111,10 @@ bool is_identifier_char(char);
 
 bool lex_boundary(Lexer*);
 
-Symbol* sym_new(Token, char*);
+Symbol* as_symbol(const str* const s);
+Token str_to_token(const str* const s);
+
+Symbol* sym_new(Token t, const str* const s);
 void sym_free_(Symbol*);
 #define sym_free(s) do{ \
     sym_free_(s);       \

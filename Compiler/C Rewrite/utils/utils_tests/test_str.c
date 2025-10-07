@@ -684,10 +684,10 @@ void test_str_raw_failure_null_data() {
 void test_str_get_alphanumeric_symbolic_boundaries_success_1() {
     const char* text = "a nice test";
     const size_t n = 6;
-    index expected_boundaries[] = { 0, 1, 2, 6, 7, 11 };
+    index_t expected_boundaries[] = { 0, 1, 2, 6, 7, 11 };
     str* s = str_new(text);
 
-    index* actual_boundaries = str_get_alphanumeric_symbolic_boundaries(s);
+    index_t* actual_boundaries = str_get_alphanumeric_symbolic_boundaries(s);
 
     for (size_t index = 0; index < n; index++) {
         // This doesn't check for buffer overruns, but it's probably not an issue rn lol
@@ -701,10 +701,10 @@ void test_str_get_alphanumeric_symbolic_boundaries_success_1() {
 void test_str_get_alphanumeric_symbolic_boundaries_success_2() {
     const char* text = "def func(i32 param)";
     const size_t n = 9;
-    index expected_boundaries[] = { 0, 3, 4, 8, 9, 12, 13, 18, 19 };
+    index_t expected_boundaries[] = { 0, 3, 4, 8, 9, 12, 13, 18, 19 };
     str* s = str_new(text);
 
-    index* actual_boundaries = str_get_alphanumeric_symbolic_boundaries(s);
+    index_t* actual_boundaries = str_get_alphanumeric_symbolic_boundaries(s);
 
     for (size_t index = 0; index < n; index++) {
         // This doesn't check for buffer overruns, but it's probably not an issue rn lol
@@ -716,6 +716,23 @@ void test_str_get_alphanumeric_symbolic_boundaries_success_2() {
 }
 
 void test_str_get_alphanumeric_symbolic_boundaries_success_3() {
+    const char* text = "bool c = (a == b) && func()";
+    const size_t n = 9;
+    index_t expected_boundaries[] = { 0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 20, 21, 25, 26, 27 };
+    str* s = str_new(text);
+
+    index_t* actual_boundaries = str_get_alphanumeric_symbolic_boundaries(s);
+
+    for (size_t index = 0; index < n; index++) {
+        // This doesn't check for buffer overruns, but it's probably not an issue rn lol
+        TEST_ASSERT_EQUAL(expected_boundaries[index], actual_boundaries[index]);
+    }
+
+    str_free(s);
+    free(actual_boundaries);
+}
+
+void test_str_get_alphanumeric_symbolic_boundaries_success_4() {
     const char* text = \
         "def fact(i32 n) {"
         "    if (n == 1) {"
@@ -736,10 +753,10 @@ void test_str_get_alphanumeric_symbolic_boundaries_success_3() {
         ;
 
     const size_t n = 9;
-    index expected_boundaries[] = {  };
+    index_t expected_boundaries[] = { 0 };
     str* s = str_new(text);
 
-    index* actual_boundaries = str_get_alphanumeric_symbolic_boundaries(s);
+    index_t* actual_boundaries = str_get_alphanumeric_symbolic_boundaries(s);
 
     for (size_t index = 0; index < n; index++) {
         // This doesn't check for buffer overruns, but it's probably not an issue rn lol
@@ -815,6 +832,7 @@ int main(void) {
     RUN_TEST(test_str_get_alphanumeric_symbolic_boundaries_success_1);
     RUN_TEST(test_str_get_alphanumeric_symbolic_boundaries_success_2);
     RUN_TEST(test_str_get_alphanumeric_symbolic_boundaries_success_3);
+    // RUN_TEST(test_str_get_alphanumeric_symbolic_boundaries_success_4);
 
     return UNITY_END();
 }

@@ -69,6 +69,12 @@ bool str_cmp(const str* const s1, const str* const s2) {
     return (strncmp(s1->data, s2->data, len_min) == 0) ? true : false;
 }
 
+bool str_cmp_raw(const str* const s, const char* const cs) {
+
+    if (s == NULL || s->data == NULL || cs == NULL) { return NULL; }
+    return !strncmp(s->data, cs, str_len(s));
+}
+
 bool str_ident(const str* const s1, const str* const s2) {
     return (s1 != NULL) && (s2 != NULL) && (s1->heap == s2->heap) && (s1->length == s2->length) && (str_cmp(s1, s2));
 }
@@ -160,14 +166,14 @@ str* str_view(const str* const s, size_t start, size_t end) {
     return view;
 }
 
-index* str_get_alphanumeric_symbolic_boundaries(const str* const s) {
+index_t* str_get_alphanumeric_symbolic_boundaries(const str* const s) {
 
     if (s == NULL) { return NULL; }
     if (s->data == NULL) { return NULL; }
 
     size_t length = 0;
     size_t capacity = 8;
-    index* boundaries = calloc(capacity, sizeof(*boundaries));
+    index_t* boundaries = calloc(capacity, sizeof(*boundaries));
     if (boundaries == NULL) { return NULL; }
 
     // Set the first entry to 0
@@ -177,7 +183,7 @@ index* str_get_alphanumeric_symbolic_boundaries(const str* const s) {
     bool was_alpha = is_alpha;
 
     size_t len = str_len(s);
-    for (size_t index = 1; index < len; index++) {
+    for (size_t index = 1; index <= len; index++) {
 
         // Update state
         char c = s->data[index];
@@ -230,6 +236,23 @@ char* str_raw(const str* const s) {
 
     strncpy(ptr, s->data, len_s);
     return (char*)ptr;
+}
+
+str* str_from_file(FILE* const file) {
+
+    if (file == NULL) { return NULL; }
+    
+    fseek(file, 0, SEEK_END);
+    size_t len = ftell(file);
+    fseek(file, 0, SEEK_SET);
+    
+    char* buffer = calloc(len, sizeof(*buffer));
+    if (buffer == NULL) { return NULL; }
+    fread (buffer, 1, len, file);
+
+    str* s = str_new(buffer);
+    free(buffer);
+    return s;
 }
 
 void str_print(const str* const s) {

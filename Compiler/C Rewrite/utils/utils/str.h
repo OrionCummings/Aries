@@ -15,7 +15,7 @@ typedef struct {
 } str;
 
 /// @brief 
-typedef size_t index;
+typedef size_t index_t;
 
 /// @brief Allocates a new string instance based on the given cstring.
 /// @param s The target cstring.
@@ -33,16 +33,22 @@ str* str_new(const char* s);
 void _str_free(str* s);
 
 /// @brief Concatenates two string instances.
-/// @param s1 A string instance
-/// @param s2 A string instance
+/// @param s1 A string.
+/// @param s2 A string.
 /// @return A new string instance of the form s1s2.
 str* str_concat(str* s1, str* s2);
 
-/// @brief Compares two strings s1 and s2 character-wise. This does not account for differences in length (which shouldn't happen?), capacity, or heap status; this function only checks character content. If strict equality is required, use `str_ident()`
-/// @param s1 A string instance
-/// @param s2 A string instance
+/// @brief Compares two strings s1 and s2 character-wise. This does not account for differences in length (which shouldn't happen?), capacity, or heap status; this function only checks character content. If strict equality is required, use `str_ident()`.
+/// @param s1 A string.
+/// @param s2 A string.
 /// @return Returns true if the string data in both strings are equal and false otherwise.
 bool str_cmp(const str* const s1, const str* const s2);
+
+/// @brief Compares a string `s` and a c-string `cs` for equality.
+/// @param s A string.
+/// @param cs A c-string.
+/// @return Returns true if the string data in `s` is equal to the c-string `cs` and false otherwise.
+bool str_cmp_raw(const str* const s, const char* const cs);
 
 /// @brief Compares two strings s1 and s2 character-wise and accounts for differences in length, capacity, and allocation status. If mear character equality is desired, use `str_cmp()` instead.
 /// @param s1 A string instance
@@ -86,6 +92,36 @@ str* str_append(const str* const s, const char c);
 /// @return A new string instance referencing the characters from `start` to `end`, inclusive.
 str* str_view(const str* const s, size_t start, size_t end);
 
+/// @brief NOT IMPLEMENTED; MAY BE USEFUL.
+str** str_split(const str* const s, char c);
+
+/// @brief Returns a copy of the underlying character array.
+/// @param s The string from which to copy.
+/// @return A heap-allocated pointer to a copy of the string.
+char* str_raw(const str* const s);
+
+/// @brief Returns a string instance containing the contents of `file`.
+/// @param file The file to convert to a string.
+/// @return A string instance containing the contents of `file`.
+str* str_from_file(FILE* const file) ;
+
+/// @brief Removes `c` from both the left and right ends of `s`. This function will modify the underlying string but will not reallocate any memory. This function will only remove one instance of `c` from either end. If `c` is not on the ends of `s`, then this function does nothing.
+/// 
+/// Example:
+/// 
+/// s = "test"; str_strip(s, 't') = "es"
+/// 
+/// @param s The string from which `c` is to be removed.
+/// @param c The character that is to be removed from `s`.
+/// @return `s` without `c` on the left and right ends.
+str* str_strip(str* s, const char c);
+
+/// @brief Prints the given string.
+/// @param s The string to print.
+void str_print(const str* const s);
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
 /// @brief Returns a list of indices at which alphanumeric-symbolic boundaries occur in `s`.
 /// 
 /// Example: 
@@ -100,18 +136,11 @@ str* str_view(const str* const s, size_t start, size_t end);
 /// 
 /// @param s The string to split.
 /// @return A pointer to a 0-terminated list of indices.
-index* str_get_alphanumeric_symbolic_boundaries(const str* const s);
+index_t* str_get_alphanumeric_symbolic_boundaries(const str* const s);
 
-/// @brief NOT IMPLEMENTED; MAY BE USEFUL.
-str** str_split(const str* const s, char c);
-
-/// @brief Returns a copy of the underlying character array.
-/// @param s The string from which to copy.
-/// @return A heap-allocated pointer to a copy of the string.
-char* str_raw(const str* const s);
-
-/// @brief Prints the given string.
-/// @param s The string to print.
-void str_print(const str* const s);
+/// @brief Returns true if the given string is a valid identifier.
+/// @param s A string.
+/// @return Returns true if the given string is a valid identifier.
+bool str_is_identifier(const str* const s);
 
 #endif
