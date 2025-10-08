@@ -1,7 +1,8 @@
 #include "lexer.h"
 
-const char* const SYM_NAMES[] = {
+const char* const SYM_CHARS[] = {
     [SYM_SPACE] = " ",
+    [SYM_NEWLINE] = "\n",
     [SYM_EOF] = "EOF",
     [SYM_SEMICOLON] = ";",
     [SYM_COLON] = ":",
@@ -69,7 +70,8 @@ const char* const TOKEN_NAMES[] = {
     [NONE] = "NONE",
     [IDENTIFIER] = "IDENTIFIER",
     [SYM_EOF] = "SYM_EOF",
-    [SYM_SPACE] = " ",
+    [SYM_SPACE] = "SYM_SPACE",
+    [SYM_NEWLINE] = "SYM_NEWLINE",
     [SYM_SEMICOLON] = "SYM_SEMICOLON",
     [SYM_COLON] = "SYM_COLON",
     [SYM_COMMA] = "SYM_COMMA",
@@ -144,16 +146,24 @@ bool lex(Lexer* lexer) {
     size_t len = str_len(file_contents);
     index_t* boundaries = str_get_alphanumeric_symbolic_boundaries(file_contents);
 
-    size_t index = 0;
+    size_t index = 1;
     while (boundaries[index++] != len) {
         index_t start = boundaries[index - 1];
         index_t end = boundaries[index] + 1;
 
         str* view = str_view(file_contents, start, end);
 
+        if (view == NULL) {
+            break;
+        }
+
         Token token = str_to_token(view);
 
-        printf("%s ('%s')\n", TOKEN_NAMES[token], view->data);
+        if (token == IDENTIFIER){
+            printf("%s = '%s'\n", TOKEN_NAMES[token], view->data);
+        }else {
+            printf("%s\n", TOKEN_NAMES[token]);
+        }
     }
 
     fclose(lexer->file);
@@ -193,10 +203,6 @@ Lexer* lex_new(size_t capacity, const char* filename) {
     return lexer;
 }
 
-bool lex_append(Lexer* lexer, Symbol sym) {
-    return true;
-}
-
 Symbol* as_symbol(const str* const s) {
 
     if (s == NULL || s->data == NULL) { return NULL; }
@@ -207,10 +213,6 @@ Symbol* as_symbol(const str* const s) {
     if (sym == NULL) { return NULL; }
 
     return sym;
-}
-
-bool is_identifier_char(char c) {
-    return (isalnum(c) || c == '_');
 }
 
 Symbol* sym_new(Token t, const str* const s) {
@@ -251,7 +253,7 @@ Token str_to_token(const str* const s) {
     if (s == NULL) { return INVALID; }
 
     for (size_t index = 3; index < TOKEN_COUNT; index++) {
-        if (str_cmp_raw(s, SYM_NAMES[index])) {
+        if (str_cmp_raw(s, SYM_CHARS[index])) {
             return (Token)index;
         }
     }
@@ -532,17 +534,4 @@ Token lex_buffer_to_token(char token_buffer[MAX_IDENTIFIER_LENGTH]) {
     } else {
         return IDENTIFIER;
     }
-}
-
-bool str_is_identifier(const str* const s) {
-    if (s == NULL || s->data == NULL) { return NULL; }
-
-    for (size_t index = 0; index < str_len(s); index++) {
-        const char c = s->data[index];
-        if (!(isalnum(c) || c == '_')) {
-            return false;
-        }
-    }
-
-    return true;
 }

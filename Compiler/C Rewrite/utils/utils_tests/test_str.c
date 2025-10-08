@@ -717,8 +717,8 @@ void test_str_get_alphanumeric_symbolic_boundaries_success_2() {
 
 void test_str_get_alphanumeric_symbolic_boundaries_success_3() {
     const char* text = "bool c = (a == b) && func()";
-    const size_t n = 9;
-    index_t expected_boundaries[] = { 0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 20, 21, 25, 26, 27 };
+    const size_t n = 20;
+    index_t expected_boundaries[] = { 0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 25, 26, 27 };
     str* s = str_new(text);
 
     index_t* actual_boundaries = str_get_alphanumeric_symbolic_boundaries(s);
@@ -733,6 +733,9 @@ void test_str_get_alphanumeric_symbolic_boundaries_success_3() {
 }
 
 void test_str_get_alphanumeric_symbolic_boundaries_success_4() {
+
+    TEST_IGNORE_MESSAGE("This test is unfinished because I am lazy");
+
     const char* text = \
         "def fact(i32 n) {"
         "    if (n == 1) {"
@@ -765,6 +768,110 @@ void test_str_get_alphanumeric_symbolic_boundaries_success_4() {
 
     str_free(s);
     free(actual_boundaries);
+}
+
+void test_str_get_alphanumeric_symbolic_boundaries_success_5() {
+    const char* text = "-> i32 { return 123; }";
+
+    const size_t n = 14;
+    index_t expected_boundaries[] = { 0, 1, 2, 3, 6, 7, 8, 9, 15, 16, 19, 20, 21, 22 };
+    str* s = str_new(text);
+
+    index_t* actual_boundaries = str_get_alphanumeric_symbolic_boundaries(s);
+
+    for (size_t index = 0; index < n; index++) {
+        // This doesn't check for buffer overruns, but it's probably not an issue rn lol
+        TEST_ASSERT_EQUAL(expected_boundaries[index], actual_boundaries[index]);
+    }
+
+    str_free(s);
+    free(actual_boundaries);
+}
+
+void test_str_str_cmp_raw_success_1() {
+
+    const char* text = "def";
+    str* s = str_new(text);
+
+    TEST_ASSERT(str_cmp_raw(s, text));
+    
+    str_free(s);
+
+}
+
+void test_str_str_cmp_raw_success_2() {
+
+    const char* text = "this is something more complex!!!!\n\n\n";
+    str* s = str_new(text);
+
+    TEST_ASSERT(str_cmp_raw(s, text));
+    
+    str_free(s);
+
+}
+
+void test_str_str_cmp_raw_success_3() {
+
+    const char* text = "t&_NV*(@#$&QW(8n-C&AQ#($*&Q@_+4cQ@&$M+C+4mcQ)M4c7=Q40CMQ )9$Aw90euasdj*(CAJM_W*()JECQA_@$))";
+    str* s = str_new(text);
+
+    TEST_ASSERT(str_cmp_raw(s, text));
+    
+    str_free(s);
+}
+
+void test_str_is_identifier_success_1() {
+    str* s = str_new("this_is_a_valid_identifier");
+    TEST_ASSERT(str_is_identifier(s));
+    str_free(s);
+}
+
+void test_str_is_identifier_success_2() {
+    str* s = str_new("anotherVariableNameThatShouldBeGood178");
+    TEST_ASSERT(str_is_identifier(s));
+    str_free(s);
+}
+
+void test_str_is_identifier_success_3() {
+    str* s = str_new("THIS_IS_PROBABLY_A_CONSTANT_OF_SOME_KIND2378");
+    TEST_ASSERT(str_is_identifier(s));
+    str_free(s);
+}
+
+void test_str_is_identifier_failure_1() {
+    str* s = str_new("bad id");
+    TEST_ASSERT_FALSE(str_is_identifier(s));
+    str_free(s);
+}
+
+void test_str_is_identifier_failure_2() {
+    str* s = str_new("this is not a valid identifier");
+    TEST_ASSERT_FALSE(str_is_identifier(s));
+    str_free(s);
+}
+
+void test_str_is_identifier_failure_3() {
+    str* s = str_new(" bad");
+    TEST_ASSERT_FALSE(str_is_identifier(s));
+    str_free(s);
+}
+
+void test_str_is_identifier_failure_4() {
+    str* s = str_new("bad ");
+    TEST_ASSERT_FALSE(str_is_identifier(s));
+    str_free(s);
+}
+
+void test_str_is_identifier_failure_5() {
+    str* s = str_new("123");
+    TEST_ASSERT_FALSE(str_is_identifier(s));
+    str_free(s);
+}
+
+void test_str_is_identifier_failure_6() {
+    str* s = str_new("269test_var");
+    TEST_ASSERT_FALSE(str_is_identifier(s));
+    str_free(s);
 }
 
 int main(void) {
@@ -829,10 +936,27 @@ int main(void) {
     RUN_TEST(test_str_raw_failure_null_string);
     RUN_TEST(test_str_raw_failure_null_data);
 
+    RUN_TEST(test_str_str_cmp_raw_success_1);
+    RUN_TEST(test_str_str_cmp_raw_success_2);
+    RUN_TEST(test_str_str_cmp_raw_success_3);
+
+    ////////// END OF LIBRARY FUNCTIONS //////////
+
     RUN_TEST(test_str_get_alphanumeric_symbolic_boundaries_success_1);
     RUN_TEST(test_str_get_alphanumeric_symbolic_boundaries_success_2);
     RUN_TEST(test_str_get_alphanumeric_symbolic_boundaries_success_3);
-    // RUN_TEST(test_str_get_alphanumeric_symbolic_boundaries_success_4);
+    RUN_TEST(test_str_get_alphanumeric_symbolic_boundaries_success_4);
+    RUN_TEST(test_str_get_alphanumeric_symbolic_boundaries_success_5);
+
+    RUN_TEST(test_str_is_identifier_success_1);
+    RUN_TEST(test_str_is_identifier_success_2);
+    RUN_TEST(test_str_is_identifier_success_3);
+    RUN_TEST(test_str_is_identifier_failure_1);
+    RUN_TEST(test_str_is_identifier_failure_2);
+    RUN_TEST(test_str_is_identifier_failure_3);
+    RUN_TEST(test_str_is_identifier_failure_4);
+    RUN_TEST(test_str_is_identifier_failure_5);
+    RUN_TEST(test_str_is_identifier_failure_6);
 
     return UNITY_END();
 }

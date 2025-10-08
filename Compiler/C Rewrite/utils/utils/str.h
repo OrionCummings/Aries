@@ -138,9 +138,24 @@ void str_print(const str* const s);
 /// @return A pointer to a 0-terminated list of indices.
 index_t* str_get_alphanumeric_symbolic_boundaries(const str* const s);
 
-/// @brief Returns true if the given string is a valid identifier.
+/// @brief Returns true if the given string is a valid identifier. Valid identifiers are of the form [a-zA-Z][a-zA-Z0-9_]*.
 /// @param s A string.
 /// @return Returns true if the given string is a valid identifier.
 bool str_is_identifier(const str* const s);
+
+bool str_is_bool_literal(const str* const s);
+bool str_is_u8_literal(const str* const s);
+bool str_is_u16_literal(const str* const s);
+bool str_is_u32_literal(const str* const s);
+bool str_is_u64_literal(const str* const s);
+bool str_is_i8_literal(const str* const s);
+bool str_is_i16_literal(const str* const s);
+bool str_is_i32_literal(const str* const s);
+bool str_is_i64_literal(const str* const s);
+bool str_is_f32_literal(const str* const s);
+bool str_is_f64_literal(const str* const s);
+bool str_is_char_literal(const str* const s);
+bool str_is_str_literal(const str* const s);
+bool str_is_opt_literal(const str* const s);
 
 #endif

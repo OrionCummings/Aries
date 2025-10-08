@@ -15,6 +15,7 @@ typedef enum {
     IDENTIFIER,
 
     SYM_SPACE,
+    SYM_NEWLINE,
     SYM_EOF,
     SYM_SEMICOLON,          // ;
     SYM_COLON,              // :
@@ -85,6 +86,13 @@ typedef enum {
 } Token;
 
 typedef struct {
+    size_t line;
+    size_t char_start;
+    size_t char_stop;
+}CharacterRange;
+
+typedef struct {
+    CharacterRange location;
     Token t;
     str* s;
 } Symbol;
@@ -101,15 +109,7 @@ typedef struct {
 
 bool lex(Lexer* lexer);
 Lexer* lex_new(size_t capacity, const char* filename);
-Symbol* lex_next(Lexer*);
-bool lex_append(Lexer*, Symbol);
-char lex_peek(Lexer*);
 Token lex_buffer_to_token(char token_buffer[MAX_IDENTIFIER_LENGTH]);
-int lex_consume_comment(Lexer*);
-
-bool is_identifier_char(char);
-
-bool lex_boundary(Lexer*);
 
 Symbol* as_symbol(const str* const s);
 Token str_to_token(const str* const s);

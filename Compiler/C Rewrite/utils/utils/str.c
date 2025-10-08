@@ -72,7 +72,7 @@ bool str_cmp(const str* const s1, const str* const s2) {
 bool str_cmp_raw(const str* const s, const char* const cs) {
 
     if (s == NULL || s->data == NULL || cs == NULL) { return NULL; }
-    return !strncmp(s->data, cs, str_len(s));
+    return strncmp(s->data, cs, str_len(s)) == 0;
 }
 
 bool str_ident(const str* const s1, const str* const s2) {
@@ -166,6 +166,42 @@ str* str_view(const str* const s, size_t start, size_t end) {
     return view;
 }
 
+char* str_raw(const str* const s) {
+    if (s == NULL || s->data == NULL) { return NULL; }
+
+    size_t len_s = str_len(s);
+    void* ptr = calloc(len_s + 1, sizeof(char));
+    if (ptr == NULL) { return NULL; }
+
+    strncpy(ptr, s->data, len_s);
+    return (char*)ptr;
+}
+
+str* str_from_file(FILE* const file) {
+
+    if (file == NULL) { return NULL; }
+
+    fseek(file, 0, SEEK_END);
+    size_t len = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    char* buffer = calloc(len, sizeof(*buffer));
+    if (buffer == NULL) { return NULL; }
+    fread(buffer, 1, len, file);
+
+    str* s = str_new(buffer);
+    free(buffer);
+    return s;
+}
+
+void str_print(const str* const s) {
+    if (s != NULL) {
+        printf("%s\n", s->data);
+    }
+}
+
+////////// END OF LIBRARY FUNCTIONS //////////
+
 index_t* str_get_alphanumeric_symbolic_boundaries(const str* const s) {
 
     if (s == NULL) { return NULL; }
@@ -183,14 +219,14 @@ index_t* str_get_alphanumeric_symbolic_boundaries(const str* const s) {
     bool was_alpha = is_alpha;
 
     size_t len = str_len(s);
-    for (size_t index = 1; index <= len; index++) {
+    for (size_t index = 1; index < len; index++) {
 
         // Update state
         char c = s->data[index];
         is_alpha = isalnum(c);
 
-        // Did the state change between the current position and the previous position?
-        if (is_alpha != was_alpha) {
+        // Did the state change between the current position and the previous position? Or is this currently NOT an alphanumeric character?
+        if ((is_alpha != was_alpha) || (!is_alpha)) {
 
             // Expand the boundary list if needed
             if (length == capacity) {
@@ -204,10 +240,8 @@ index_t* str_get_alphanumeric_symbolic_boundaries(const str* const s) {
 
             boundaries[length++] = index;
         }
-
-        // Remember the state
+        
         was_alpha = is_alpha;
-
     }
 
     // Expand the boundary list if needed
@@ -227,37 +261,20 @@ index_t* str_get_alphanumeric_symbolic_boundaries(const str* const s) {
     return boundaries;
 }
 
-char* str_raw(const str* const s) {
+bool str_is_identifier(const str* const s) {
     if (s == NULL || s->data == NULL) { return NULL; }
 
-    size_t len_s = str_len(s);
-    void* ptr = calloc(len_s + 1, sizeof(char));
-    if (ptr == NULL) { return NULL; }
+    size_t len = str_len(s);
 
-    strncpy(ptr, s->data, len_s);
-    return (char*)ptr;
-}
+    if (len == 0) { return false; }
+    if (!isalpha(s->data[0])) { return false; }
 
-str* str_from_file(FILE* const file) {
-
-    if (file == NULL) { return NULL; }
-    
-    fseek(file, 0, SEEK_END);
-    size_t len = ftell(file);
-    fseek(file, 0, SEEK_SET);
-    
-    char* buffer = calloc(len, sizeof(*buffer));
-    if (buffer == NULL) { return NULL; }
-    fread (buffer, 1, len, file);
-
-    str* s = str_new(buffer);
-    free(buffer);
-    return s;
-}
-
-void str_print(const str* const s) {
-    if (s != NULL) {
-        printf("%s\n", s->data);
+    for (size_t index = 1; index < len; index++) {
+        const char c = s->data[index];
+        if (!(isalnum(c) || c == '_')) {
+            return false;
+        }
     }
-}
 
+    return true;
+}
