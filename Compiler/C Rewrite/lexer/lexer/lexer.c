@@ -3,7 +3,6 @@
 const char* const SYM_CHARS[] = {
     [SYM_SPACE] = " ",
     [SYM_NEWLINE] = "\n",
-    [SYM_EOF] = "EOF",
     [SYM_SEMICOLON] = ";",
     [SYM_COLON] = ":",
     [SYM_COMMA] = ",",
@@ -69,7 +68,6 @@ const char* const TOKEN_NAMES[] = {
     [INVALID] = "INVALID",
     [NONE] = "NONE",
     [IDENTIFIER] = "IDENTIFIER",
-    [SYM_EOF] = "SYM_EOF",
     [SYM_SPACE] = "SYM_SPACE",
     [SYM_NEWLINE] = "SYM_NEWLINE",
     [SYM_SEMICOLON] = "SYM_SEMICOLON",
@@ -146,7 +144,7 @@ bool lex(Lexer* lexer) {
     size_t len = str_len(file_contents);
     index_t* boundaries = str_get_alphanumeric_symbolic_boundaries(file_contents);
 
-    size_t index = 1;
+    size_t index = 0;
     while (boundaries[index++] != len) {
         index_t start = boundaries[index - 1];
         index_t end = boundaries[index] + 1;
@@ -159,9 +157,9 @@ bool lex(Lexer* lexer) {
 
         Token token = str_to_token(view);
 
-        if (token == IDENTIFIER){
+        if (token != SYM_NEWLINE) {
             printf("%s = '%s'\n", TOKEN_NAMES[token], view->data);
-        }else {
+        } else {
             printf("%s\n", TOKEN_NAMES[token]);
         }
     }
@@ -196,11 +194,19 @@ Lexer* lex_new(size_t capacity, const char* filename) {
         return false;
     }
 
-    A_INFO("Opened file '%s'", filename);
+    // A_INFO("Opened file '%s'", filename);
 
     lexer->file = file;
 
     return lexer;
+}
+
+// TODO: I'm not convinved that this is correct; add some tests
+void lex_free_(Lexer* l) {
+    if (l == NULL) { return; }
+    fclose(l->file);
+    sym_free(l->symbols);
+    free(l->symbols);
 }
 
 Symbol* as_symbol(const str* const s) {
@@ -247,6 +253,10 @@ void sym_free_(Symbol* s) {
         free(s->s);
     }
     free(s);
+}
+
+bool sym_cmp(const Symbol s1, const Symbol s2) {
+    return (s1.t == s2.t && str_cmp(&s1.s, &s2.s));
 }
 
 Token str_to_token(const str* const s) {
@@ -407,9 +417,7 @@ Token lex_buffer_to_token(char token_buffer[MAX_IDENTIFIER_LENGTH]) {
 
     // TODO: Come back here and appreciate how awful this is. Go on. Do it.
     // Refactor it, coward.
-    if (token_buffer[0] == EOF) {
-        return SYM_EOF;
-    } else if (token_buffer[0] == ' ') {
+    if (token_buffer[0] == ' ') {
         return SYM_SPACE;
     } else if (token_buffer[0] == '\0') {
         return NONE;

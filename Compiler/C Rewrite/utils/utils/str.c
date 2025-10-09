@@ -71,8 +71,11 @@ bool str_cmp(const str* const s1, const str* const s2) {
 
 bool str_cmp_raw(const str* const s, const char* const cs) {
 
-    if (s == NULL || s->data == NULL || cs == NULL) { return NULL; }
-    return strncmp(s->data, cs, str_len(s)) == 0;
+    if (s == NULL || s->data == NULL || cs == NULL) { return false; }
+    size_t len_s = str_len(s);
+    size_t len_cs = strlen(cs);
+    if (len_s != len_cs) { return false; }
+    return strncmp(s->data, cs, len_s) == 0;
 }
 
 bool str_ident(const str* const s1, const str* const s2) {
@@ -240,7 +243,7 @@ index_t* str_get_alphanumeric_symbolic_boundaries(const str* const s) {
 
             boundaries[length++] = index;
         }
-        
+
         was_alpha = is_alpha;
     }
 

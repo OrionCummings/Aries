@@ -122,7 +122,7 @@ void str_print(const str* const s);
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-/// @brief Returns a list of indices at which alphanumeric-symbolic boundaries occur in `s`.
+/// @brief Returns a list of indices at which alphanumeric-symbolic boundaries occur in `s`. Symbolic character strings will always be split as individual characters.
 /// 
 /// Example: 
 /// 

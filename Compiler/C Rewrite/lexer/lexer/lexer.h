@@ -8,6 +8,9 @@
 
 #define MAX_IDENTIFIER_LENGTH (8)
 #define TOKEN_LIST_GROWTH_FACTOR (2)
+#define NULL_CHAR_RANGE ((CharacterRange){.char_start = 0, .char_stop = 0, .line = 0})
+#define NULL_SYMBOL ((Symbol){.location = NULL_CHAR_RANGE, .s = NULL, .t = 0})
+#define DEREF_SYMBOL(s) ((s != NULL) ? *s : NULL_SYMBOL)
 
 typedef enum {
     INVALID,                // Used for internal errors
@@ -16,7 +19,6 @@ typedef enum {
 
     SYM_SPACE,
     SYM_NEWLINE,
-    SYM_EOF,
     SYM_SEMICOLON,          // ;
     SYM_COLON,              // :
     SYM_COMMA,              // ,
@@ -86,10 +88,10 @@ typedef enum {
 } Token;
 
 typedef struct {
-    size_t line;
-    size_t char_start;
-    size_t char_stop;
-}CharacterRange;
+    uint16_t line;
+    uint16_t char_start;
+    uint16_t char_stop;
+} CharacterRange;
 
 typedef struct {
     CharacterRange location;
@@ -109,10 +111,18 @@ typedef struct {
 
 bool lex(Lexer* lexer);
 Lexer* lex_new(size_t capacity, const char* filename);
+
+void lex_free_(Lexer* lexer);
+#define lex_free(l) do{ \
+    lex_free_(l);       \
+    l = NULL;           \
+} while(0)              \
+
 Token lex_buffer_to_token(char token_buffer[MAX_IDENTIFIER_LENGTH]);
 
 Symbol* as_symbol(const str* const s);
 Token str_to_token(const str* const s);
+bool sym_cmp(const Symbol s1, const Symbol s2);
 
 Symbol* sym_new(Token t, const str* const s);
 void sym_free_(Symbol*);
@@ -120,5 +130,6 @@ void sym_free_(Symbol*);
     sym_free_(s);       \
     s = NULL;           \
 } while(0)              \
+
 
 #endif
