@@ -44,14 +44,23 @@ typedef enum {
     SYM_CARET,              // ^
     SYM_SQUOTE,             // '
     SYM_DQUOTE,             // "
-    LIT_INT,                // integers
-    LIT_UINT,               // unsigned integers
-    LIT_FLOAT,              // floats
-    LIT_CHAR,               // characters
-    LIT_STRING,             // strings
+
+    LIT_I8,                 // 
+    LIT_I16,                // 
+    LIT_I32,                // 
+    LIT_I64,                // 
+    LIT_U8,                 // 
+    LIT_U16,                // 
+    LIT_U32,                // 
+    LIT_U64,                // 
+    LIT_F32,                // 
+    LIT_F64,                // 
+    LIT_BYTE,               // 
+    LIT_STRING,             // 
+
     KEYWORD_OPT,            // opt
     KEYWORD_VOID,           // void
-    KEYWORD_CHAR,           // character
+    KEYWORD_BYTE,           // byte
     KEYWORD_STRING,         // string
     KEYWORD_U8,             // u8
     KEYWORD_U16,            // u16
@@ -63,6 +72,7 @@ typedef enum {
     KEYWORD_I64,            // i64
     KEYWORD_F32,            // f32
     KEYWORD_F64,            // f64
+    
     KEYWORD_BOOL,           // bool
     KEYWORD_BREAK,          // break
     KEYWORD_CASE,           // case

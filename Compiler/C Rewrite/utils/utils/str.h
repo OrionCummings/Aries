@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <errno.h>
 
 /// @brief An immutable string. Usually allocated on the heap, but this is not always true, especially with string views.
 typedef struct {
@@ -115,6 +116,18 @@ str* str_from_file(FILE* const file) ;
 /// @param c The character that is to be removed from `s`.
 /// @return `s` without `c` on the left and right ends.
 str* str_strip(str* s, const char c);
+
+/// @brief Returns true if `s` begins with `prefix`.
+/// @param s A string.
+/// @param prefix A c-string.
+/// @return Returns true if `s` begins with `prefix`, otherwise returns false.
+bool str_has_prefix(const str* const s, const char* prefix);
+
+/// @brief Returns true if `s` ends with `suffix`.
+/// @param s A string.
+/// @param suffix A c-string.
+/// @return Returns true if `s` ends with `suffix`, otherwise returns false.
+bool str_has_suffix(const str* const s, const char* suffix);
 
 /// @brief Prints the given string.
 /// @param s The string to print.

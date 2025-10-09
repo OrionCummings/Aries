@@ -197,6 +197,33 @@ str* str_from_file(FILE* const file) {
     return s;
 }
 
+bool str_has_prefix(const str* const s, const char* prefix) {
+    if (s == NULL || s->data == NULL || prefix == NULL) { return NULL; }
+
+    size_t len_prefix = strlen(prefix);
+    size_t len_s = str_len(s);
+
+    if (len_prefix > len_s) { return false; }
+
+    str* view_s = str_view(s, 0, len_prefix);
+
+    return str_cmp_raw(view_s, prefix);
+}
+
+bool str_has_suffix(const str* const s, const char* suffix) {
+    if (s == NULL || s->data == NULL || suffix == NULL) { return NULL; }
+
+    size_t len_suffix = strlen(suffix);
+    size_t len_s = str_len(s);
+
+    if (len_suffix > len_s) { return false; }
+
+    str* view_s = str_view(s, len_s - len_suffix, len_suffix);
+
+    return str_cmp_raw(view_s, suffix);
+}
+
+
 void str_print(const str* const s) {
     if (s != NULL) {
         printf("%s\n", s->data);
@@ -206,9 +233,7 @@ void str_print(const str* const s) {
 ////////// END OF LIBRARY FUNCTIONS //////////
 
 index_t* str_get_alphanumeric_symbolic_boundaries(const str* const s) {
-
-    if (s == NULL) { return NULL; }
-    if (s->data == NULL) { return NULL; }
+    if (s == NULL || s->data == NULL) { return NULL; }
 
     size_t length = 0;
     size_t capacity = 8;
@@ -281,3 +306,43 @@ bool str_is_identifier(const str* const s) {
 
     return true;
 }
+
+bool str_is_i8_literal(const str* const s) {
+    if (s == NULL || s->data) { return false; }
+
+    char* buffer;
+    long value = strtol(s->data, &buffer, 10);
+
+    return (value >= -128 && value <= 127);
+}
+
+bool str_is_i16_literal(const str* const s) {
+    if (s == NULL || s->data) { return false; }
+
+    char* buffer;
+    long value = strtol(s->data, &buffer, 10);
+
+    return (value >= -32768 && value <= 32767);
+}
+
+bool str_is_i32_literal(const str* const s) {
+    if (s == NULL || s->data) { return false; }
+
+    char* buffer;
+    long value = strtol(s->data, &buffer, 10);
+
+    return (value >= -2147483648 && value <= 2147483647);
+}
+
+bool str_is_i64_literal(const str* const s) {
+    if (s == NULL || s->data) { return false; }
+
+    char* buffer;
+    long value = strtol(s->data, &buffer, 10);
+
+    return (value >= -9223372036854775808 && value <= 9223372036854775807);
+}
+
+
+
+

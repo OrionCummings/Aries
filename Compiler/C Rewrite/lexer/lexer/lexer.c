@@ -30,7 +30,7 @@ const char* const SYM_CHARS[] = {
     [SYM_DQUOTE] = "\"",
     [KEYWORD_OPT] = "opt",
     [KEYWORD_VOID] = "void",
-    [KEYWORD_CHAR] = "char",
+    [KEYWORD_BYTE] = "byte",
     [KEYWORD_STRING] = "string",
     [KEYWORD_U8] = "u8",
     [KEYWORD_U16] = "u16",
@@ -95,14 +95,23 @@ const char* const TOKEN_NAMES[] = {
     [SYM_CARET] = "SYM_CARET",
     [SYM_SQUOTE] = "SYM_SQUOTE",
     [SYM_DQUOTE] = "SYM_DQUOTE",
-    [LIT_INT] = "LIT_INT",
-    [LIT_UINT] = "LIT_UINT",
-    [LIT_FLOAT] = "LIT_FLOAT",
-    [LIT_CHAR] = "LIT_CHAR",
+
+    [LIT_I8] = "LIT_I8",
+    [LIT_I16] = "LIT_I16",
+    [LIT_I32] = "LIT_I32",
+    [LIT_I64] = "LIT_I64",
+    [LIT_U8] = "LIT_U8",
+    [LIT_U16] = "LIT_U16",
+    [LIT_U32] = "LIT_U32",
+    [LIT_U64] = "LIT_U64",
+    [LIT_F32] = "LIT_F32",
+    [LIT_F64] = "LIT_F64",
+    [LIT_BYTE] = "LIT_BYTE",
     [LIT_STRING] = "LIT_STRING",
+
     [KEYWORD_OPT] = "KEYWORD_OPT",
     [KEYWORD_VOID] = "KEYWORD_VOID",
-    [KEYWORD_CHAR] = "KEYWORD_CHAR",
+    [KEYWORD_BYTE] = "KEYWORD_BYTE",
     [KEYWORD_STRING] = "KEYWORD_STRING",
     [KEYWORD_U8] = "KEYWORD_U8",
     [KEYWORD_U16] = "KEYWORD_U16",
@@ -256,7 +265,7 @@ void sym_free_(Symbol* s) {
 }
 
 bool sym_cmp(const Symbol s1, const Symbol s2) {
-    return (s1.t == s2.t && str_cmp(&s1.s, &s2.s));
+    return (s1.t == s2.t && str_cmp(s1.s, s2.s));
 }
 
 Token str_to_token(const str* const s) {
@@ -475,8 +484,8 @@ Token lex_buffer_to_token(char token_buffer[MAX_IDENTIFIER_LENGTH]) {
         return KEYWORD_OPT;
     } else if (!strncmp(token_buffer, "void", MAX_IDENTIFIER_LENGTH)) {
         return KEYWORD_VOID;
-    } else if (!strncmp(token_buffer, "char", MAX_IDENTIFIER_LENGTH)) {
-        return KEYWORD_CHAR;
+    } else if (!strncmp(token_buffer, "byte", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_BYTE;
     } else if (!strncmp(token_buffer, "string", MAX_IDENTIFIER_LENGTH)) {
         return KEYWORD_STRING;
     } else if (!strncmp(token_buffer, "u8", MAX_IDENTIFIER_LENGTH)) {

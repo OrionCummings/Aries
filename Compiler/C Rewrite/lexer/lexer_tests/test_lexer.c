@@ -119,7 +119,7 @@ void test_lexer_lex_success_1() {
     symbols[15] = DEREF_SYMBOL(sym_new(SYM_SPACE, str_new(" ")));
     symbols[16] = DEREF_SYMBOL(sym_new(KEYWORD_RETURN, str_new("return")));
     symbols[17] = DEREF_SYMBOL(sym_new(SYM_SPACE, str_new(" ")));
-    symbols[18] = DEREF_SYMBOL(sym_new(LIT_INT, str_new("0")));
+    symbols[18] = DEREF_SYMBOL(sym_new(LIT_I32, str_new("0")));
     symbols[19] = DEREF_SYMBOL(sym_new(SYM_SEMICOLON, str_new(";")));
     symbols[20] = DEREF_SYMBOL(sym_new(SYM_NEWLINE, str_new("\n")));
     symbols[21] = DEREF_SYMBOL(sym_new(SYM_BRACE_CLOSE, str_new("}")));
