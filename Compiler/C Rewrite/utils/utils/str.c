@@ -61,7 +61,9 @@ str* str_concat(str* s1, str* s2) {
 
 bool str_cmp(const str* const s1, const str* const s2) {
 
-    if (s1 == NULL || s2 == NULL) { return false; }
+    if (s1 == NULL || s2 == NULL) {
+        return false;
+    }
 
     size_t len_s1 = str_len(s1);
     size_t len_s2 = str_len(s2);
@@ -71,20 +73,27 @@ bool str_cmp(const str* const s1, const str* const s2) {
 
 bool str_cmp_raw(const str* const s, const char* const cs) {
 
-    if (s == NULL || s->data == NULL || cs == NULL) { return false; }
+    if (s == NULL || s->data == NULL || cs == NULL) {
+        return false;
+    }
     size_t len_s = str_len(s);
     size_t len_cs = strlen(cs);
-    if (len_s != len_cs) { return false; }
+    if (len_s != len_cs) {
+        return false;
+    }
     return strncmp(s->data, cs, len_s) == 0;
 }
 
 bool str_ident(const str* const s1, const str* const s2) {
-    return (s1 != NULL) && (s2 != NULL) && (s1->heap == s2->heap) && (s1->length == s2->length) && (str_cmp(s1, s2));
+    return (s1 != NULL) && (s2 != NULL) && (s1->heap == s2->heap) &&
+        (s1->length == s2->length) && (str_cmp(s1, s2));
 }
 
 int str_find(const str* const s, const char c) {
 
-    if (s == NULL) { return -1; }
+    if (s == NULL) {
+        return -1;
+    }
 
     for (size_t index = 0; index < str_len(s); index++) {
         if (str_at(s, index) == c) {
@@ -97,13 +106,18 @@ int str_find(const str* const s, const char c) {
 
 int str_sub(const str* const s, const str* const sub) {
 
-    if (s == NULL || sub == NULL) { return -1; }
+    if (s == NULL || sub == NULL) {
+        return -1;
+    }
 
     size_t len_s = str_len(s);
     size_t len_sub = str_len(sub);
 
-    // If the length of the sub string is greater than the string, then there is no way for it to be a sub string
-    if (len_sub > len_s) { return -1; }
+    // If the length of the sub string is greater than the string, then there is
+    // no way for it to be a sub string
+    if (len_sub > len_s) {
+        return -1;
+    }
 
     bool possible_sub = false;
     int possible_sub_index = -1;
@@ -131,35 +145,48 @@ size_t str_len(const str* s) {
 }
 
 char str_at(const str const* s, size_t index) {
-    if (s == NULL) { return 0; }
+    if (s == NULL) {
+        return 0;
+    }
 
     size_t length = str_len(s);
 
-    if (index > length) { return 0; }
+    if (index > length) {
+        return 0;
+    }
 
     return s->data[index];
 }
 
 str* str_append(const str* const s, const char c) {
-    if (s == NULL || !s->heap || c == '\0') { return NULL; }
+    if (s == NULL || !s->heap || c == '\0') {
+        return NULL;
+    }
 
     size_t length = str_len(s);
-    char buffer[length + 1]; // null byte
+    char buffer[length + 1];       // null byte
     memset(buffer, 0, length + 1); // null byte
 
-    (void)snprintf(buffer, length + 2, "%s%c", s->data, c); // new char + null byte
+    (void)snprintf(buffer, length + 2, "%s%c", s->data,
+        c); // new char + null byte
 
     return str_new((char*)buffer); // get that nasty array away!!! Yuck!
 }
 
 str* str_view(const str* const s, size_t start, size_t end) {
-    if (s == NULL) { return NULL; }
-    if (start >= end) { return NULL; }
+    if (s == NULL) {
+        return NULL;
+    }
+    if (start >= end) {
+        return NULL;
+    }
 
     size_t len = str_len(s);
-    if (len == 0 || start > len || end > len) { return NULL; }
+    if (len == 0 || start > len || end > len) {
+        return NULL;
+    }
 
-    size_t len_substring = end - start - 1;
+    size_t len_substring = end - start;
     char substring[len_substring + 1];
     memset(substring, 0, len_substring + 1);
     memcpy(substring, s->data + start, len_substring);
@@ -170,11 +197,15 @@ str* str_view(const str* const s, size_t start, size_t end) {
 }
 
 char* str_raw(const str* const s) {
-    if (s == NULL || s->data == NULL) { return NULL; }
+    if (s == NULL || s->data == NULL) {
+        return NULL;
+    }
 
     size_t len_s = str_len(s);
     void* ptr = calloc(len_s + 1, sizeof(char));
-    if (ptr == NULL) { return NULL; }
+    if (ptr == NULL) {
+        return NULL;
+    }
 
     strncpy(ptr, s->data, len_s);
     return (char*)ptr;
@@ -182,14 +213,18 @@ char* str_raw(const str* const s) {
 
 str* str_from_file(FILE* const file) {
 
-    if (file == NULL) { return NULL; }
+    if (file == NULL) {
+        return NULL;
+    }
 
     fseek(file, 0, SEEK_END);
     size_t len = ftell(file);
     fseek(file, 0, SEEK_SET);
 
     char* buffer = calloc(len, sizeof(*buffer));
-    if (buffer == NULL) { return NULL; }
+    if (buffer == NULL) {
+        return NULL;
+    }
     fread(buffer, 1, len, file);
 
     str* s = str_new(buffer);
@@ -198,31 +233,46 @@ str* str_from_file(FILE* const file) {
 }
 
 bool str_has_prefix(const str* const s, const char* prefix) {
-    if (s == NULL || s->data == NULL || prefix == NULL) { return NULL; }
+    if (s == NULL || s->data == NULL || prefix == NULL) {
+        return NULL;
+    }
 
     size_t len_prefix = strlen(prefix);
     size_t len_s = str_len(s);
 
-    if (len_prefix > len_s) { return false; }
+    if (len_prefix > len_s) {
+        return false;
+    }
 
     str* view_s = str_view(s, 0, len_prefix);
 
-    return str_cmp_raw(view_s, prefix);
+    bool has_prefix = str_cmp_raw(view_s, prefix);
+
+    str_free(view_s);
+
+    return has_prefix;
 }
 
 bool str_has_suffix(const str* const s, const char* suffix) {
-    if (s == NULL || s->data == NULL || suffix == NULL) { return NULL; }
+    if (s == NULL || s->data == NULL || suffix == NULL) {
+        return NULL;
+    }
 
     size_t len_suffix = strlen(suffix);
     size_t len_s = str_len(s);
 
-    if (len_suffix > len_s) { return false; }
+    if (len_suffix > len_s) {
+        return false;
+    }
 
-    str* view_s = str_view(s, len_s - len_suffix, len_suffix);
+    str* view_s = str_view(s, len_s - len_suffix, len_s);
 
-    return str_cmp_raw(view_s, suffix);
+    bool has_suffix = str_cmp_raw(view_s, suffix);
+
+    str_free(view_s);
+
+    return has_suffix;
 }
-
 
 void str_print(const str* const s) {
     if (s != NULL) {
@@ -233,12 +283,16 @@ void str_print(const str* const s) {
 ////////// END OF LIBRARY FUNCTIONS //////////
 
 index_t* str_get_alphanumeric_symbolic_boundaries(const str* const s) {
-    if (s == NULL || s->data == NULL) { return NULL; }
+    if (s == NULL || s->data == NULL) {
+        return NULL;
+    }
 
     size_t length = 0;
     size_t capacity = 8;
     index_t* boundaries = calloc(capacity, sizeof(*boundaries));
-    if (boundaries == NULL) { return NULL; }
+    if (boundaries == NULL) {
+        return NULL;
+    }
 
     // Set the first entry to 0
     boundaries[length++] = 0;
@@ -253,13 +307,15 @@ index_t* str_get_alphanumeric_symbolic_boundaries(const str* const s) {
         char c = s->data[index];
         is_alpha = isalnum(c);
 
-        // Did the state change between the current position and the previous position? Or is this currently NOT an alphanumeric character?
+        // Did the state change between the current position and the previous
+        // position? Or is this currently NOT an alphanumeric character?
         if ((is_alpha != was_alpha) || (!is_alpha)) {
 
             // Expand the boundary list if needed
             if (length == capacity) {
                 capacity *= 2;
-                void* new_boundaries = realloc(boundaries, capacity * sizeof(*boundaries));
+                void* new_boundaries =
+                    realloc(boundaries, capacity * sizeof(*boundaries));
                 if (new_boundaries == NULL) {
                     return NULL;
                 }
@@ -276,7 +332,8 @@ index_t* str_get_alphanumeric_symbolic_boundaries(const str* const s) {
     // TODO: Refactor so this is a generic function!
     if (length == capacity) {
         capacity *= 2;
-        void* new_boundaries = realloc(boundaries, capacity * sizeof(*boundaries));
+        void* new_boundaries =
+            realloc(boundaries, capacity * sizeof(*boundaries));
         if (new_boundaries == NULL) {
             return NULL;
         }
@@ -290,12 +347,18 @@ index_t* str_get_alphanumeric_symbolic_boundaries(const str* const s) {
 }
 
 bool str_is_identifier(const str* const s) {
-    if (s == NULL || s->data == NULL) { return NULL; }
+    if (s == NULL || s->data == NULL) {
+        return NULL;
+    }
 
     size_t len = str_len(s);
 
-    if (len == 0) { return false; }
-    if (!isalpha(s->data[0])) { return false; }
+    if (len == 0) {
+        return false;
+    }
+    if (!isalpha(s->data[0])) {
+        return false;
+    }
 
     for (size_t index = 1; index < len; index++) {
         const char c = s->data[index];
@@ -307,8 +370,102 @@ bool str_is_identifier(const str* const s) {
     return true;
 }
 
+bool str_is_bool_literal(const str* const s) {
+    if (s == NULL || s->data) {
+        return false;
+    }
+    return str_cmp_raw(s, "false") || str_cmp_raw(s, "true");
+}
+
+bool str_is_u8_literal(const str* const s) {
+
+    if (s == NULL || s->data == NULL) {
+        return false;
+    }
+
+    // must contain at least one digit; "u8" is not valid => min length is 3
+    // cannot contain more than 3 digits + "u8" => max length is 5
+    size_t len = str_len(s);
+    if (len < 3 || len > 5) { return false; }
+
+    // check the suffix
+    if (!str_has_suffix(s, "u8")) { return false; }
+
+    str* view = str_view(s, 0, len - 2);
+
+    char* buffer;
+    long value = strtol(view->data, &buffer, 10);
+
+    return (value >= 0 && value <= 255);
+}
+
+bool str_is_u16_literal(const str* const s) {
+    if (s == NULL || s->data == NULL) {
+        return false;
+    }
+
+    // must contain at least one digit; "u16" is not valid => min length is 4
+    // cannot contain more than 5 digits + "u16" => max length is 8
+    size_t len = str_len(s);
+    if (len < 4 || len > 8) { return false; }
+
+    // check the suffix
+    if (!str_has_suffix(s, "u16")) { return false; }
+
+    str* view = str_view(s, 0, len - 3);
+
+    char* buffer;
+    long value = strtol(s->data, &buffer, 10);
+
+    return (value >= 0 && value <= 65535);
+}
+
+bool str_is_u32_literal(const str* const s) {
+    if (s == NULL || s->data == NULL) {
+        return false;
+    }
+
+    // must contain at least one digit; "u32" is not valid => min length is 4
+    // cannot contain more than 10 digits + "u32" => max length is 13
+    size_t len = str_len(s);
+    if (len < 4 || len > 13) { return false; }
+
+    // check the suffix
+    if (!str_has_suffix(s, "u32")) { return false; }
+
+    str* view = str_view(s, 0, len - 3);
+
+    char* buffer;
+    long value = strtol(s->data, &buffer, 10);
+
+    return (value >= 0L && value <= 4294967295L);
+}
+
+bool str_is_u64_literal(const str* const s) {
+    if (s == NULL || s->data == NULL) {
+        return false;
+    }
+
+    // must contain at least one digit; "u64" is not valid => min length is 4
+    // cannot contain more than 20 digits + "u64" => max length is 23
+    size_t len = str_len(s);
+    if (len < 4 || len > 23) { return false; }
+
+    // check the suffix
+    if (!str_has_suffix(s, "u64")) { return false; }
+
+    str* view = str_view(s, 0, len - 3);
+
+    char* buffer;
+    long value = strtoul(s->data, &buffer, 10);
+
+    return (value >= 0UL && value <= 18446744073709551615UL);
+}
+
 bool str_is_i8_literal(const str* const s) {
-    if (s == NULL || s->data) { return false; }
+    if (s == NULL || s->data) {
+        return false;
+    }
 
     char* buffer;
     long value = strtol(s->data, &buffer, 10);
@@ -317,7 +474,9 @@ bool str_is_i8_literal(const str* const s) {
 }
 
 bool str_is_i16_literal(const str* const s) {
-    if (s == NULL || s->data) { return false; }
+    if (s == NULL || s->data) {
+        return false;
+    }
 
     char* buffer;
     long value = strtol(s->data, &buffer, 10);
@@ -326,23 +485,23 @@ bool str_is_i16_literal(const str* const s) {
 }
 
 bool str_is_i32_literal(const str* const s) {
-    if (s == NULL || s->data) { return false; }
+    if (s == NULL || s->data) {
+        return false;
+    }
 
     char* buffer;
     long value = strtol(s->data, &buffer, 10);
 
-    return (value >= -2147483648 && value <= 2147483647);
+    return (value >= -2147483648L && value <= 2147483647L);
 }
 
 bool str_is_i64_literal(const str* const s) {
-    if (s == NULL || s->data) { return false; }
+    if (s == NULL || s->data) {
+        return false;
+    }
 
     char* buffer;
     long value = strtol(s->data, &buffer, 10);
 
-    return (value >= -9223372036854775808 && value <= 9223372036854775807);
+    return (value >= -9223372036854775807L && value <= 9223372036854775807L);
 }
-
-
-
-

@@ -7,8 +7,28 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <errno.h>
+#include <stdint.h>
 
-/// @brief An immutable string. Usually allocated on the heap, but this is not always true, especially with string views.
+#define PREFIX_BIN ("0b")
+#define PREFIX_OCT ("0o")
+#define PREFIX_HEX ("0x")
+
+#define U8_SUFFIX  ("u8")
+#define U16_SUFFIX ("u16")
+#define U32_SUFFIX ("u32")
+#define U64_SUFFIX ("u64")
+
+#define I8_SUFFIX  ("i8")
+#define I16_SUFFIX ("i16")
+#define I32_SUFFIX ("i32")
+#define I64_SUFFIX ("i64")
+
+#define F32_SUFFIX ("f32")
+#define F64_SUFFIX ("f64")
+
+#define BOOL_SUFFIX ("b") // TODO: is this something i want?
+
+/// @brief An immutable string. Usually allocated on the heap.
 typedef struct {
     bool heap;
     size_t length;
@@ -89,7 +109,7 @@ str* str_append(const str* const s, const char c);
 /// @brief Returns a view of `s`. Does not free `s`! The returned string has the `heap` field set to false! The return value of this function should never be passed as an argument to `str_free`. The behavior of this function is undefined if the underlying string is freed.
 /// @param s The underlying string.
 /// @param start The starting index of the view (inclusive).
-/// @param end The ending index of the view (exclusive).
+/// @param end The ending index of the view (inclusive).
 /// @return A new string instance referencing the characters from `start` to `end`, inclusive.
 str* str_view(const str* const s, size_t start, size_t end);
 
@@ -104,7 +124,7 @@ char* str_raw(const str* const s);
 /// @brief Returns a string instance containing the contents of `file`.
 /// @param file The file to convert to a string.
 /// @return A string instance containing the contents of `file`.
-str* str_from_file(FILE* const file) ;
+str* str_from_file(FILE* const file);
 
 /// @brief Removes `c` from both the left and right ends of `s`. This function will modify the underlying string but will not reallocate any memory. This function will only remove one instance of `c` from either end. If `c` is not on the ends of `s`, then this function does nothing.
 /// 
@@ -156,19 +176,79 @@ index_t* str_get_alphanumeric_symbolic_boundaries(const str* const s);
 /// @return Returns true if the given string is a valid identifier.
 bool str_is_identifier(const str* const s);
 
+/// @brief Determines if `s` is a valid boolean literal.
+/// @param s The string to check.
+/// @return Returns `true` if `s` is a valid boolean literal. Otherwise, returns `false`.
 bool str_is_bool_literal(const str* const s);
+
+/// @brief Determines if `s` is a valid unsigned 8-bit int literal.
+/// @param s The string to check.
+/// @return Returns `true` if `s` is a valid unsigned 8-bit int literal. Otherwise, returns `false`.
 bool str_is_u8_literal(const str* const s);
+
+/// @brief Determines if `s` is a valid unsigned 16-bit int literal.
+/// @param s The string to check.
+/// @return Returns `true` if `s` is a valid unsigned 16-bit int literal. Otherwise, returns `false`.
 bool str_is_u16_literal(const str* const s);
+
+/// @brief Determines if `s` is a valid unsigned 32-bit int literal.
+/// @param s The string to check.
+/// @return Returns `true` if `s` is a valid unsigned 32-bit int literal. Otherwise, returns `false`.
 bool str_is_u32_literal(const str* const s);
+
+/// @brief Determines if `s` is a valid unsigned 64-bit int literal.
+/// @param s The string to check.
+/// @return Returns `true` if `s` is a valid unsigned 64-bit int literal. Otherwise, returns `false`.
 bool str_is_u64_literal(const str* const s);
+
+/// @brief Determines if `s` is a valid 8-bit int literal.
+/// @param s The string to check.
+/// @return Returns `true` if `s` is a valid 8-bit int literal. Otherwise, returns `false`.
 bool str_is_i8_literal(const str* const s);
+
+/// @brief Determines if `s` is a valid 16-bit int literal.
+/// @param s The string to check.
+/// @return Returns `true` if `s` is a valid 16-bit int literal. Otherwise, returns `false`.
 bool str_is_i16_literal(const str* const s);
+
+/// @brief Determines if `s` is a valid 32-bit int literal.
+/// @param s The string to check.
+/// @return Returns `true` if `s` is a valid 32-bit int literal. Otherwise, returns `false`.
 bool str_is_i32_literal(const str* const s);
+
+/// @brief Determines if `s` is a valid 64-bit int literal.
+/// @param s The string to check.
+/// @return Returns `true` if `s` is a valid 64-bit int literal. Otherwise, returns `false`.
 bool str_is_i64_literal(const str* const s);
+
+/// @brief Determines if `s` is a valid 32-bit float literal.
+/// @param s The string to check.
+/// @return Returns `true` if `s` is a valid 32-bit float literal. Otherwise, returns `false`.
 bool str_is_f32_literal(const str* const s);
+
+/// @brief Determines if `s` is a valid 32-bit float literal.
+/// @param s The string to check.
+/// @return Returns `true` if `s` is a valid 32-bit float literal. Otherwise, returns `false`.
 bool str_is_f64_literal(const str* const s);
+
+/// @brief Determines if `s` is a valid 64-bit float literal.
+/// @param s The string to check.
+/// @return Returns `true` if `s` is a valid 64-bit float literal. Otherwise, returns `false`.
 bool str_is_char_literal(const str* const s);
+
+/// @brief Determines if `s` is a valid string literal.
+/// @param s The string to check.
+/// @return Returns `true` if `s` is a valid string literal. Otherwise, returns `false`.
 bool str_is_str_literal(const str* const s);
+
+/// @brief Determines if `s` is a valid option literal.
+/// @param s The string to check.
+/// @return Returns `true` if `s` is a valid option literal. Otherwise, returns `false`.
 bool str_is_opt_literal(const str* const s);
+
+/// @brief Determines if `s` is a valid result literal.
+/// @param s The string to check.
+/// @return Returns `true` if `s` is a valid result literal. Otherwise, returns `false`.
+bool str_is_res_literal(const str* const s);
 
 #endif

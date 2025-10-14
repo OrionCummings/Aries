@@ -1,0 +1,19 @@
+
+Language: C
+BasedOnStyle: LLVM
+
+IndentWidth: 4
+UseTab: Never
+ColumnLimit: 80
+PointerAlignment: left
+
+AllowShortBlocksOnASingleLine: SBS_Always
+
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: false
+
+SpaceBeforeAssignmentOperators: true
+SpaceAfterAssignmentOperators: true
+SpacesBeforeTrailingComments: 1
