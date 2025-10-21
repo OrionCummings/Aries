@@ -14,5 +14,7 @@ int main(int argc, char **argv) {
         return -1;
     }
 
+    lex_free(lexer);
+
     return 0;
 }

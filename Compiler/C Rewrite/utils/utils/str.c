@@ -10,11 +10,11 @@ str* str_new(const char* s) {
 
     if (r != NULL) {
 
-        size_t len = strlen(s);
+        size_t len = strlen(s); // TODO: !
 
         r->data = calloc(len + 1, sizeof(*(r->data)));
 
-        strcpy(r->data, s);
+        strncpy(r->data, s, len);
 
         r->length = len;
         r->heap = true;
@@ -174,25 +174,31 @@ str* str_append(const str* const s, const char c) {
 }
 
 str* str_view(const str* const s, size_t start, size_t end) {
-    if (s == NULL) {
-        return NULL;
-    }
-    if (start >= end) {
-        return NULL;
-    }
+    if (s == NULL || start >= end) { return NULL; }
 
     size_t len = str_len(s);
-    if (len == 0 || start > len || end > len) {
-        return NULL;
-    }
+    if (len == 0 || start > len || end > len) { return NULL; }
+
+    str* view = calloc(1, sizeof(*view));
+    view->heap = false;
+    view->length = end - start;
+    view->data = s->data + start;
+    return view;
+}
+
+str* str_copy(const str* const s, size_t start, size_t end) {
+    if (s == NULL || start >= end) { return NULL; }
+
+    size_t len = str_len(s);
+    if (len == 0 || start > len || end > len) { return NULL; }
 
     size_t len_substring = end - start;
+
     char substring[len_substring + 1];
     memset(substring, 0, len_substring + 1);
     memcpy(substring, s->data + start, len_substring);
 
     str* view = str_new((char*)substring);
-    view->heap = false;
     return view;
 }
 
@@ -276,7 +282,7 @@ bool str_has_suffix(const str* const s, const char* suffix) {
 
 void str_print(const str* const s) {
     if (s != NULL) {
-        printf("%s\n", s->data);
+        printf("%.*s\n", (int)s->length, s->data);
     }
 }
 
@@ -427,16 +433,27 @@ bool str_is_u32_literal(const str* const s) {
 
     // must contain at least one digit; "u32" is not valid => min length is 4
     // cannot contain more than 10 digits + "u32" => max length is 13
+    // u32's are the default type, so it actually CAN have 1 digit!
     size_t len = str_len(s);
-    if (len < 4 || len > 13) { return false; }
+    if (len < 1 || len > 13) { return false; }
+    if (!isdigit(s->data[0])) { return false; }
 
     // check the suffix
-    if (!str_has_suffix(s, "u32")) { return false; }
+    str* view = NULL;
+    if (str_has_suffix(s, "u32")) {
+        view = str_view(s, 0, len - 3);
+    } else {
+        view = str_view(s, 0, len);
+    }
 
-    str* view = str_view(s, 0, len - 3);
+    if (view == NULL) { return false; }
 
     char* buffer;
-    long value = strtol(s->data, &buffer, 10);
+    long value = strtol(view->data, &buffer, 10);
+
+    if (strcmp(buffer, "u32") != 0) {
+        return false;
+    }
 
     return (value >= 0L && value <= 4294967295L);
 }
@@ -463,7 +480,7 @@ bool str_is_u64_literal(const str* const s) {
 }
 
 bool str_is_i8_literal(const str* const s) {
-    if (s == NULL || s->data) {
+    if (s == NULL || s->data == NULL) {
         return false;
     }
 
@@ -474,7 +491,7 @@ bool str_is_i8_literal(const str* const s) {
 }
 
 bool str_is_i16_literal(const str* const s) {
-    if (s == NULL || s->data) {
+    if (s == NULL || s->data == NULL) {
         return false;
     }
 
@@ -485,7 +502,7 @@ bool str_is_i16_literal(const str* const s) {
 }
 
 bool str_is_i32_literal(const str* const s) {
-    if (s == NULL || s->data) {
+    if (s == NULL || s->data == NULL) {
         return false;
     }
 
@@ -496,7 +513,7 @@ bool str_is_i32_literal(const str* const s) {
 }
 
 bool str_is_i64_literal(const str* const s) {
-    if (s == NULL || s->data) {
+    if (s == NULL || s->data == NULL) {
         return false;
     }
 
@@ -505,3 +522,24 @@ bool str_is_i64_literal(const str* const s) {
 
     return (value >= -9223372036854775807L && value <= 9223372036854775807L);
 }
+
+bool str_is_char_literal(const str* const s) {
+    if (s == NULL || s->data == NULL) {
+        return false;
+    }
+
+    size_t len = str_len(s);
+
+    // ' ? '
+    if ((len == 3) && (s->data[0] == '\'') && (s->data[1] != '\'') && (s->data[2] == '\'')) {
+        return true;
+    }
+
+    // ' \ ? '
+    if ((len == 4) && (s->data[0] == '\'') && (s->data[1] == '\\') && (s->data[2] != '\'') && (s->data[3] == '\'')) {
+        return true;
+    }
+
+    return false;
+}
+

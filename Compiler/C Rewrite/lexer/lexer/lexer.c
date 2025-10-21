@@ -1,6 +1,6 @@
 #include "lexer.h"
 
-const char *const SYM_CHARS[] = {
+const char* const SYM_CHARS[] = {
     [SYM_SPACE] = " ",
     [SYM_NEWLINE] = "\n",
     [SYM_SEMICOLON] = ";",
@@ -64,7 +64,7 @@ const char *const SYM_CHARS[] = {
     [KEYWORD_AS] = "as",
 };
 
-const char *const TOKEN_NAMES[] = {
+const char* const TOKEN_NAMES[] = {
     [INVALID] = "INVALID",
     [NONE] = "NONE",
     [IDENTIFIER] = "IDENTIFIER",
@@ -145,422 +145,448 @@ const char *const TOKEN_NAMES[] = {
     [KEYWORD_AS] = "KEYWORD_AS",
 };
 
-bool lex(Lexer *lexer) {
+bool lex(Lexer* lexer) {
 
-  if (lexer == NULL) {
-    A_WARNING("Passed null parameter 'lexer'");
-    return false;
-  }
-
-  str *file_contents = str_from_file(lexer->file);
-  size_t len = str_len(file_contents);
-  index_t *boundaries = str_get_alphanumeric_symbolic_boundaries(file_contents);
-
-  size_t index = 0;
-  while (boundaries[index++] != len) {
-    index_t start = boundaries[index - 1];
-    index_t end = boundaries[index] + 1;
-
-    str *view = str_view(file_contents, start, end);
-
-    if (view == NULL) {
-      break;
+    if (lexer == NULL) {
+        A_WARNING("Passed null parameter 'lexer'");
+        return false;
     }
 
-    Token token = str_to_token(view);
+    str* file_contents = str_from_file(lexer->file);
+    size_t len = str_len(file_contents);
+    index_t* boundaries = str_get_alphanumeric_symbolic_boundaries(file_contents);
 
-    if (token != SYM_NEWLINE) {
-      printf("%s = '%s'\n", TOKEN_NAMES[token], view->data);
-    } else {
-      printf("%s\n", TOKEN_NAMES[token]);
+    size_t index = 0;
+    char buffer[MAX_IDENTIFIER_LENGTH];
+    while (boundaries[index++] != len) {
+
+        // Clear the char buffer
+        memset(buffer, 0, MAX_IDENTIFIER_LENGTH);
+
+        index_t start = boundaries[index - 1];
+        index_t end = boundaries[index];
+
+        str* s = str_copy(file_contents, start, end);
+        Symbol* sym = sym_new(s);
+
+        if (sym == NULL) {
+            A_WARNING("Failed to create symbol");
+            return false;
+        }
+
+        lex_add_symbol(lexer, sym);
+        // sym_print(*sym);
     }
-  }
 
-  fclose(lexer->file);
-  free(lexer->symbols); // TODO: Remove this eventually lol
-
-  return true;
+    return true;
 }
 
-Lexer *lex_new(size_t capacity, const char *filename) {
+Lexer* lex_new(size_t capacity, const char* filename) {
 
-  Lexer *lexer = calloc(1, sizeof(*lexer));
-  if (lexer == NULL) {
-    A_WARNING("failed to allocate new lexer");
-    return false;
-  }
+    Lexer* lexer = calloc(1, sizeof(*lexer));
+    if (lexer == NULL) {
+        A_WARNING("failed to allocate new lexer");
+        return false;
+    }
 
-  lexer->symbol_capacity = capacity;
+    lexer->symbol_capacity = capacity;
 
-  void *symbols = calloc(capacity, sizeof(*lexer->symbols));
-  if (symbols == NULL) {
-    A_WARNING("failed to allocate new lexer->symbols");
-    return false;
-  }
+    void* symbols = calloc(capacity, sizeof(*lexer->symbols));
+    if (symbols == NULL) {
+        A_WARNING("failed to allocate new lexer->symbols");
+        return false;
+    }
 
-  lexer->symbols = symbols;
+    lexer->symbols = symbols;
 
-  FILE *file = fopen(filename, "r");
-  if (file == NULL) {
-    A_WARNING("Failed to open file '%s'", filename);
-    return false;
-  }
+    FILE* file = fopen(filename, "r");
+    if (file == NULL) {
+        A_WARNING("Failed to open file '%s'", filename);
+        return false;
+    }
 
-  // A_INFO("Opened file '%s'", filename);
+    // A_INFO("Opened file '%s'", filename);
 
-  lexer->file = file;
+    lexer->file = file;
 
-  return lexer;
+    return lexer;
 }
 
 // TODO: I'm not convinved that this is correct; add some tests
-void lex_free_(Lexer *l) {
-  if (l == NULL) {
-    return;
-  }
-  fclose(l->file);
-  sym_free(l->symbols);
-  free(l->symbols);
+void lex_free_(Lexer* l) {
+    if (l == NULL) {
+        return;
+    }
+    fclose(l->file);
+    sym_free(*l->symbols);
+    free(l->symbols);
+    free(l);
 }
 
-Symbol *as_symbol(const str *const s) {
+bool lex_add_symbol(Lexer* const lex, Symbol* sym) {
+    if (lex == NULL || lex->symbols == NULL) { return false; }
 
-  if (s == NULL || s->data == NULL) {
-    return NULL;
-  }
+    if (lex->symbol_length == lex->symbol_capacity) {
 
-  Token t = lex_buffer_to_token(s->data);
-  Symbol *sym = sym_new(t, s);
+    }
 
-  if (sym == NULL) {
-    return NULL;
-  }
+    lex->symbols[lex->symbol_length++] = sym;
 
-  return sym;
+    return true;
 }
 
-Symbol *sym_new(Token t, const str *const s) {
+Symbol* sym_new(const str* const s) {
 
-  if (s == NULL) {
-    return NULL;
-  }
+    if (s == NULL) { return NULL; }
 
-  Symbol *sym = calloc(1, sizeof(Symbol));
-  if (sym == NULL) {
-    A_WARNING("failed to allocate new symbol");
-    return NULL;
-  }
+    Symbol* sym = calloc(1, sizeof(Symbol));
+    if (sym == NULL) {
+        A_WARNING("failed to allocate new symbol");
+        return NULL;
+    }
 
-  // If it's an identifier, then we DON'T know what the text will
-  // be so we save it. If it's NOT an identifier, then it's a keyword
-  // or known symbol; save memory and don't track the character content.
-  // Regardless, save the token information!
-  sym->t = t;
-  if (t == IDENTIFIER) {
-    sym->s = calloc(str_len(s), sizeof(*sym->s));
-    sym->s = str_new(s->data);
+    sym->t = str_to_token(s);
+    if (sym->t == INVALID) {
+        return NULL;
+    }
+
+    str* new_str = str_copy(s, 0, s->length);
+    if (new_str == NULL) { return NULL; }
+    sym->s = new_str;
+
     return sym;
-
-  } else {
-    sym->s = NULL;
-    return sym;
-  }
 }
 
-void sym_free_(Symbol *s) {
-  if (s != NULL) {
-    free(s->s);
-  }
-  free(s);
+void sym_free_(Symbol* s) {
+    if (s != NULL) {
+        free(s->s);
+    }
+    free(s);
 }
 
 bool sym_cmp(const Symbol s1, const Symbol s2) {
-  return (s1.t == s2.t && str_cmp(s1.s, s2.s));
+    return (s1.t == s2.t && str_cmp(s1.s, s2.s));
 }
 
-Token str_to_token(const str *const s) {
-  if (s == NULL) {
-    return INVALID;
-  }
-
-  for (size_t index = 3; index < TOKEN_COUNT; index++) {
-    if (str_cmp_raw(s, SYM_CHARS[index])) {
-      return (Token)index;
+void sym_print(const Symbol s) {
+    printf("[%s:%d-%d]: ", TOKEN_NAMES[s.t], s.location.char_start, s.location.char_stop);
+    if (s.t == SYM_NEWLINE) {
+        printf("'\\n'\n");
+    } else {
+        printf("'%.*s'\n", (int)s.s->length, s.s->data);
     }
-  }
+}
 
-  if (str_is_identifier(s)) {
-    return IDENTIFIER;
-  }
+Token str_is_literal(const str* const s) {
 
-  return INVALID;
+    // TODO: Play with the order to get the correct precedence!
+    // TODO: Add ALL literals!!!!
+    if (str_is_bool_literal(s)) {
+        return LIT_BOOL;
+    } else if (str_is_u8_literal(s)) {
+        return LIT_U8;
+    } else if (str_is_u16_literal(s)) {
+        return LIT_U16;
+    } else if (str_is_u32_literal(s)) {
+        return LIT_U32;
+    } else if (str_is_u64_literal(s)) {
+        return LIT_U64;
+    } else if (str_is_i8_literal(s)) {
+        return LIT_I8;
+    } else if (str_is_i16_literal(s)) {
+        return LIT_I16;
+    } else if (str_is_i32_literal(s)) {
+        return LIT_I32;
+    } else if (str_is_i64_literal(s)) {
+        return LIT_I64;
+    } 
 
-  /** This obviously sucks, but i typed it out so it's staying for a while
-  if (str_cmp_raw(s, TOKEN_NAMES[NONE])) {
-      return NONE;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[WHITESPACE])) {
-      return WHITESPACE;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_EOF])) {
-      return SYM_EOF;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_SEMICOLON])) {
-      return SYM_SEMICOLON;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_COLON])) {
-      return SYM_COLON;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_COMMA])) {
-      return SYM_COMMA;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_QUESTION])) {
-      return SYM_QUESTION;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_FSLASH])) {
-      return SYM_FSLASH;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_BSLASH])) {
-      return SYM_BSLASH;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_PAREN_OPEN])) {
-      return SYM_PAREN_OPEN;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_PAREN_CLOSE])) {
-      return SYM_PAREN_CLOSE;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_BRACKET_OPEN])) {
-      return SYM_BRACKET_OPEN;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_BRACKET_CLOSE])) {
-      return SYM_BRACKET_CLOSE;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_BRACE_OPEN])) {
-      return SYM_BRACE_OPEN;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_BRACE_CLOSE])) {
-      return SYM_BRACE_CLOSE;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_EQUAL])) {
-      return SYM_EQUAL;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_PLUS])) {
-      return SYM_PLUS;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_DASH])) {
-      return SYM_DASH;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_STAR])) {
-      return SYM_STAR;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_PERCENT])) {
-      return SYM_PERCENT;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_EXCLAIM])) {
-      return SYM_EXCLAIM;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_LT])) {
-      return SYM_LT;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_GT])) {
-      return SYM_GT;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_AMPERSAND])) {
-      return SYM_AMPERSAND;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_PIPE])) {
-      return SYM_PIPE;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_CARET])) {
-      return SYM_CARET;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_SQUOTE])) {
-      return SYM_SQUOTE;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_DQUOTE])) {
-      return SYM_DQUOTE;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[LIT_INT])) {
-      return LIT_INT;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[LIT_UINT])) {
-      return LIT_UINT;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[LIT_FLOAT])) {
-      return LIT_FLOAT;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[LIT_CHAR])) {
-      return LIT_CHAR;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[LIT_STRING])) {
-      return LIT_STRING;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_OPT])) {
-      return KEYWORD_OPT;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_VOID])) {
-      return KEYWORD_VOID;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_CHAR])) {
-      return KEYWORD_CHAR;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_STRING])) {
-      return KEYWORD_STRING;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_U8])) {
-      return KEYWORD_U8;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_U16])) {
-      return KEYWORD_U16;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_U32])) {
-      return KEYWORD_U32;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_U64])) {
-      return KEYWORD_U64;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_I8])) {
-      return KEYWORD_I8;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_I16])) {
-      return KEYWORD_I16;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_I32])) {
-      return KEYWORD_I32;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_I64])) {
-      return KEYWORD_I64;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_F32])) {
-      return KEYWORD_F32;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_F64])) {
-      return KEYWORD_F64;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_BOOL])) {
-      return KEYWORD_BOOL;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_BREAK])) {
-      return KEYWORD_BREAK;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_CASE])) {
-      return KEYWORD_CASE;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_MUT])) {
-      return KEYWORD_MUT;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_CONTINUE])) {
-      return KEYWORD_CONTINUE;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_DEFAULT])) {
-      return KEYWORD_DEFAULT;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_ENUM])) {
-      return KEYWORD_ENUM;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_FOR])) {
-      return KEYWORD_FOR;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_RETURN])) {
-      return KEYWORD_RETURN;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_SIZEOF])) {
-      return KEYWORD_SIZEOF;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_STATIC])) {
-      return KEYWORD_STATIC;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_STRUCT])) {
-      return KEYWORD_STRUCT;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_SWITCH])) {
-      return KEYWORD_SWITCH;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_DEF])) {
-      return KEYWORD_DEF;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_WHILE])) {
-      return KEYWORD_WHILE;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_OVERLOAD])) {
-      return KEYWORD_OVERLOAD;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_ASM])) {
-      return KEYWORD_ASM;
-  } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_AS])) {
-      return KEYWORD_AS;
-  } else if (str_is_identifier(s)) {
-      return IDENTIFIER;
-  } else {
-      return INVALID;
-  }
-  //**/
+    return INVALID;
+}
+
+Token str_to_token(const str* const s) {
+    if (s == NULL) {
+        return INVALID;
+    }
+
+    for (size_t index = 3; index < TOKEN_COUNT; index++) {
+        if (str_cmp_raw(s, SYM_CHARS[index])) {
+            return (Token)index;
+        }
+    }
+
+    if (str_is_identifier(s)) {
+        return IDENTIFIER;
+    }
+
+    return str_is_literal(s);
+
+    /** This obviously sucks, but i typed it out so it's staying for a while
+    if (str_cmp_raw(s, TOKEN_NAMES[NONE])) {
+        return NONE;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[WHITESPACE])) {
+        return WHITESPACE;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_EOF])) {
+        return SYM_EOF;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_SEMICOLON])) {
+        return SYM_SEMICOLON;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_COLON])) {
+        return SYM_COLON;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_COMMA])) {
+        return SYM_COMMA;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_QUESTION])) {
+        return SYM_QUESTION;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_FSLASH])) {
+        return SYM_FSLASH;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_BSLASH])) {
+        return SYM_BSLASH;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_PAREN_OPEN])) {
+        return SYM_PAREN_OPEN;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_PAREN_CLOSE])) {
+        return SYM_PAREN_CLOSE;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_BRACKET_OPEN])) {
+        return SYM_BRACKET_OPEN;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_BRACKET_CLOSE])) {
+        return SYM_BRACKET_CLOSE;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_BRACE_OPEN])) {
+        return SYM_BRACE_OPEN;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_BRACE_CLOSE])) {
+        return SYM_BRACE_CLOSE;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_EQUAL])) {
+        return SYM_EQUAL;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_PLUS])) {
+        return SYM_PLUS;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_DASH])) {
+        return SYM_DASH;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_STAR])) {
+        return SYM_STAR;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_PERCENT])) {
+        return SYM_PERCENT;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_EXCLAIM])) {
+        return SYM_EXCLAIM;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_LT])) {
+        return SYM_LT;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_GT])) {
+        return SYM_GT;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_AMPERSAND])) {
+        return SYM_AMPERSAND;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_PIPE])) {
+        return SYM_PIPE;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_CARET])) {
+        return SYM_CARET;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_SQUOTE])) {
+        return SYM_SQUOTE;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[SYM_DQUOTE])) {
+        return SYM_DQUOTE;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[LIT_INT])) {
+        return LIT_INT;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[LIT_UINT])) {
+        return LIT_UINT;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[LIT_FLOAT])) {
+        return LIT_FLOAT;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[LIT_CHAR])) {
+        return LIT_CHAR;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[LIT_STRING])) {
+        return LIT_STRING;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_OPT])) {
+        return KEYWORD_OPT;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_VOID])) {
+        return KEYWORD_VOID;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_CHAR])) {
+        return KEYWORD_CHAR;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_STRING])) {
+        return KEYWORD_STRING;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_U8])) {
+        return KEYWORD_U8;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_U16])) {
+        return KEYWORD_U16;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_U32])) {
+        return KEYWORD_U32;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_U64])) {
+        return KEYWORD_U64;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_I8])) {
+        return KEYWORD_I8;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_I16])) {
+        return KEYWORD_I16;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_I32])) {
+        return KEYWORD_I32;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_I64])) {
+        return KEYWORD_I64;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_F32])) {
+        return KEYWORD_F32;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_F64])) {
+        return KEYWORD_F64;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_BOOL])) {
+        return KEYWORD_BOOL;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_BREAK])) {
+        return KEYWORD_BREAK;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_CASE])) {
+        return KEYWORD_CASE;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_MUT])) {
+        return KEYWORD_MUT;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_CONTINUE])) {
+        return KEYWORD_CONTINUE;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_DEFAULT])) {
+        return KEYWORD_DEFAULT;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_ENUM])) {
+        return KEYWORD_ENUM;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_FOR])) {
+        return KEYWORD_FOR;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_RETURN])) {
+        return KEYWORD_RETURN;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_SIZEOF])) {
+        return KEYWORD_SIZEOF;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_STATIC])) {
+        return KEYWORD_STATIC;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_STRUCT])) {
+        return KEYWORD_STRUCT;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_SWITCH])) {
+        return KEYWORD_SWITCH;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_DEF])) {
+        return KEYWORD_DEF;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_WHILE])) {
+        return KEYWORD_WHILE;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_OVERLOAD])) {
+        return KEYWORD_OVERLOAD;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_ASM])) {
+        return KEYWORD_ASM;
+    } else if (str_cmp_raw(s, TOKEN_NAMES[KEYWORD_AS])) {
+        return KEYWORD_AS;
+    } else if (str_is_identifier(s)) {
+        return IDENTIFIER;
+    } else {
+        return INVALID;
+    }
+    //**/
 }
 
 Token lex_buffer_to_token(char token_buffer[MAX_IDENTIFIER_LENGTH]) {
 
-  // TODO: Come back here and appreciate how awful this is. Go on. Do it.
-  // Refactor it, coward.
-  if (token_buffer[0] == ' ') {
-    return SYM_SPACE;
-  } else if (token_buffer[0] == '\0') {
-    return NONE;
-  } else if (token_buffer[0] == ';') {
-    return SYM_SEMICOLON;
-  } else if (token_buffer[0] == ':') {
-    return SYM_COLON;
-  } else if (token_buffer[0] == ',') {
-    return SYM_COMMA;
-  } else if (token_buffer[0] == '?') {
-    return SYM_QUESTION;
-  } else if (token_buffer[0] == '/') {
-    return SYM_FSLASH;
-  } else if (token_buffer[0] == '(') {
-    return SYM_PAREN_OPEN;
-  } else if (token_buffer[0] == ')') {
-    return SYM_PAREN_CLOSE;
-  } else if (token_buffer[0] == '[') {
-    return SYM_BRACKET_OPEN;
-  } else if (token_buffer[0] == ']') {
-    return SYM_BRACKET_CLOSE;
-  } else if (token_buffer[0] == '{') {
-    return SYM_BRACE_OPEN;
-  } else if (token_buffer[0] == '}') {
-    return SYM_BRACE_CLOSE;
-  } else if (token_buffer[0] == '=') {
-    return SYM_EQUAL;
-  } else if (token_buffer[0] == '+') {
-    return SYM_PLUS;
-  } else if (token_buffer[0] == '-') {
-    return SYM_DASH;
-  } else if (token_buffer[0] == '/') {
-    return SYM_FSLASH;
-  } else if (token_buffer[0] == '*') {
-    return SYM_STAR;
-  } else if (token_buffer[0] == '%') {
-    return SYM_PERCENT;
-  } else if (token_buffer[0] == '!') {
-    return SYM_EXCLAIM;
-  } else if (token_buffer[0] == '<') {
-    return SYM_LT;
-  } else if (token_buffer[0] == '>') {
-    return SYM_GT;
-  } else if (token_buffer[0] == '&') {
-    return SYM_AMPERSAND;
-  } else if (token_buffer[0] == '|') {
-    return SYM_PIPE;
-  } else if (token_buffer[0] == '^') {
-    return SYM_CARET;
-  } else if (token_buffer[0] == '\'') {
-    return SYM_SQUOTE;
-  } else if (token_buffer[0] == '"') {
-    return SYM_DQUOTE;
-  } else if (!strncmp(token_buffer, "opt", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_OPT;
-  } else if (!strncmp(token_buffer, "void", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_VOID;
-  } else if (!strncmp(token_buffer, "byte", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_BYTE;
-  } else if (!strncmp(token_buffer, "string", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_STRING;
-  } else if (!strncmp(token_buffer, "u8", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_U8;
-  } else if (!strncmp(token_buffer, "u16", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_U16;
-  } else if (!strncmp(token_buffer, "u32", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_U32;
-  } else if (!strncmp(token_buffer, "u64", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_U64;
-  } else if (!strncmp(token_buffer, "i8", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_I8;
-  } else if (!strncmp(token_buffer, "i16", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_I16;
-  } else if (!strncmp(token_buffer, "i32", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_I32;
-  } else if (!strncmp(token_buffer, "i64", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_I64;
-  } else if (!strncmp(token_buffer, "f32", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_F32;
-  } else if (!strncmp(token_buffer, "f64", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_F64;
-  } else if (!strncmp(token_buffer, "bool", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_BOOL;
-  } else if (!strncmp(token_buffer, "break", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_BREAK;
-  } else if (!strncmp(token_buffer, "case", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_CASE;
-  } else if (!strncmp(token_buffer, "mut", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_MUT;
-  } else if (!strncmp(token_buffer, "continue", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_CONTINUE;
-  } else if (!strncmp(token_buffer, "default", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_DEFAULT;
-  } else if (!strncmp(token_buffer, "else", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_ELSE;
-  } else if (!strncmp(token_buffer, "enum", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_ENUM;
-  } else if (!strncmp(token_buffer, "for", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_FOR;
-  } else if (!strncmp(token_buffer, "if", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_IF;
-  } else if (!strncmp(token_buffer, "return", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_RETURN;
-  } else if (!strncmp(token_buffer, "sizeof", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_SIZEOF;
-  } else if (!strncmp(token_buffer, "static", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_STATIC;
-  } else if (!strncmp(token_buffer, "struct", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_STRUCT;
-  } else if (!strncmp(token_buffer, "switch", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_SWITCH;
-  } else if (!strncmp(token_buffer, "def", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_DEF;
-  } else if (!strncmp(token_buffer, "while", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_WHILE;
-  } else if (!strncmp(token_buffer, "overload", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_OVERLOAD;
-  } else if (!strncmp(token_buffer, "asm", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_ASM;
-  } else if (!strncmp(token_buffer, "as", MAX_IDENTIFIER_LENGTH)) {
-    return KEYWORD_AS;
-  } else {
-    return IDENTIFIER;
-  }
+    // TODO: Come back here and appreciate how awful this is. Go on. Do it.
+    // Refactor it, coward.
+    if (token_buffer[0] == ' ') {
+        return SYM_SPACE;
+    } else if (token_buffer[0] == '\0') {
+        return NONE;
+    } else if (token_buffer[0] == ';') {
+        return SYM_SEMICOLON;
+    } else if (token_buffer[0] == ':') {
+        return SYM_COLON;
+    } else if (token_buffer[0] == ',') {
+        return SYM_COMMA;
+    } else if (token_buffer[0] == '?') {
+        return SYM_QUESTION;
+    } else if (token_buffer[0] == '/') {
+        return SYM_FSLASH;
+    } else if (token_buffer[0] == '(') {
+        return SYM_PAREN_OPEN;
+    } else if (token_buffer[0] == ')') {
+        return SYM_PAREN_CLOSE;
+    } else if (token_buffer[0] == '[') {
+        return SYM_BRACKET_OPEN;
+    } else if (token_buffer[0] == ']') {
+        return SYM_BRACKET_CLOSE;
+    } else if (token_buffer[0] == '{') {
+        return SYM_BRACE_OPEN;
+    } else if (token_buffer[0] == '}') {
+        return SYM_BRACE_CLOSE;
+    } else if (token_buffer[0] == '=') {
+        return SYM_EQUAL;
+    } else if (token_buffer[0] == '+') {
+        return SYM_PLUS;
+    } else if (token_buffer[0] == '-') {
+        return SYM_DASH;
+    } else if (token_buffer[0] == '/') {
+        return SYM_FSLASH;
+    } else if (token_buffer[0] == '*') {
+        return SYM_STAR;
+    } else if (token_buffer[0] == '%') {
+        return SYM_PERCENT;
+    } else if (token_buffer[0] == '!') {
+        return SYM_EXCLAIM;
+    } else if (token_buffer[0] == '<') {
+        return SYM_LT;
+    } else if (token_buffer[0] == '>') {
+        return SYM_GT;
+    } else if (token_buffer[0] == '&') {
+        return SYM_AMPERSAND;
+    } else if (token_buffer[0] == '|') {
+        return SYM_PIPE;
+    } else if (token_buffer[0] == '^') {
+        return SYM_CARET;
+    } else if (token_buffer[0] == '\'') {
+        return SYM_SQUOTE;
+    } else if (token_buffer[0] == '"') {
+        return SYM_DQUOTE;
+    } else if (!strncmp(token_buffer, "opt", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_OPT;
+    } else if (!strncmp(token_buffer, "void", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_VOID;
+    } else if (!strncmp(token_buffer, "byte", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_BYTE;
+    } else if (!strncmp(token_buffer, "string", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_STRING;
+    } else if (!strncmp(token_buffer, "u8", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_U8;
+    } else if (!strncmp(token_buffer, "u16", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_U16;
+    } else if (!strncmp(token_buffer, "u32", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_U32;
+    } else if (!strncmp(token_buffer, "u64", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_U64;
+    } else if (!strncmp(token_buffer, "i8", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_I8;
+    } else if (!strncmp(token_buffer, "i16", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_I16;
+    } else if (!strncmp(token_buffer, "i32", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_I32;
+    } else if (!strncmp(token_buffer, "i64", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_I64;
+    } else if (!strncmp(token_buffer, "f32", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_F32;
+    } else if (!strncmp(token_buffer, "f64", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_F64;
+    } else if (!strncmp(token_buffer, "bool", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_BOOL;
+    } else if (!strncmp(token_buffer, "break", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_BREAK;
+    } else if (!strncmp(token_buffer, "case", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_CASE;
+    } else if (!strncmp(token_buffer, "mut", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_MUT;
+    } else if (!strncmp(token_buffer, "continue", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_CONTINUE;
+    } else if (!strncmp(token_buffer, "default", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_DEFAULT;
+    } else if (!strncmp(token_buffer, "else", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_ELSE;
+    } else if (!strncmp(token_buffer, "enum", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_ENUM;
+    } else if (!strncmp(token_buffer, "for", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_FOR;
+    } else if (!strncmp(token_buffer, "if", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_IF;
+    } else if (!strncmp(token_buffer, "return", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_RETURN;
+    } else if (!strncmp(token_buffer, "sizeof", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_SIZEOF;
+    } else if (!strncmp(token_buffer, "static", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_STATIC;
+    } else if (!strncmp(token_buffer, "struct", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_STRUCT;
+    } else if (!strncmp(token_buffer, "switch", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_SWITCH;
+    } else if (!strncmp(token_buffer, "def", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_DEF;
+    } else if (!strncmp(token_buffer, "while", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_WHILE;
+    } else if (!strncmp(token_buffer, "overload", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_OVERLOAD;
+    } else if (!strncmp(token_buffer, "asm", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_ASM;
+    } else if (!strncmp(token_buffer, "as", MAX_IDENTIFIER_LENGTH)) {
+        return KEYWORD_AS;
+    } else {
+        return IDENTIFIER;
+    }
 }
