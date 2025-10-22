@@ -157,6 +157,7 @@ bool lex(Lexer* lexer) {
     index_t* boundaries = str_get_alphanumeric_symbolic_boundaries(file_contents);
 
     size_t index = 0;
+    uint16_t line = 1;
     char buffer[MAX_IDENTIFIER_LENGTH];
     while (boundaries[index++] != len) {
 
@@ -168,6 +169,10 @@ bool lex(Lexer* lexer) {
 
         str* s = str_copy(file_contents, start, end);
         Symbol* sym = sym_new(s);
+        sym->location = (CharacterRange){ .line = line, .char_start = start, .char_stop = end };
+        if (sym->t == SYM_NEWLINE) {
+            line++;
+        }
 
         if (sym == NULL) {
             A_WARNING("Failed to create symbol");
@@ -175,7 +180,7 @@ bool lex(Lexer* lexer) {
         }
 
         lex_add_symbol(lexer, sym);
-        // sym_print(*sym);
+        sym_print(*sym);
     }
 
     return true;
@@ -213,7 +218,7 @@ Lexer* lex_new(size_t capacity, const char* filename) {
 }
 
 // TODO: I'm not convinved that this is correct; add some tests
-void lex_free_(Lexer* l) {
+void _lex_free(Lexer* l) {
     if (l == NULL) {
         return;
     }
@@ -257,7 +262,7 @@ Symbol* sym_new(const str* const s) {
     return sym;
 }
 
-void sym_free_(Symbol* s) {
+void _sym_free(Symbol* s) {
     if (s != NULL) {
         free(s->s);
     }
@@ -269,7 +274,7 @@ bool sym_cmp(const Symbol s1, const Symbol s2) {
 }
 
 void sym_print(const Symbol s) {
-    printf("[%s:%d-%d]: ", TOKEN_NAMES[s.t], s.location.char_start, s.location.char_stop);
+    printf("[%s:%d(%d-%d)]: ", TOKEN_NAMES[s.t], s.location.line, s.location.char_start, s.location.char_stop);
     if (s.t == SYM_NEWLINE) {
         printf("'\\n'\n");
     } else {
@@ -299,7 +304,7 @@ Token str_is_literal(const str* const s) {
         return LIT_I32;
     } else if (str_is_i64_literal(s)) {
         return LIT_I64;
-    } 
+    }
 
     return INVALID;
 }

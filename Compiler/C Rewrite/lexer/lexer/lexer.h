@@ -124,10 +124,10 @@ typedef struct {
 bool lex(Lexer* lexer);
 Lexer* lex_new(size_t capacity, const char* filename);
 
-void lex_free_(Lexer* lexer);
+void _lex_free(Lexer* lexer);
 #define lex_free(l)                                                            \
   do {                                                                         \
-    lex_free_(l);                                                              \
+    _lex_free(l);                                                              \
     l = NULL;                                                                  \
   } while (0)
 
@@ -139,10 +139,10 @@ Token str_to_token(const str* const s);
 Token str_is_literal(const str* const s);
 
 Symbol* sym_new(const str* const s);
-void sym_free_(Symbol*);
+void _sym_free(Symbol*);
 #define sym_free(s)                                                            \
 do {                                                                         \
-    sym_free_(s);                                                              \
+    _sym_free(s);                                                              \
     s = NULL;                                                                  \
 } while (0)
 
