@@ -135,21 +135,21 @@ void test_str_to_token_success_1() {
     Token t14 = str_to_token(s14);
     Token t15 = str_to_token(s15);
 
-    // TEST_ASSERT_EQUAL(expected_token1, t1);
-    // TEST_ASSERT_EQUAL(expected_token2, t2);
-    // TEST_ASSERT_EQUAL(expected_token3, t3);
-    // TEST_ASSERT_EQUAL(expected_token4, t4);
-    // TEST_ASSERT_EQUAL(expected_token5, t5);
-    // TEST_ASSERT_EQUAL(expected_token6, t6);
-    // TEST_ASSERT_EQUAL(expected_token7, t7);
-    // TEST_ASSERT_EQUAL(expected_token8, t8);
-    // TEST_ASSERT_EQUAL(expected_token9, t9);
-    // TEST_ASSERT_EQUAL(expected_token10, t10);
-    // TEST_ASSERT_EQUAL(expected_token11, t11);
-    // TEST_ASSERT_EQUAL(expected_token12, t12);
-    // TEST_ASSERT_EQUAL(expected_token13, t13);
+    TEST_ASSERT_EQUAL(expected_token1, t1);
+    TEST_ASSERT_EQUAL(expected_token2, t2);
+    TEST_ASSERT_EQUAL(expected_token3, t3);
+    TEST_ASSERT_EQUAL(expected_token4, t4);
+    TEST_ASSERT_EQUAL(expected_token5, t5);
+    TEST_ASSERT_EQUAL(expected_token6, t6);
+    TEST_ASSERT_EQUAL(expected_token7, t7);
+    TEST_ASSERT_EQUAL(expected_token8, t8);
+    TEST_ASSERT_EQUAL(expected_token9, t9);
+    TEST_ASSERT_EQUAL(expected_token10, t10);
+    TEST_ASSERT_EQUAL(expected_token11, t11);
+    TEST_ASSERT_EQUAL(expected_token12, t12);
+    TEST_ASSERT_EQUAL(expected_token13, t13);
     TEST_ASSERT_EQUAL(expected_token14, t14);
-    // TEST_ASSERT_EQUAL(expected_token15, t15);
+    TEST_ASSERT_EQUAL(expected_token15, t15);
 
     str_free(s1);
     str_free(s2);

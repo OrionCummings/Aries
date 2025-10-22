@@ -380,7 +380,7 @@ bool str_is_bool_literal(const str* const s) {
     if (s == NULL || s->data) {
         return false;
     }
-    return str_cmp_raw(s, "false") || str_cmp_raw(s, "true");
+    return str_cmp_raw(s, "false") || str_cmp_raw(s, "False") || str_cmp_raw(s, "true") || str_cmp_raw(s, "True");
 }
 
 bool str_is_u8_literal(const str* const s) {
@@ -443,7 +443,7 @@ bool str_is_u32_literal(const str* const s) {
     if (str_has_suffix(s, "u32")) {
         view = str_view(s, 0, len - 3);
     } else {
-        view = str_view(s, 0, len);
+        view = str_view(s, 0, len); // TODO: Remove this; just use s?
     }
 
     if (view == NULL) { return false; }
@@ -451,7 +451,9 @@ bool str_is_u32_literal(const str* const s) {
     char* buffer;
     long value = strtol(view->data, &buffer, 10);
 
-    if (strcmp(buffer, "u32") != 0) {
+    int has_suffix = strcmp(buffer, "u32");
+    int lacks_suffix = strcmp(buffer, "");
+    if (has_suffix != 0 && lacks_suffix != 0) {
         return false;
     }
 
