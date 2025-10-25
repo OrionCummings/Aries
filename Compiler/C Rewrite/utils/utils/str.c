@@ -198,8 +198,7 @@ str* str_copy(const str* const s, size_t start, size_t end) {
     memset(substring, 0, len_substring + 1);
     memcpy(substring, s->data + start, len_substring);
 
-    str* view = str_new((char*)substring);
-    return view;
+    return str_new((char*)substring);
 }
 
 char* str_raw(const str* const s) {
@@ -227,7 +226,7 @@ str* str_from_file(FILE* const file) {
     size_t len = ftell(file);
     fseek(file, 0, SEEK_SET);
 
-    char* buffer = calloc(len, sizeof(*buffer));
+    char* buffer = calloc(len, sizeof(*buffer) * len);
     if (buffer == NULL) {
         return NULL;
     }

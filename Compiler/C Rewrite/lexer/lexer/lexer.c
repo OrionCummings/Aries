@@ -169,19 +169,28 @@ bool lex(Lexer* lexer) {
 
         str* s = str_copy(file_contents, start, end);
         Symbol* sym = sym_new(s);
-        sym->location = (CharacterRange){ .line = line, .char_start = start, .char_stop = end };
-        if (sym->t == SYM_NEWLINE) {
-            line++;
-        }
+        // sym->location = (CharacterRange){ .line = line, .char_start = start, .char_stop = end };
+        // if (sym->t == SYM_NEWLINE) {
+        //     line++;
+        // }
 
-        if (sym == NULL) {
-            A_WARNING("Failed to create symbol");
-            return false;
-        }
+        // if (sym == NULL) {
+        //     A_WARNING("Failed to create symbol");
+        //     return false;
+        // }
 
         lex_add_symbol(lexer, sym);
-        sym_print(*sym);
+        // sym_print(*sym);
+        // sym_free(sym); // DEBUG
+        str_free(s);
     }
+
+    free(boundaries);
+    str_free(file_contents);
+
+    free(lexer->symbols); // DEBUG
+    fclose(lexer->file); // DEBUG
+    free(lexer); // DEBUG
 
     return true;
 }
@@ -210,8 +219,6 @@ Lexer* lex_new(size_t capacity, const char* filename) {
         return false;
     }
 
-    // A_INFO("Opened file '%s'", filename);
-
     lexer->file = file;
 
     return lexer;
@@ -223,8 +230,8 @@ void _lex_free(Lexer* l) {
         return;
     }
     fclose(l->file);
-    sym_free(*l->symbols);
-    free(l->symbols);
+    // sym_free(l->symbols);
+    // free(l->symbols);
     free(l);
 }
 
@@ -232,11 +239,16 @@ bool lex_add_symbol(Lexer* const lex, Symbol* sym) {
     if (lex == NULL || lex->symbols == NULL) { return false; }
 
     if (lex->symbol_length == lex->symbol_capacity) {
-
+        void* temp = realloc(lex->symbols, sizeof(*lex->symbols) * lex->symbol_capacity * 2);
+        if (temp == NULL) {
+            return false;
+        }
+        lex->symbol_capacity *= 2;
+        lex->symbols = temp;
     }
 
-    lex->symbols[lex->symbol_length++] = sym;
-
+    memcpy(&lex->symbols[lex->symbol_length++], sym, sizeof(*sym));
+    
     return true;
 }
 
@@ -264,7 +276,7 @@ Symbol* sym_new(const str* const s) {
 
 void _sym_free(Symbol* s) {
     if (s != NULL) {
-        free(s->s);
+        str_free(s->s);
     }
     free(s);
 }

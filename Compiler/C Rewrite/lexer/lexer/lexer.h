@@ -114,11 +114,9 @@ typedef struct {
 typedef struct {
     FILE* file;
     size_t index;
-
     size_t symbol_capacity;
     size_t symbol_length;
-    Symbol** symbols;
-
+    Symbol* symbols;
 } Lexer;
 
 bool lex(Lexer* lexer);
