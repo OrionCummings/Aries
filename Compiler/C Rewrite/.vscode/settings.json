@@ -4,6 +4,14 @@
         "debug.h": "c",
         "errno.h": "c",
         "stdint.h": "c",
-        "stdint-gcc.h": "c"
+        "stdint-gcc.h": "c",
+        "lexer.h": "c",
+        "symbol.h": "c",
+        "token.h": "c",
+        "sym_list.h": "c",
+        "ctype.h": "c",
+        "str.h": "c",
+        "unity.h": "c",
+        "file.h": "c"
     }
 }

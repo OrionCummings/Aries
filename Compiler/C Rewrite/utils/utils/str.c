@@ -237,6 +237,22 @@ str* str_from_file(FILE* const file) {
     return s;
 }
 
+str* str_from_filename(const char* filename) {
+    FILE* file = fopen(filename, "r");
+    if (file == NULL) {
+        return NULL;
+    }
+
+    str* s = str_from_file(file);
+    if (file == NULL) {
+        return NULL;
+    }
+
+    fclose(file);
+
+    return s;
+}
+
 bool str_has_prefix(const str* const s, const char* prefix) {
     if (s == NULL || s->data == NULL || prefix == NULL) {
         return NULL;

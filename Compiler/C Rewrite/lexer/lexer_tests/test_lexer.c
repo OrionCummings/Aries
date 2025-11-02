@@ -1,20 +1,15 @@
-#include "unity.h"
-#include "lexer.h"
-
-void setUp() {
-}
-
-void tearDown() {
-}
+#include "test_lexer.h"
 
 void test_lexer_new_success_1(void) {
     const size_t num_symbols = 24;
-    const char* filename = "/home/orion/Projects/Aries/Compiler/C Rewrite/lexer/lexer_tests/example1.ari";
+    str* filename = str_new("/home/orion/Projects/Aries/Compiler/C Rewrite/lexer/lexer_tests/example1.ari");
     Lexer* l = lex_new(8, filename);
-    if (!lex(l)) { TEST_FAIL_MESSAGE("Call to lex() failed!"); }
-    if (l == NULL) { TEST_FAIL_MESSAGE("Null lexer object!"); }
-    if (l->symbols == NULL) { TEST_FAIL_MESSAGE("Null lexer symbols object!"); }
+    if (!lex(l)) { TEST_FAIL_MESSAGE("call to lex() failed!"); }
+    if (l == NULL) { TEST_FAIL_MESSAGE("null lexer object!"); }
+    if (l->sym_list == NULL) { TEST_FAIL_MESSAGE("null lexer symlist object!"); }
 
+    str_free(filename);
+    lex_free(l);
 }
 
 void test_sym_new_success_1(void) {
@@ -32,13 +27,13 @@ void test_sym_new_success_1(void) {
 void test_lexer_lex_success_1() {
 
     const size_t num_symbols = 24;
-    const char* filename = "/home/orion/Projects/Aries/Compiler/C Rewrite/lexer/lexer_tests/example1.ari";
+    str* filename = str_new("/home/orion/Projects/Aries/Compiler/C Rewrite/lexer/lexer_tests/example1.ari");
     Lexer* l = lex_new(8, filename);
-    if (!lex(l)) { TEST_FAIL_MESSAGE("Call to lex() failed!"); }
-    if (l == NULL) { TEST_FAIL_MESSAGE("Null lexer object!"); }
-    if (l->symbols == NULL) { TEST_FAIL_MESSAGE("Null lexer symbols object!"); }
+    if (!lex(l)) { TEST_FAIL_MESSAGE("call to lex() failed!"); }
+    if (l == NULL) { TEST_FAIL_MESSAGE("null lexer object!"); }
+    if (l->sym_list == NULL) { TEST_FAIL_MESSAGE("null lexer symlist object!"); }
 
-    TEST_ASSERT_EQUAL(num_symbols, l->symbol_length);
+    TEST_ASSERT_EQUAL(num_symbols, l->sym_list->length);
 
     Symbol* symbols = calloc(num_symbols, sizeof(*symbols));
 
@@ -66,7 +61,7 @@ void test_lexer_lex_success_1() {
     symbols[21] = DEREF_SYMBOL(sym_new(str_new("}")));
 
     for (size_t index = 0; index < num_symbols; index++) {
-        TEST_ASSERT(sym_cmp(symbols[index], l->symbols[index]));
+        TEST_ASSERT(sym_cmp(symbols[index], l->sym_list->symbols[index]));
     }
 
     free(symbols);
@@ -594,62 +589,41 @@ void test_str_is_char_literal() {
 }
 
 void test_lexer_add_symbol_1() {
-    const char* filename = "/home/orion/Projects/Aries/Compiler/C Rewrite/lexer/lexer_tests/example1.ari";
+    str* filename = str_new("/home/orion/Projects/Aries/Compiler/C Rewrite/lexer/lexer_tests/example1.ari");
+
     Lexer* l = lex_new(4, filename);
+    Symbol* sym1 = sym_new(str_new("def"));
+    Symbol* sym2 = sym_new(str_new("void"));
+    Symbol* sym3 = sym_new(str_new("return"));
+    Symbol* sym4 = sym_new(str_new("i32"));
+    Symbol* sym5 = sym_new(str_new("opt"));
+    Symbol* sym6 = sym_new(str_new("str"));
+    Symbol* sym7 = sym_new(str_new("byte"));
+    Symbol* sym8 = sym_new(str_new("res"));
+    Symbol* sym9 = sym_new(str_new("f64"));
+    Symbol* sym10 = sym_new(str_new("u8"));
+
+    lex_add_symbol(l, sym1);
+    lex_add_symbol(l, sym2);
+    lex_add_symbol(l, sym3);
+    lex_add_symbol(l, sym4);
+    lex_add_symbol(l, sym5);
+    lex_add_symbol(l, sym6);
+    lex_add_symbol(l, sym7);
+    lex_add_symbol(l, sym8);
+    lex_add_symbol(l, sym9);
+    lex_add_symbol(l, sym10);
+
+    TEST_ASSERT_NOT_NULL(l->sym_list);
+    TEST_ASSERT_EQUAL(l->sym_list->symbols[0].t, KEYWORD_DEF);
+    TEST_ASSERT_EQUAL(l->sym_list->symbols[0].location.line, 0);
+    TEST_ASSERT_EQUAL(l->sym_list->symbols[0].location.char_start, 0);
+    TEST_ASSERT_EQUAL(l->sym_list->symbols[0].location.char_stop, 3);
 
     lex_free(l);
 
     TEST_ASSERT_NULL(l);
+
+    str_free(filename);
 }
 
-int main(void) {
-    UNITY_BEGIN();
-
-    RUN_TEST(test_lexer_add_symbol_1);
-
-    if (false) {
-
-        RUN_TEST(test_str_get_alphanumeric_symbolic_boundaries_success_1);
-        RUN_TEST(test_str_get_alphanumeric_symbolic_boundaries_success_2);
-        RUN_TEST(test_str_get_alphanumeric_symbolic_boundaries_success_3);
-        RUN_TEST(test_str_get_alphanumeric_symbolic_boundaries_success_4);
-        RUN_TEST(test_str_get_alphanumeric_symbolic_boundaries_success_5);
-
-        RUN_TEST(test_str_is_identifier_success_1);
-        RUN_TEST(test_str_is_identifier_success_2);
-        RUN_TEST(test_str_is_identifier_success_3);
-        RUN_TEST(test_str_is_identifier_failure_1);
-        RUN_TEST(test_str_is_identifier_failure_2);
-        RUN_TEST(test_str_is_identifier_failure_3);
-        RUN_TEST(test_str_is_identifier_failure_4);
-        RUN_TEST(test_str_is_identifier_failure_5);
-        RUN_TEST(test_str_is_identifier_failure_6);
-
-        RUN_TEST(test_str_is_bool_literal_success_true);
-        RUN_TEST(test_str_is_bool_literal_success_false);
-
-        RUN_TEST(test_str_has_prefix_success);
-        RUN_TEST(test_str_has_prefix_failure);
-
-        RUN_TEST(test_str_has_suffix_success);
-        RUN_TEST(test_str_has_suffix_failure);
-
-        RUN_TEST(test_str_is_u8_literal);
-        RUN_TEST(test_str_is_u16_literal);
-        RUN_TEST(test_str_is_u32_literal);
-        RUN_TEST(test_str_is_u64_literal);
-
-        RUN_TEST(test_str_is_char_literal);
-
-        // RUN_TEST(test_lexer_new_success_1);
-
-        // RUN_TEST(test_lexer_lex_success_1);
-
-        RUN_TEST(test_str_to_token_success_1);
-
-        // RUN_TEST(test_sym_new_success_1);
-        // sym_new with "0" passed fails!
-    }
-
-    return UNITY_END();
-}

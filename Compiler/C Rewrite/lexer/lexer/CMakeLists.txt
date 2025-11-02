@@ -1,5 +1,8 @@
 add_library(lexer_lib STATIC
     lexer.c
+    token.c
+    symbol.c
+    sym_list.c
 )
 
 target_link_libraries(lexer_lib

@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <stdint.h>
 
+// TODO: Handle capitalized variants!
 #define PREFIX_BIN ("0b")
 #define PREFIX_OCT ("0o")
 #define PREFIX_HEX ("0x")
@@ -132,6 +133,11 @@ char* str_raw(const str* const s);
 /// @param file The file to convert to a string.
 /// @return A string instance containing the contents of `file`.
 str* str_from_file(FILE* const file);
+
+/// @brief Returns a string instance containing the contents of `file`.
+/// @param filename The filename of the file to convert to a string.
+/// @return A string instance containing the contents of the file `filename`.
+str* str_from_filename(const char* filename);
 
 /// @brief Removes `c` from both the left and right ends of `s`. This function will modify the underlying string but will not reallocate any memory. This function will only remove one instance of `c` from either end. If `c` is not on the ends of `s`, then this function does nothing.
 /// 
