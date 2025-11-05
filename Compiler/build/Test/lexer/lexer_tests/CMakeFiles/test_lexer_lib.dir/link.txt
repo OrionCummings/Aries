@@ -1,0 +1,1 @@
+/usr/bin/gcc -g -DDEBUG -Wl,--dependency-file=CMakeFiles/test_lexer_lib.dir/link.d CMakeFiles/test_lexer_lib.dir/main.c.o CMakeFiles/test_lexer_lib.dir/test_lexer.c.o CMakeFiles/test_lexer_lib.dir/test_sym_list.c.o -o test_lexer_lib  ../lexer/liblexer_lib.a ../../external/unity_cmake/libunity_lib.a ../../utils/utils/libutils_lib.a

@@ -1,0 +1,1 @@
+/usr/bin/gcc -g -DDEBUG -Wl,--dependency-file=CMakeFiles/test_arena_lib.dir/link.d CMakeFiles/test_arena_lib.dir/test_arena.c.o -o test_arena_lib  ../../external/unity_cmake/libunity_lib.a ../utils/libutils_lib.a

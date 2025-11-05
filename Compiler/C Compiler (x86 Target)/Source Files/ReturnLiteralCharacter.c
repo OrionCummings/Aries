@@ -1,3 +1,0 @@
-char test() {
-    return 'g';
-}

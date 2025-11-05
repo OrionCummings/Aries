@@ -1,0 +1,2 @@
+/usr/bin/ar qc libutils_lib.a CMakeFiles/utils_lib.dir/debug.c.o CMakeFiles/utils_lib.dir/arena.c.o CMakeFiles/utils_lib.dir/list.c.o CMakeFiles/utils_lib.dir/str.c.o
+/usr/bin/ranlib libutils_lib.a

@@ -1,0 +1,158 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2,
+						4
+					],
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "4.0"
+					},
+					"projectIndex" : 0,
+					"source" : "."
+				},
+				{
+					"build" : "src",
+					"jsonFile" : "directory-src-Debug-b6cf2213fc5053b67c22.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "4.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "src",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"build" : "lexer",
+					"childIndexes" : 
+					[
+						3
+					],
+					"jsonFile" : "directory-lexer-Debug-1113400b97b1860bcc26.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "4.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "lexer"
+				},
+				{
+					"build" : "lexer/lexer",
+					"jsonFile" : "directory-lexer.lexer-Debug-e550d9700b2e4a65ef57.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "4.0"
+					},
+					"parentIndex" : 2,
+					"projectIndex" : 0,
+					"source" : "lexer/lexer",
+					"targetIndexes" : 
+					[
+						1
+					]
+				},
+				{
+					"build" : "utils",
+					"childIndexes" : 
+					[
+						5
+					],
+					"jsonFile" : "directory-utils-Debug-ecc62ddb27eede1f7ffa.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "4.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "utils"
+				},
+				{
+					"build" : "utils/utils",
+					"jsonFile" : "directory-utils.utils-Debug-24cb02be0a45be07a7b4.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "4.0"
+					},
+					"parentIndex" : 4,
+					"projectIndex" : 0,
+					"source" : "utils/utils",
+					"targetIndexes" : 
+					[
+						2
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5
+					],
+					"name" : "AriesCompiler",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 1,
+					"id" : "AriesCompiler::@145eef247bfb46b6828c",
+					"jsonFile" : "target-AriesCompiler-Debug-62b21f27383a8e9b4232.json",
+					"name" : "AriesCompiler",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "lexer_lib::@8a72bf3f966e2c6fb3f1",
+					"jsonFile" : "target-lexer_lib-Debug-1a38896112d94a535e3c.json",
+					"name" : "lexer_lib",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "utils_lib::@2d17a358e6f859b2d3e0",
+					"jsonFile" : "target-utils_lib-Debug-6048efe7cbba8a118d57.json",
+					"name" : "utils_lib",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/orion/Projects/Aries/Compiler/build/Default",
+		"source" : "/home/orion/Projects/Aries/Compiler"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 8
+	}
+}

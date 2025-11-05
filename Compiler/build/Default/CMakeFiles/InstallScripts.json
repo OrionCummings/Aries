@@ -1,0 +1,12 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/orion/Projects/Aries/Compiler/build/Default/cmake_install.cmake",
+		"/home/orion/Projects/Aries/Compiler/build/Default/src/cmake_install.cmake",
+		"/home/orion/Projects/Aries/Compiler/build/Default/lexer/cmake_install.cmake",
+		"/home/orion/Projects/Aries/Compiler/build/Default/lexer/lexer/cmake_install.cmake",
+		"/home/orion/Projects/Aries/Compiler/build/Default/utils/cmake_install.cmake",
+		"/home/orion/Projects/Aries/Compiler/build/Default/utils/utils/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
