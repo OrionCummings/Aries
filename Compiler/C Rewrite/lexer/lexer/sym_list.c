@@ -4,7 +4,7 @@ SymbolList* sym_list_new(const size_t capacity) {
     SymbolList* sl = calloc(1, sizeof(*sl));
 
     if (sl == NULL) {
-        A_WARNING("Failed to allocate new sym list object");
+        A_WARNING("failed to allocate new sym list object");
         return NULL;
     }
 
@@ -13,7 +13,7 @@ SymbolList* sym_list_new(const size_t capacity) {
     sl->symbols = calloc(capacity, sizeof(*sl->symbols));
 
     if (sl->symbols == NULL) {
-        A_WARNING("Failed to allocate new symbol list in a sym list object");
+        A_WARNING("failed to allocate new symbol list in a sym list object");
         free(sl);
         return NULL;
     }
@@ -25,21 +25,25 @@ void _sym_list_free(SymbolList* sl) {
     if (sl != NULL) {
         free(sl->symbols);
     }
-
     free(sl);
 }
 
 void sym_list_add(SymbolList* sl, Symbol* sym) {
     if (sl == NULL) {
-        A_WARNING("Cannot add symbol to NULL symbol list");
+        A_WARNING("cannot add symbol to NULL symbol list");
+        return;
+    }
+
+    if (sl->symbols == NULL) {
+        A_WARNING("cannot add symbol to NULL symbol list ptr");
         return;
     }
 
     if (sl->length == sl->capacity) {
-        void* temp = realloc(sl->symbols, sl->capacity * 2);
+        void* temp = realloc(sl->symbols, (sl->capacity * 2) * sizeof(*sl->symbols));
 
         if (temp == NULL) {
-            A_WARNING("Failed to reallocate symbol list");
+            A_WARNING("failed to reallocate symbol list");
             return;
         }
 
@@ -47,7 +51,8 @@ void sym_list_add(SymbolList* sl, Symbol* sym) {
         sl->capacity *= 2;
     }
 
-    memcpy((sl->symbols + (sl->length * sizeof(*sym))), sym, sizeof(*sym));
+    sl->symbols[sl->length] = *sym;
+    // memcpy((sl->symbols + (sl->length * sizeof(*sym))), sym, sizeof(*sym));
 
     sl->length++;
 }

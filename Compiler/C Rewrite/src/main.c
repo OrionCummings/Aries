@@ -6,15 +6,15 @@
 
 int main(int argc, char** argv) {
 
-    const char* filename = "/home/orion/Projects/Aries/Compiler/C Rewrite/code/example1.ari";
-    const str* file_content = str_from_filename(filename);
-    Lexer* lexer = lex_new(2, file_content);
+    const char* filename = "/home/orion/Projects/Aries/Compiler/C Rewrite/code/example5.ari";
+    str* file_content = str_from_filename(filename);
+    Lexer* lexer = lex_new(file_content);
     if (!lex(lexer)) {
         A_WARNING("Failed to lex file '%s'", filename);
         return -1;
     }
 
-    // lex_free(lexer);
+    lex_free(lexer);
 
     return 0;
 }

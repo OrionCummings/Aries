@@ -179,6 +179,7 @@ str* str_view(const str* const s, size_t start, size_t end) {
     size_t len = str_len(s);
     if (len == 0 || start > len || end > len) { return NULL; }
 
+    // TODO: why does this allocate lmao
     str* view = calloc(1, sizeof(*view));
     view->heap = false;
     view->length = end - start;
@@ -465,6 +466,8 @@ bool str_is_u32_literal(const str* const s) {
 
     char* buffer;
     long value = strtol(view->data, &buffer, 10);
+
+    str_free(view);
 
     int has_suffix = strcmp(buffer, "u32");
     int lacks_suffix = strcmp(buffer, "");

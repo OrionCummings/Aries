@@ -1,0 +1,8 @@
+def main(void) -> i32 {
+
+    i32 a = 16;
+    i32 b = 126;
+    i32 c = a + b;
+
+    return c;
+}

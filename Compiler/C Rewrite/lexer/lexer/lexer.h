@@ -7,12 +7,12 @@
 #include "sym_list.h"
 
 typedef struct {
-    const str* file_content; // TODO: Should the lexer even have this?
+    str* file_content; // TODO: Should the lexer even have this?
     size_t index;
     SymbolList* sym_list;
 } Lexer;
 
-Lexer* lex_new(size_t capacity, const str* file_contents);
+Lexer* lex_new(str* file_contents);
 
 void _lex_free(Lexer* lexer);
 #define lex_free(l)                                                            \

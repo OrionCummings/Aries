@@ -3,7 +3,7 @@
 bool lex(Lexer* lexer) {
 
     if (lexer == NULL) {
-        A_WARNING("Passed null parameter 'lexer'");
+        A_WARNING("passed null parameter 'lexer'");
         return false;
     }
 
@@ -23,7 +23,7 @@ bool lex(Lexer* lexer) {
 
         str* s = str_copy(lexer->file_content, start, end);
         if (s == NULL) {
-            A_WARNING("Failed to copy string");
+            A_WARNING("failed to copy string");
             return false;
         }
 
@@ -34,12 +34,15 @@ bool lex(Lexer* lexer) {
         }
 
         if (sym == NULL) {
-            A_WARNING("Failed to create symbol");
+            A_WARNING("failed to create symbol");
             return false;
         }
 
         lex_add_symbol(lexer, sym);
         sym_print(*sym);
+
+        str_free(s);
+        sym_free(sym);
     }
 
     free(boundaries);
@@ -47,7 +50,7 @@ bool lex(Lexer* lexer) {
     return true;
 }
 
-Lexer* lex_new(size_t capacity, const str* file_contents) {
+Lexer* lex_new(str* file_contents) {
 
     Lexer* lexer = calloc(1, sizeof(*lexer));
     if (lexer == NULL) {
@@ -55,7 +58,7 @@ Lexer* lex_new(size_t capacity, const str* file_contents) {
         return NULL;
     }
 
-    void* temp = sym_list_new(capacity);
+    void* temp = sym_list_new(SYM_LIST_DEFAULT_SIZE);
     if (temp == NULL) {
         A_WARNING("failed to allocate new symbol list");
         lex_free(lexer);
@@ -69,15 +72,11 @@ Lexer* lex_new(size_t capacity, const str* file_contents) {
 
 // TODO: I'm not convinved that this is correct; add some tests
 void _lex_free(Lexer* l) {
-    if (l == NULL) {
-        return;
+    if (l != NULL) {
+        str_free(l->file_content);
+        sym_list_free(l->sym_list);
     }
-    // fclose(l->file);
-    // for (size_t index = 0; index < l->symbol_length; index++){
-    //     sym_free(l->symbols[index]);
-    // }
-    // free(l->symbols);
-    // free(l);
+    free(l);
 }
 
 bool lex_add_symbol(Lexer* const lex, Symbol* sym) {

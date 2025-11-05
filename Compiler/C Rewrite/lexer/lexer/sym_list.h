@@ -3,6 +3,8 @@
 
 #include "symbol.h"
 
+#define SYM_LIST_DEFAULT_SIZE ((size_t)64)
+
 typedef struct {
     size_t capacity;
     size_t length;
