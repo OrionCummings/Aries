@@ -65,24 +65,28 @@ CMAKE_BINARY_DIR = /home/orion/Projects/Aries/Compiler/build/Default
 # The main recursive "all" target.
 all: src/all
 all: lexer/all
+all: parser/all
 all: utils/all
 .PHONY : all
 
 # The main recursive "codegen" target.
 codegen: src/codegen
 codegen: lexer/codegen
+codegen: parser/codegen
 codegen: utils/codegen
 .PHONY : codegen
 
 # The main recursive "preinstall" target.
 preinstall: src/preinstall
 preinstall: lexer/preinstall
+preinstall: parser/preinstall
 preinstall: utils/preinstall
 .PHONY : preinstall
 
 # The main recursive "clean" target.
 clean: src/clean
 clean: lexer/clean
+clean: parser/clean
 clean: utils/clean
 .PHONY : clean
 
@@ -123,6 +127,44 @@ lexer/lexer/preinstall:
 # Recursive "clean" directory target.
 lexer/lexer/clean: lexer/lexer/CMakeFiles/lexer_lib.dir/clean
 .PHONY : lexer/lexer/clean
+
+#=============================================================================
+# Directory level rules for directory parser
+
+# Recursive "all" directory target.
+parser/all: parser/parser/all
+.PHONY : parser/all
+
+# Recursive "codegen" directory target.
+parser/codegen: parser/parser/codegen
+.PHONY : parser/codegen
+
+# Recursive "preinstall" directory target.
+parser/preinstall: parser/parser/preinstall
+.PHONY : parser/preinstall
+
+# Recursive "clean" directory target.
+parser/clean: parser/parser/clean
+.PHONY : parser/clean
+
+#=============================================================================
+# Directory level rules for directory parser/parser
+
+# Recursive "all" directory target.
+parser/parser/all: parser/parser/CMakeFiles/parser_lib.dir/all
+.PHONY : parser/parser/all
+
+# Recursive "codegen" directory target.
+parser/parser/codegen: parser/parser/CMakeFiles/parser_lib.dir/codegen
+.PHONY : parser/parser/codegen
+
+# Recursive "preinstall" directory target.
+parser/parser/preinstall:
+.PHONY : parser/parser/preinstall
+
+# Recursive "clean" directory target.
+parser/parser/clean: parser/parser/CMakeFiles/parser_lib.dir/clean
+.PHONY : parser/parser/clean
 
 #=============================================================================
 # Directory level rules for directory src
@@ -186,6 +228,7 @@ utils/utils/clean: utils/utils/CMakeFiles/utils_lib.dir/clean
 
 # All Build rule for target.
 src/CMakeFiles/AriesCompiler.dir/all: lexer/lexer/CMakeFiles/lexer_lib.dir/all
+src/CMakeFiles/AriesCompiler.dir/all: parser/parser/CMakeFiles/parser_lib.dir/all
 src/CMakeFiles/AriesCompiler.dir/all: utils/utils/CMakeFiles/utils_lib.dir/all
 	$(MAKE) $(MAKESILENT) -f src/CMakeFiles/AriesCompiler.dir/build.make src/CMakeFiles/AriesCompiler.dir/depend
 	$(MAKE) $(MAKESILENT) -f src/CMakeFiles/AriesCompiler.dir/build.make src/CMakeFiles/AriesCompiler.dir/build
@@ -194,7 +237,7 @@ src/CMakeFiles/AriesCompiler.dir/all: utils/utils/CMakeFiles/utils_lib.dir/all
 
 # Build rule for subdir invocation for target.
 src/CMakeFiles/AriesCompiler.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/orion/Projects/Aries/Compiler/build/Default/CMakeFiles 12
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/orion/Projects/Aries/Compiler/build/Default/CMakeFiles 14
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/CMakeFiles/AriesCompiler.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/orion/Projects/Aries/Compiler/build/Default/CMakeFiles 0
 .PHONY : src/CMakeFiles/AriesCompiler.dir/rule
@@ -247,13 +290,45 @@ lexer/lexer/CMakeFiles/lexer_lib.dir/clean:
 .PHONY : lexer/lexer/CMakeFiles/lexer_lib.dir/clean
 
 #=============================================================================
+# Target rules for target parser/parser/CMakeFiles/parser_lib.dir
+
+# All Build rule for target.
+parser/parser/CMakeFiles/parser_lib.dir/all: utils/utils/CMakeFiles/utils_lib.dir/all
+	$(MAKE) $(MAKESILENT) -f parser/parser/CMakeFiles/parser_lib.dir/build.make parser/parser/CMakeFiles/parser_lib.dir/depend
+	$(MAKE) $(MAKESILENT) -f parser/parser/CMakeFiles/parser_lib.dir/build.make parser/parser/CMakeFiles/parser_lib.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/orion/Projects/Aries/Compiler/build/Default/CMakeFiles --progress-num=8,9 "Built target parser_lib"
+.PHONY : parser/parser/CMakeFiles/parser_lib.dir/all
+
+# Build rule for subdir invocation for target.
+parser/parser/CMakeFiles/parser_lib.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/orion/Projects/Aries/Compiler/build/Default/CMakeFiles 7
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 parser/parser/CMakeFiles/parser_lib.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/orion/Projects/Aries/Compiler/build/Default/CMakeFiles 0
+.PHONY : parser/parser/CMakeFiles/parser_lib.dir/rule
+
+# Convenience name for target.
+parser_lib: parser/parser/CMakeFiles/parser_lib.dir/rule
+.PHONY : parser_lib
+
+# codegen rule for target.
+parser/parser/CMakeFiles/parser_lib.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f parser/parser/CMakeFiles/parser_lib.dir/build.make parser/parser/CMakeFiles/parser_lib.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/orion/Projects/Aries/Compiler/build/Default/CMakeFiles --progress-num=8,9 "Finished codegen for target parser_lib"
+.PHONY : parser/parser/CMakeFiles/parser_lib.dir/codegen
+
+# clean rule for target.
+parser/parser/CMakeFiles/parser_lib.dir/clean:
+	$(MAKE) $(MAKESILENT) -f parser/parser/CMakeFiles/parser_lib.dir/build.make parser/parser/CMakeFiles/parser_lib.dir/clean
+.PHONY : parser/parser/CMakeFiles/parser_lib.dir/clean
+
+#=============================================================================
 # Target rules for target utils/utils/CMakeFiles/utils_lib.dir
 
 # All Build rule for target.
 utils/utils/CMakeFiles/utils_lib.dir/all:
 	$(MAKE) $(MAKESILENT) -f utils/utils/CMakeFiles/utils_lib.dir/build.make utils/utils/CMakeFiles/utils_lib.dir/depend
 	$(MAKE) $(MAKESILENT) -f utils/utils/CMakeFiles/utils_lib.dir/build.make utils/utils/CMakeFiles/utils_lib.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/orion/Projects/Aries/Compiler/build/Default/CMakeFiles --progress-num=8,9,10,11,12 "Built target utils_lib"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/orion/Projects/Aries/Compiler/build/Default/CMakeFiles --progress-num=10,11,12,13,14 "Built target utils_lib"
 .PHONY : utils/utils/CMakeFiles/utils_lib.dir/all
 
 # Build rule for subdir invocation for target.
@@ -270,7 +345,7 @@ utils_lib: utils/utils/CMakeFiles/utils_lib.dir/rule
 # codegen rule for target.
 utils/utils/CMakeFiles/utils_lib.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f utils/utils/CMakeFiles/utils_lib.dir/build.make utils/utils/CMakeFiles/utils_lib.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/orion/Projects/Aries/Compiler/build/Default/CMakeFiles --progress-num=8,9,10,11,12 "Finished codegen for target utils_lib"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/orion/Projects/Aries/Compiler/build/Default/CMakeFiles --progress-num=10,11,12,13,14 "Finished codegen for target utils_lib"
 .PHONY : utils/utils/CMakeFiles/utils_lib.dir/codegen
 
 # clean rule for target.

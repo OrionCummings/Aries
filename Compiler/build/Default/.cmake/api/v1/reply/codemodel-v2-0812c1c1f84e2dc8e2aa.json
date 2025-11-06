@@ -10,7 +10,8 @@
 					[
 						1,
 						2,
-						4
+						4,
+						6
 					],
 					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
 					"minimumCMakeVersion" : 
@@ -66,10 +67,40 @@
 					]
 				},
 				{
-					"build" : "utils",
+					"build" : "parser",
 					"childIndexes" : 
 					[
 						5
+					],
+					"jsonFile" : "directory-parser-Debug-d8481011a4b315b11951.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "4.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "parser"
+				},
+				{
+					"build" : "parser/parser",
+					"jsonFile" : "directory-parser.parser-Debug-14784aabcdffc1564351.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "4.0"
+					},
+					"parentIndex" : 4,
+					"projectIndex" : 0,
+					"source" : "parser/parser",
+					"targetIndexes" : 
+					[
+						2
+					]
+				},
+				{
+					"build" : "utils",
+					"childIndexes" : 
+					[
+						7
 					],
 					"jsonFile" : "directory-utils-Debug-ecc62ddb27eede1f7ffa.json",
 					"minimumCMakeVersion" : 
@@ -87,12 +118,12 @@
 					{
 						"string" : "4.0"
 					},
-					"parentIndex" : 4,
+					"parentIndex" : 6,
 					"projectIndex" : 0,
 					"source" : "utils/utils",
 					"targetIndexes" : 
 					[
-						2
+						3
 					]
 				}
 			],
@@ -107,14 +138,17 @@
 						2,
 						3,
 						4,
-						5
+						5,
+						6,
+						7
 					],
 					"name" : "AriesCompiler",
 					"targetIndexes" : 
 					[
 						0,
 						1,
-						2
+						2,
+						3
 					]
 				}
 			],
@@ -123,7 +157,7 @@
 				{
 					"directoryIndex" : 1,
 					"id" : "AriesCompiler::@145eef247bfb46b6828c",
-					"jsonFile" : "target-AriesCompiler-Debug-62b21f27383a8e9b4232.json",
+					"jsonFile" : "target-AriesCompiler-Debug-86a3feae3dc0566529c3.json",
 					"name" : "AriesCompiler",
 					"projectIndex" : 0
 				},
@@ -136,6 +170,13 @@
 				},
 				{
 					"directoryIndex" : 5,
+					"id" : "parser_lib::@3071077ab57c3a397a25",
+					"jsonFile" : "target-parser_lib-Debug-331bd8ccf324149cab8e.json",
+					"name" : "parser_lib",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 7,
 					"id" : "utils_lib::@2d17a358e6f859b2d3e0",
 					"jsonFile" : "target-utils_lib-Debug-6048efe7cbba8a118d57.json",
 					"name" : "utils_lib",

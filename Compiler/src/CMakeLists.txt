@@ -5,6 +5,7 @@ add_executable(AriesCompiler
 target_link_libraries(AriesCompiler PUBLIC
     utils_lib
     lexer_lib
+    parser_lib
 )
 
 target_compile_options(AriesCompiler PRIVATE

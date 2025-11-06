@@ -627,3 +627,6 @@ void test_lexer_add_symbol_1() {
     str_free(filename);
 }
 
+void test_lexer_example1() {
+    
+}

@@ -150,6 +150,19 @@ lexer_lib/fast:
 .PHONY : lexer_lib/fast
 
 #=============================================================================
+# Target rules for targets named parser_lib
+
+# Build rule for target.
+parser_lib: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 parser_lib
+.PHONY : parser_lib
+
+# fast build rule for target.
+parser_lib/fast:
+	$(MAKE) $(MAKESILENT) -f parser/parser/CMakeFiles/parser_lib.dir/build.make parser/parser/CMakeFiles/parser_lib.dir/build
+.PHONY : parser_lib/fast
+
+#=============================================================================
 # Target rules for targets named utils_lib
 
 # Build rule for target.
@@ -173,6 +186,7 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... AriesCompiler"
 	@echo "... lexer_lib"
+	@echo "... parser_lib"
 	@echo "... utils_lib"
 .PHONY : help
 

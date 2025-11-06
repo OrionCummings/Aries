@@ -1,1 +1,1 @@
-/usr/bin/gcc -g -DDEBUG -Wl,--dependency-file=CMakeFiles/AriesCompiler.dir/link.d CMakeFiles/AriesCompiler.dir/main.c.o -o AriesCompiler  ../utils/utils/libutils_lib.a ../lexer/lexer/liblexer_lib.a ../utils/utils/libutils_lib.a
+/usr/bin/gcc -g -DDEBUG -Wl,--dependency-file=CMakeFiles/AriesCompiler.dir/link.d CMakeFiles/AriesCompiler.dir/main.c.o -o AriesCompiler  ../utils/utils/libutils_lib.a ../lexer/lexer/liblexer_lib.a ../parser/parser/libparser_lib.a ../utils/utils/libutils_lib.a

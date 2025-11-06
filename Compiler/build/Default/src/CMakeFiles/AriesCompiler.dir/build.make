@@ -98,6 +98,7 @@ src/AriesCompiler: src/CMakeFiles/AriesCompiler.dir/build.make
 src/AriesCompiler: src/CMakeFiles/AriesCompiler.dir/compiler_depend.ts
 src/AriesCompiler: utils/utils/libutils_lib.a
 src/AriesCompiler: lexer/lexer/liblexer_lib.a
+src/AriesCompiler: parser/parser/libparser_lib.a
 src/AriesCompiler: utils/utils/libutils_lib.a
 src/AriesCompiler: src/CMakeFiles/AriesCompiler.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/orion/Projects/Aries/Compiler/build/Default/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable AriesCompiler"

@@ -1,12 +1,13 @@
 #include "debug.h"
 #include <stdio.h>
 
-#include "lexer.h"
 #include "str.h"
+#include "lexer.h"
+#include "parser.h"
 
 int main(int argc, char** argv) {
 
-    const char* filename = "/home/orion/Projects/Aries/Compiler/code/example5.ari";
+    const char* filename = "/home/orion/Projects/Aries/Compiler/code/example1.ari";
 
     str* file_content = str_from_filename(filename);
     if (file_content == NULL) {
@@ -20,7 +21,19 @@ int main(int argc, char** argv) {
         return -1;
     }
 
+    // lex_print(lexer);
+    
+    // Parser* parser = parser_new(lexer->sym_list);
+    // Parser* parser = NULL;
+    // if (!parse(parser)) {
+    //     A_WARNING("Failed to parse file '%s'", filename);
+    //     return -2;
+    // }
+
+    // parser_print(parser);
+    
     lex_free(lexer);
+    // parser_free(parser);
 
     return 0;
 }

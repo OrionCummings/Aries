@@ -14,6 +14,7 @@ add_compile_definitions(true=1)
 
 add_subdirectory(src)
 add_subdirectory(lexer)
+add_subdirectory(parser)
 add_subdirectory(utils)
 
 if(TARGET_GROUP STREQUAL test)

@@ -5,6 +5,7 @@ AriesCompiler: \
   CMakeFiles/AriesCompiler.dir/main.c.o \
   ../utils/utils/libutils_lib.a \
   ../lexer/lexer/liblexer_lib.a \
+  ../parser/parser/libparser_lib.a \
   ../utils/utils/libutils_lib.a \
   /usr/lib/gcc/x86_64-linux-gnu/13/libgcc.a \
   /usr/lib/gcc/x86_64-linux-gnu/13/libgcc_s.so \
@@ -39,6 +40,8 @@ CMakeFiles/AriesCompiler.dir/main.c.o:
 ../utils/utils/libutils_lib.a:
 
 ../lexer/lexer/liblexer_lib.a:
+
+../parser/parser/libparser_lib.a:
 
 ../utils/utils/libutils_lib.a:
 

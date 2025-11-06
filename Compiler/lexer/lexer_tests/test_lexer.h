@@ -34,5 +34,6 @@ void test_str_is_u32_literal(void);
 void test_str_is_u64_literal(void);
 void test_str_is_char_literal(void);
 void test_lexer_add_symbol_1(void);
+void test_lexer_example1(void);
 
 #endif

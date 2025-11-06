@@ -12,6 +12,7 @@ bool lex(Lexer* lexer) {
 
     size_t index = 0;
     uint16_t line = 1;
+    size_t char_start = 0;
     char buffer[MAX_IDENTIFIER_LENGTH];
     while (boundaries[index++] != len) {
 
@@ -21,6 +22,8 @@ bool lex(Lexer* lexer) {
         index_t start = boundaries[index - 1];
         index_t end = boundaries[index];
 
+        size_t char_len = end - start;
+
         str* s = str_copy(lexer->file_content, start, end);
         if (s == NULL) {
             A_WARNING("failed to copy string");
@@ -28,14 +31,17 @@ bool lex(Lexer* lexer) {
         }
 
         Symbol* sym = sym_new(s);
-        sym->location = (CharacterRange){ .line = line, .char_start = start, .char_stop = end };
-        if (sym->t == SYM_NEWLINE) {
-            line++;
-        }
+        sym->location = (CharacterRange){ .line = line, .char_start = char_start, .char_stop = char_start + char_len };
 
         if (sym == NULL) {
             A_WARNING("failed to create symbol");
             return false;
+        }
+
+        char_start += char_len;
+        if (sym->t == SYM_NEWLINE) {
+            line++;
+            char_start = 0;
         }
 
         lex_add_symbol(lexer, sym);
@@ -79,12 +85,27 @@ void _lex_free(Lexer* l) {
     free(l);
 }
 
+// TODO: sym could be const?
 bool lex_add_symbol(Lexer* const lex, Symbol* sym) {
-    if (lex == NULL || lex->sym_list == NULL) { return false; }
+    if (lex == NULL || lex->sym_list == NULL || sym == NULL) { return false; }
 
     sym_list_add(lex->sym_list, sym);
 
     return true;
+}
+
+void lex_print(const Lexer* const lexer) {
+    printf("Lexer:\n");
+
+    if (lexer == NULL) {
+        printf("\t<null>\n");
+        return;
+    }
+
+    if (lexer->sym_list != NULL) {
+        sym_list_print(*lexer->sym_list);
+    }
+    printf("\n");
 }
 
 Token str_is_literal(const str* const s) {

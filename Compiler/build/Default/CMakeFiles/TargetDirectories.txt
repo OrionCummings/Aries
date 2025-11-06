@@ -8,6 +8,11 @@
 /home/orion/Projects/Aries/Compiler/build/Default/lexer/lexer/CMakeFiles/lexer_lib.dir
 /home/orion/Projects/Aries/Compiler/build/Default/lexer/lexer/CMakeFiles/edit_cache.dir
 /home/orion/Projects/Aries/Compiler/build/Default/lexer/lexer/CMakeFiles/rebuild_cache.dir
+/home/orion/Projects/Aries/Compiler/build/Default/parser/CMakeFiles/edit_cache.dir
+/home/orion/Projects/Aries/Compiler/build/Default/parser/CMakeFiles/rebuild_cache.dir
+/home/orion/Projects/Aries/Compiler/build/Default/parser/parser/CMakeFiles/parser_lib.dir
+/home/orion/Projects/Aries/Compiler/build/Default/parser/parser/CMakeFiles/edit_cache.dir
+/home/orion/Projects/Aries/Compiler/build/Default/parser/parser/CMakeFiles/rebuild_cache.dir
 /home/orion/Projects/Aries/Compiler/build/Default/utils/CMakeFiles/edit_cache.dir
 /home/orion/Projects/Aries/Compiler/build/Default/utils/CMakeFiles/rebuild_cache.dir
 /home/orion/Projects/Aries/Compiler/build/Default/utils/utils/CMakeFiles/utils_lib.dir

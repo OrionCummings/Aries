@@ -21,4 +21,6 @@ do {                                                                         \
 
 void sym_list_add(SymbolList* sl, Symbol* sym);
 
+void sym_list_print(const SymbolList sl);
+
 #endif

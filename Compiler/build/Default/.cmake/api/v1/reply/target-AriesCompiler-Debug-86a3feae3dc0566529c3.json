@@ -40,7 +40,7 @@
 			{
 				"command" : 2,
 				"file" : 0,
-				"line" : 10,
+				"line" : 11,
 				"parent" : 0
 			},
 			{
@@ -129,6 +129,10 @@
 				{
 					"backtrace" : 2,
 					"path" : "/home/orion/Projects/Aries/Compiler/lexer/lexer"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "/home/orion/Projects/Aries/Compiler/parser/parser"
 				}
 			],
 			"language" : "C",
@@ -154,6 +158,10 @@
 		},
 		{
 			"backtrace" : 2,
+			"id" : "parser_lib::@3071077ab57c3a397a25"
+		},
+		{
+			"backtrace" : 2,
 			"id" : "utils_lib::@2d17a358e6f859b2d3e0"
 		}
 	],
@@ -174,6 +182,11 @@
 			{
 				"backtrace" : 2,
 				"fragment" : "../lexer/lexer/liblexer_lib.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 2,
+				"fragment" : "../parser/parser/libparser_lib.a",
 				"role" : "libraries"
 			},
 			{
