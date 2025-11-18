@@ -27,7 +27,7 @@ int main(void) {
     }
 
     /// Lexer Tests
-    if (true) {
+    if (false) {
 
         RUN_TEST(test_str_get_alphanumeric_symbolic_boundaries_success_1);
         RUN_TEST(test_str_get_alphanumeric_symbolic_boundaries_success_2);

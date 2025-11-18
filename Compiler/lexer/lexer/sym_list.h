@@ -19,7 +19,7 @@ do {                                                                         \
     sl = NULL;                                                               \
 } while (0)
 
-void sym_list_add(SymbolList* sl, Symbol* sym);
+void sym_list_add(SymbolList* sl, const Symbol* sym);
 
 void sym_list_print(const SymbolList sl);
 

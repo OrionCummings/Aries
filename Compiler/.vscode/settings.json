@@ -12,6 +12,7 @@
         "ctype.h": "c",
         "str.h": "c",
         "unity.h": "c",
-        "file.h": "c"
+        "file.h": "c",
+        "parser.h": "c"
     }
 }

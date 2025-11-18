@@ -1,0 +1,98 @@
+[
+{
+  "directory": "/home/orion/Projects/Aries/Compiler/build/test/src",
+  "command": "/usr/bin/gcc -Dfalse=0 -Dtrue=1 -I/home/orion/Projects/Aries/Compiler/utils/utils -I/home/orion/Projects/Aries/Compiler/lexer/lexer -I/home/orion/Projects/Aries/Compiler/parser/parser -g -DDEBUG -std=c2x -pedantic -Wall -Wextra -Werror -Wconversion -Wundef -Wno-unused-parameter -Wno-unused-variable -Wno-type-limits -g -o CMakeFiles/AriesCompiler.dir/main.c.o -c /home/orion/Projects/Aries/Compiler/src/main.c",
+  "file": "/home/orion/Projects/Aries/Compiler/src/main.c",
+  "output": "src/CMakeFiles/AriesCompiler.dir/main.c.o"
+},
+{
+  "directory": "/home/orion/Projects/Aries/Compiler/build/test/lexer/lexer",
+  "command": "/usr/bin/gcc -Dfalse=0 -Dtrue=1 -I/home/orion/Projects/Aries/Compiler/lexer/lexer -I/home/orion/Projects/Aries/Compiler/utils/utils -g -DDEBUG -std=c2x -o CMakeFiles/lexer_lib.dir/lexer.c.o -c /home/orion/Projects/Aries/Compiler/lexer/lexer/lexer.c",
+  "file": "/home/orion/Projects/Aries/Compiler/lexer/lexer/lexer.c",
+  "output": "lexer/lexer/CMakeFiles/lexer_lib.dir/lexer.c.o"
+},
+{
+  "directory": "/home/orion/Projects/Aries/Compiler/build/test/lexer/lexer",
+  "command": "/usr/bin/gcc -Dfalse=0 -Dtrue=1 -I/home/orion/Projects/Aries/Compiler/lexer/lexer -I/home/orion/Projects/Aries/Compiler/utils/utils -g -DDEBUG -std=c2x -o CMakeFiles/lexer_lib.dir/token.c.o -c /home/orion/Projects/Aries/Compiler/lexer/lexer/token.c",
+  "file": "/home/orion/Projects/Aries/Compiler/lexer/lexer/token.c",
+  "output": "lexer/lexer/CMakeFiles/lexer_lib.dir/token.c.o"
+},
+{
+  "directory": "/home/orion/Projects/Aries/Compiler/build/test/lexer/lexer",
+  "command": "/usr/bin/gcc -Dfalse=0 -Dtrue=1 -I/home/orion/Projects/Aries/Compiler/lexer/lexer -I/home/orion/Projects/Aries/Compiler/utils/utils -g -DDEBUG -std=c2x -o CMakeFiles/lexer_lib.dir/symbol.c.o -c /home/orion/Projects/Aries/Compiler/lexer/lexer/symbol.c",
+  "file": "/home/orion/Projects/Aries/Compiler/lexer/lexer/symbol.c",
+  "output": "lexer/lexer/CMakeFiles/lexer_lib.dir/symbol.c.o"
+},
+{
+  "directory": "/home/orion/Projects/Aries/Compiler/build/test/lexer/lexer",
+  "command": "/usr/bin/gcc -Dfalse=0 -Dtrue=1 -I/home/orion/Projects/Aries/Compiler/lexer/lexer -I/home/orion/Projects/Aries/Compiler/utils/utils -g -DDEBUG -std=c2x -o CMakeFiles/lexer_lib.dir/sym_list.c.o -c /home/orion/Projects/Aries/Compiler/lexer/lexer/sym_list.c",
+  "file": "/home/orion/Projects/Aries/Compiler/lexer/lexer/sym_list.c",
+  "output": "lexer/lexer/CMakeFiles/lexer_lib.dir/sym_list.c.o"
+},
+{
+  "directory": "/home/orion/Projects/Aries/Compiler/build/test/parser/parser",
+  "command": "/usr/bin/gcc -Dfalse=0 -Dtrue=1 -I/home/orion/Projects/Aries/Compiler/parser/parser -I/home/orion/Projects/Aries/Compiler/utils/utils -g -DDEBUG -std=c2x -o CMakeFiles/parser_lib.dir/parser.c.o -c /home/orion/Projects/Aries/Compiler/parser/parser/parser.c",
+  "file": "/home/orion/Projects/Aries/Compiler/parser/parser/parser.c",
+  "output": "parser/parser/CMakeFiles/parser_lib.dir/parser.c.o"
+},
+{
+  "directory": "/home/orion/Projects/Aries/Compiler/build/test/utils/utils",
+  "command": "/usr/bin/gcc -Dfalse=0 -Dtrue=1 -I/home/orion/Projects/Aries/Compiler/utils/utils -g -DDEBUG -std=c2x -o CMakeFiles/utils_lib.dir/debug.c.o -c /home/orion/Projects/Aries/Compiler/utils/utils/debug.c",
+  "file": "/home/orion/Projects/Aries/Compiler/utils/utils/debug.c",
+  "output": "utils/utils/CMakeFiles/utils_lib.dir/debug.c.o"
+},
+{
+  "directory": "/home/orion/Projects/Aries/Compiler/build/test/utils/utils",
+  "command": "/usr/bin/gcc -Dfalse=0 -Dtrue=1 -I/home/orion/Projects/Aries/Compiler/utils/utils -g -DDEBUG -std=c2x -o CMakeFiles/utils_lib.dir/arena.c.o -c /home/orion/Projects/Aries/Compiler/utils/utils/arena.c",
+  "file": "/home/orion/Projects/Aries/Compiler/utils/utils/arena.c",
+  "output": "utils/utils/CMakeFiles/utils_lib.dir/arena.c.o"
+},
+{
+  "directory": "/home/orion/Projects/Aries/Compiler/build/test/utils/utils",
+  "command": "/usr/bin/gcc -Dfalse=0 -Dtrue=1 -I/home/orion/Projects/Aries/Compiler/utils/utils -g -DDEBUG -std=c2x -o CMakeFiles/utils_lib.dir/list.c.o -c /home/orion/Projects/Aries/Compiler/utils/utils/list.c",
+  "file": "/home/orion/Projects/Aries/Compiler/utils/utils/list.c",
+  "output": "utils/utils/CMakeFiles/utils_lib.dir/list.c.o"
+},
+{
+  "directory": "/home/orion/Projects/Aries/Compiler/build/test/utils/utils",
+  "command": "/usr/bin/gcc -Dfalse=0 -Dtrue=1 -I/home/orion/Projects/Aries/Compiler/utils/utils -g -DDEBUG -std=c2x -o CMakeFiles/utils_lib.dir/str.c.o -c /home/orion/Projects/Aries/Compiler/utils/utils/str.c",
+  "file": "/home/orion/Projects/Aries/Compiler/utils/utils/str.c",
+  "output": "utils/utils/CMakeFiles/utils_lib.dir/str.c.o"
+},
+{
+  "directory": "/home/orion/Projects/Aries/Compiler/build/test/external/unity_cmake",
+  "command": "/usr/bin/gcc -Dfalse=0 -Dtrue=1 -I/home/orion/Projects/Aries/Compiler/external/unity_cmake/Unity/src -g -DDEBUG -std=c2x -o CMakeFiles/unity_lib.dir/Unity/src/unity.c.o -c /home/orion/Projects/Aries/Compiler/external/unity_cmake/Unity/src/unity.c",
+  "file": "/home/orion/Projects/Aries/Compiler/external/unity_cmake/Unity/src/unity.c",
+  "output": "external/unity_cmake/CMakeFiles/unity_lib.dir/Unity/src/unity.c.o"
+},
+{
+  "directory": "/home/orion/Projects/Aries/Compiler/build/test/utils/utils_tests",
+  "command": "/usr/bin/gcc -Dfalse=0 -Dtrue=1 -I/home/orion/Projects/Aries/Compiler/external/unity_cmake/Unity/src -I/home/orion/Projects/Aries/Compiler/utils/utils -g -DDEBUG -std=c2x -o CMakeFiles/test_arena_lib.dir/test_arena.c.o -c /home/orion/Projects/Aries/Compiler/utils/utils_tests/test_arena.c",
+  "file": "/home/orion/Projects/Aries/Compiler/utils/utils_tests/test_arena.c",
+  "output": "utils/utils_tests/CMakeFiles/test_arena_lib.dir/test_arena.c.o"
+},
+{
+  "directory": "/home/orion/Projects/Aries/Compiler/build/test/utils/utils_tests",
+  "command": "/usr/bin/gcc -Dfalse=0 -Dtrue=1 -I/home/orion/Projects/Aries/Compiler/external/unity_cmake/Unity/src -I/home/orion/Projects/Aries/Compiler/utils/utils -g -DDEBUG -std=c2x -o CMakeFiles/test_str_lib.dir/test_str.c.o -c /home/orion/Projects/Aries/Compiler/utils/utils_tests/test_str.c",
+  "file": "/home/orion/Projects/Aries/Compiler/utils/utils_tests/test_str.c",
+  "output": "utils/utils_tests/CMakeFiles/test_str_lib.dir/test_str.c.o"
+},
+{
+  "directory": "/home/orion/Projects/Aries/Compiler/build/test/lexer/lexer_tests",
+  "command": "/usr/bin/gcc -Dfalse=0 -Dtrue=1 -I/home/orion/Projects/Aries/Compiler/lexer/lexer -I/home/orion/Projects/Aries/Compiler/utils/utils -I/home/orion/Projects/Aries/Compiler/external/unity_cmake/Unity/src -g -DDEBUG -std=c2x -o CMakeFiles/test_lexer_lib.dir/main.c.o -c /home/orion/Projects/Aries/Compiler/lexer/lexer_tests/main.c",
+  "file": "/home/orion/Projects/Aries/Compiler/lexer/lexer_tests/main.c",
+  "output": "lexer/lexer_tests/CMakeFiles/test_lexer_lib.dir/main.c.o"
+},
+{
+  "directory": "/home/orion/Projects/Aries/Compiler/build/test/lexer/lexer_tests",
+  "command": "/usr/bin/gcc -Dfalse=0 -Dtrue=1 -I/home/orion/Projects/Aries/Compiler/lexer/lexer -I/home/orion/Projects/Aries/Compiler/utils/utils -I/home/orion/Projects/Aries/Compiler/external/unity_cmake/Unity/src -g -DDEBUG -std=c2x -o CMakeFiles/test_lexer_lib.dir/test_lexer.c.o -c /home/orion/Projects/Aries/Compiler/lexer/lexer_tests/test_lexer.c",
+  "file": "/home/orion/Projects/Aries/Compiler/lexer/lexer_tests/test_lexer.c",
+  "output": "lexer/lexer_tests/CMakeFiles/test_lexer_lib.dir/test_lexer.c.o"
+},
+{
+  "directory": "/home/orion/Projects/Aries/Compiler/build/test/lexer/lexer_tests",
+  "command": "/usr/bin/gcc -Dfalse=0 -Dtrue=1 -I/home/orion/Projects/Aries/Compiler/lexer/lexer -I/home/orion/Projects/Aries/Compiler/utils/utils -I/home/orion/Projects/Aries/Compiler/external/unity_cmake/Unity/src -g -DDEBUG -std=c2x -o CMakeFiles/test_lexer_lib.dir/test_sym_list.c.o -c /home/orion/Projects/Aries/Compiler/lexer/lexer_tests/test_sym_list.c",
+  "file": "/home/orion/Projects/Aries/Compiler/lexer/lexer_tests/test_sym_list.c",
+  "output": "lexer/lexer_tests/CMakeFiles/test_lexer_lib.dir/test_sym_list.c.o"
+}
+]

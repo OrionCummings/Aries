@@ -58,5 +58,41 @@
   "command": "/usr/bin/gcc -Dfalse=0 -Dtrue=1 -I/home/orion/Projects/Aries/Compiler/utils/utils -g -DDEBUG -std=c2x -o CMakeFiles/utils_lib.dir/str.c.o -c /home/orion/Projects/Aries/Compiler/utils/utils/str.c",
   "file": "/home/orion/Projects/Aries/Compiler/utils/utils/str.c",
   "output": "utils/utils/CMakeFiles/utils_lib.dir/str.c.o"
+},
+{
+  "directory": "/home/orion/Projects/Aries/Compiler/build/Default/external/unity_cmake",
+  "command": "/usr/bin/gcc -Dfalse=0 -Dtrue=1 -I/home/orion/Projects/Aries/Compiler/external/unity_cmake/Unity/src -g -DDEBUG -std=c2x -o CMakeFiles/unity_lib.dir/Unity/src/unity.c.o -c /home/orion/Projects/Aries/Compiler/external/unity_cmake/Unity/src/unity.c",
+  "file": "/home/orion/Projects/Aries/Compiler/external/unity_cmake/Unity/src/unity.c",
+  "output": "external/unity_cmake/CMakeFiles/unity_lib.dir/Unity/src/unity.c.o"
+},
+{
+  "directory": "/home/orion/Projects/Aries/Compiler/build/Default/utils/utils_tests",
+  "command": "/usr/bin/gcc -Dfalse=0 -Dtrue=1 -I/home/orion/Projects/Aries/Compiler/external/unity_cmake/Unity/src -I/home/orion/Projects/Aries/Compiler/utils/utils -g -DDEBUG -std=c2x -o CMakeFiles/test_arena_lib.dir/test_arena.c.o -c /home/orion/Projects/Aries/Compiler/utils/utils_tests/test_arena.c",
+  "file": "/home/orion/Projects/Aries/Compiler/utils/utils_tests/test_arena.c",
+  "output": "utils/utils_tests/CMakeFiles/test_arena_lib.dir/test_arena.c.o"
+},
+{
+  "directory": "/home/orion/Projects/Aries/Compiler/build/Default/utils/utils_tests",
+  "command": "/usr/bin/gcc -Dfalse=0 -Dtrue=1 -I/home/orion/Projects/Aries/Compiler/external/unity_cmake/Unity/src -I/home/orion/Projects/Aries/Compiler/utils/utils -g -DDEBUG -std=c2x -o CMakeFiles/test_str_lib.dir/test_str.c.o -c /home/orion/Projects/Aries/Compiler/utils/utils_tests/test_str.c",
+  "file": "/home/orion/Projects/Aries/Compiler/utils/utils_tests/test_str.c",
+  "output": "utils/utils_tests/CMakeFiles/test_str_lib.dir/test_str.c.o"
+},
+{
+  "directory": "/home/orion/Projects/Aries/Compiler/build/Default/lexer/lexer_tests",
+  "command": "/usr/bin/gcc -Dfalse=0 -Dtrue=1 -I/home/orion/Projects/Aries/Compiler/lexer/lexer -I/home/orion/Projects/Aries/Compiler/utils/utils -I/home/orion/Projects/Aries/Compiler/external/unity_cmake/Unity/src -g -DDEBUG -std=c2x -o CMakeFiles/test_lexer_lib.dir/main.c.o -c /home/orion/Projects/Aries/Compiler/lexer/lexer_tests/main.c",
+  "file": "/home/orion/Projects/Aries/Compiler/lexer/lexer_tests/main.c",
+  "output": "lexer/lexer_tests/CMakeFiles/test_lexer_lib.dir/main.c.o"
+},
+{
+  "directory": "/home/orion/Projects/Aries/Compiler/build/Default/lexer/lexer_tests",
+  "command": "/usr/bin/gcc -Dfalse=0 -Dtrue=1 -I/home/orion/Projects/Aries/Compiler/lexer/lexer -I/home/orion/Projects/Aries/Compiler/utils/utils -I/home/orion/Projects/Aries/Compiler/external/unity_cmake/Unity/src -g -DDEBUG -std=c2x -o CMakeFiles/test_lexer_lib.dir/test_lexer.c.o -c /home/orion/Projects/Aries/Compiler/lexer/lexer_tests/test_lexer.c",
+  "file": "/home/orion/Projects/Aries/Compiler/lexer/lexer_tests/test_lexer.c",
+  "output": "lexer/lexer_tests/CMakeFiles/test_lexer_lib.dir/test_lexer.c.o"
+},
+{
+  "directory": "/home/orion/Projects/Aries/Compiler/build/Default/lexer/lexer_tests",
+  "command": "/usr/bin/gcc -Dfalse=0 -Dtrue=1 -I/home/orion/Projects/Aries/Compiler/lexer/lexer -I/home/orion/Projects/Aries/Compiler/utils/utils -I/home/orion/Projects/Aries/Compiler/external/unity_cmake/Unity/src -g -DDEBUG -std=c2x -o CMakeFiles/test_lexer_lib.dir/test_sym_list.c.o -c /home/orion/Projects/Aries/Compiler/lexer/lexer_tests/test_sym_list.c",
+  "file": "/home/orion/Projects/Aries/Compiler/lexer/lexer_tests/test_sym_list.c",
+  "output": "lexer/lexer_tests/CMakeFiles/test_lexer_lib.dir/test_sym_list.c.o"
 }
 ]

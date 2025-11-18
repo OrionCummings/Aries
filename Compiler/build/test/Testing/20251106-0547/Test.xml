@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Site BuildName="Linux-gcc"
+	BuildStamp="20251106-0547-Experimental"
+	Name="libra"
+	Generator="ctest-4.1.0-rc2"
+	CompilerName=""
+	CompilerVersion=""
+	OSName="Linux"
+	Hostname="libra"
+	OSRelease="6.14.0-35-generic"
+	OSVersion="#35~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Tue Oct 14 13:55:17 UTC 2"
+	OSPlatform="x86_64"
+	Is64Bits="1"
+	VendorString="AuthenticAMD"
+	VendorID="Advanced Micro Devices"
+	FamilyID="25"
+	ModelID="97"
+	ModelName="AMD Ryzen 7 7700X 8-Core Processor"
+	ProcessorCacheSize="1024"
+	NumberOfLogicalCPU="16"
+	NumberOfPhysicalCPU="8"
+	TotalVirtualMemory="2047"
+	TotalPhysicalMemory="31197"
+	LogicalProcessorsPerPhysical="2"
+	ProcessorClockFrequency="5364.83"
+	>
+	<Testing>
+		<StartDateTime>Nov 18 18:06 EST</StartDateTime>
+		<StartTestTime>1763507207</StartTestTime>
+		<TestList/>
+		<EndDateTime>Nov 18 18:06 EST</EndDateTime>
+		<EndTestTime>1763507207</EndTestTime>
+		<ElapsedMinutes>0</ElapsedMinutes>
+	</Testing>
+</Site>

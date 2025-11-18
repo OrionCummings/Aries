@@ -62,6 +62,21 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("/home/orion/Projects/Aries/Compiler/build/Default/utils/cmake_install.cmake")
 endif()
 
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("/home/orion/Projects/Aries/Compiler/build/Default/external/cmake_install.cmake")
+endif()
+
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("/home/orion/Projects/Aries/Compiler/build/Default/utils/utils_tests/cmake_install.cmake")
+endif()
+
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("/home/orion/Projects/Aries/Compiler/build/Default/lexer/lexer_tests/cmake_install.cmake")
+endif()
+
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 if(CMAKE_INSTALL_LOCAL_ONLY)

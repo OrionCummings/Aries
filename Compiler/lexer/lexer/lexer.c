@@ -45,10 +45,10 @@ bool lex(Lexer* lexer) {
         }
 
         lex_add_symbol(lexer, sym);
-        sym_print(*sym);
+        // sym_print(*sym);
 
-        str_free(s);
-        sym_free(sym);
+        str_free(s);     // Freeing these breaks the lexer!
+        // sym_free(sym);   // AHHHHHHHHHHHHHH
     }
 
     free(boundaries);
@@ -86,7 +86,7 @@ void _lex_free(Lexer* l) {
 }
 
 // TODO: sym could be const?
-bool lex_add_symbol(Lexer* const lex, Symbol* sym) {
+bool lex_add_symbol(Lexer* const lex, const Symbol* const sym) {
     if (lex == NULL || lex->sym_list == NULL || sym == NULL) { return false; }
 
     sym_list_add(lex->sym_list, sym);
@@ -95,14 +95,16 @@ bool lex_add_symbol(Lexer* const lex, Symbol* sym) {
 }
 
 void lex_print(const Lexer* const lexer) {
-    printf("Lexer:\n");
+    printf("Lexer ");
 
     if (lexer == NULL) {
         printf("\t<null>\n");
         return;
     }
 
+    
     if (lexer->sym_list != NULL) {
+        printf("(%lu/%lu):\n", lexer->sym_list->length, lexer->sym_list->capacity);
         sym_list_print(*lexer->sym_list);
     }
     printf("\n");

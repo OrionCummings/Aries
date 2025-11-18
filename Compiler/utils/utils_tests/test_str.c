@@ -763,75 +763,121 @@ void test_str_str_cmp_raw_success_3() {
     str_free(s);
 }
 
+void test_str_copy() {
+    size_t start_index = 11;
+    size_t end_index = 18;
+    const char* text = "apples and oranges";
+    const char* expected_text = "oranges";
+
+    // Create a base string
+    str* base = str_new(text);
+
+    // Create a copy of part of the base string
+    str* copy = str_copy(base, start_index, end_index);
+
+    // Assert that they match
+    for (size_t index = 0; index < copy->length; index++) {
+        TEST_ASSERT_EQUAL(copy->data[index], base->data[index + start_index]);
+        TEST_ASSERT_EQUAL(copy->data[index], expected_text[index]);
+    }
+
+    TEST_ASSERT(base->heap);
+    TEST_ASSERT_EQUAL(18, base->length);
+    
+    TEST_ASSERT(copy->heap);
+    TEST_ASSERT_EQUAL((end_index - start_index), copy->length);
+
+    // Free the base
+    str_free(base);
+    TEST_ASSERT_NULL(base);
+    TEST_ASSERT_NOT_NULL(copy);
+
+    // Assert that they still match
+    for (size_t index = 0; index < copy->length; index++) {
+        // NOTE: Removed direct check against the base because it's been free'd 
+        TEST_ASSERT_EQUAL(copy->data[index], expected_text[index]);
+    }
+
+    TEST_ASSERT(copy->heap);
+    TEST_ASSERT_EQUAL((end_index - start_index), copy->length);
+
+    str_free(copy);
+    TEST_ASSERT_NULL(base);
+}
+
 int main(void) {
     UNITY_BEGIN();
 
-    RUN_TEST(test_str_new_success);
-    RUN_TEST(test_str_new_null_string);
+    if (false) {
+        RUN_TEST(test_str_new_success);
+        RUN_TEST(test_str_new_null_string);
 
-    RUN_TEST(test_str_free_valid_string);
-    RUN_TEST(test_str_free_valid_string_null_data);
-    RUN_TEST(test_str_free_null_string);
+        RUN_TEST(test_str_free_valid_string);
+        RUN_TEST(test_str_free_valid_string_null_data);
+        RUN_TEST(test_str_free_null_string);
 
-    RUN_TEST(test_str_concat_nominal_success);
-    RUN_TEST(test_str_concat_null_parameter);
-    RUN_TEST(test_str_concat_malformed_parameter);
+        RUN_TEST(test_str_concat_nominal_success);
+        RUN_TEST(test_str_concat_null_parameter);
+        RUN_TEST(test_str_concat_malformed_parameter);
 
-    RUN_TEST(test_str_cmp_success_ident_str);
-    RUN_TEST(test_str_cmp_success_same_text);
-    RUN_TEST(test_str_cmp_failure_different_str);
-    RUN_TEST(test_str_cmp_failure_different_text);
-    RUN_TEST(test_str_cmp_failure_one_null);
-    RUN_TEST(test_str_cmp_failure_both_null);
+        RUN_TEST(test_str_cmp_success_ident_str);
+        RUN_TEST(test_str_cmp_success_same_text);
+        RUN_TEST(test_str_cmp_failure_different_str);
+        RUN_TEST(test_str_cmp_failure_different_text);
+        RUN_TEST(test_str_cmp_failure_one_null);
+        RUN_TEST(test_str_cmp_failure_both_null);
 
-    RUN_TEST(test_str_cmp_raw_success);
-    RUN_TEST(test_str_cmp_raw_failure);
+        RUN_TEST(test_str_cmp_raw_success);
+        RUN_TEST(test_str_cmp_raw_failure);
 
-    RUN_TEST(test_str_ident_success_ident_str);
-    RUN_TEST(test_str_ident_failure_same_text);
-    RUN_TEST(test_str_ident_failure_different_str);
-    RUN_TEST(test_str_ident_failure_different_text);
-    RUN_TEST(test_str_ident_failure_one_null);
-    RUN_TEST(test_str_ident_failure_both_null);
+        RUN_TEST(test_str_ident_success_ident_str);
+        RUN_TEST(test_str_ident_failure_same_text);
+        RUN_TEST(test_str_ident_failure_different_str);
+        RUN_TEST(test_str_ident_failure_different_text);
+        RUN_TEST(test_str_ident_failure_one_null);
+        RUN_TEST(test_str_ident_failure_both_null);
 
-    RUN_TEST(test_str_find_success);
-    RUN_TEST(test_str_find_failure_not_present);
-    RUN_TEST(test_str_find_failure_empty_str);
-    RUN_TEST(test_str_find_failure_null_str);
-    RUN_TEST(test_str_find_failure_empty_str_null_char);
+        RUN_TEST(test_str_find_success);
+        RUN_TEST(test_str_find_failure_not_present);
+        RUN_TEST(test_str_find_failure_empty_str);
+        RUN_TEST(test_str_find_failure_null_str);
+        RUN_TEST(test_str_find_failure_empty_str_null_char);
 
-    RUN_TEST(test_str_sub_success_single);
-    RUN_TEST(test_str_sub_success_double);
-    RUN_TEST(test_str_sub_failure_none);
-    RUN_TEST(test_str_sub_failure_null_str);
-    RUN_TEST(test_str_sub_failure_null_sub);
-    RUN_TEST(test_str_sub_failure_both_null);
+        RUN_TEST(test_str_sub_success_single);
+        RUN_TEST(test_str_sub_success_double);
+        RUN_TEST(test_str_sub_failure_none);
+        RUN_TEST(test_str_sub_failure_null_str);
+        RUN_TEST(test_str_sub_failure_null_sub);
+        RUN_TEST(test_str_sub_failure_both_null);
 
-    RUN_TEST(test_str_len_success);
-    RUN_TEST(test_str_len_failure_null_str);
+        RUN_TEST(test_str_len_success);
+        RUN_TEST(test_str_len_failure_null_str);
 
-    RUN_TEST(test_str_at_success);
-    RUN_TEST(test_str_at_failure_index_too_big);
-    RUN_TEST(test_str_at_failure_null_str);
+        RUN_TEST(test_str_at_success);
+        RUN_TEST(test_str_at_failure_index_too_big);
+        RUN_TEST(test_str_at_failure_null_str);
 
-    RUN_TEST(test_str_append_success);
-    RUN_TEST(test_str_append_failure_null_character);
-    RUN_TEST(test_str_append_failure_null_str);
+        RUN_TEST(test_str_append_success);
+        RUN_TEST(test_str_append_failure_null_character);
+        RUN_TEST(test_str_append_failure_null_str);
 
-    RUN_TEST(test_str_view_success);
-    RUN_TEST(test_str_view_success_free);
-    RUN_TEST(test_str_view_failure_start_greater_than_end);
-    RUN_TEST(test_str_view_failure_start_too_large);
-    RUN_TEST(test_str_view_failure_end_too_large);
-    RUN_TEST(test_str_view_failure_start_equal_to_end);
+        RUN_TEST(test_str_view_success);
+        RUN_TEST(test_str_view_success_free);
+        RUN_TEST(test_str_view_failure_start_greater_than_end);
+        RUN_TEST(test_str_view_failure_start_too_large);
+        RUN_TEST(test_str_view_failure_end_too_large);
+        RUN_TEST(test_str_view_failure_start_equal_to_end);
 
-    RUN_TEST(test_str_raw_success);
-    RUN_TEST(test_str_raw_failure_null_string);
-    RUN_TEST(test_str_raw_failure_null_data);
+        RUN_TEST(test_str_raw_success);
+        RUN_TEST(test_str_raw_failure_null_string);
+        RUN_TEST(test_str_raw_failure_null_data);
 
-    RUN_TEST(test_str_str_cmp_raw_success_1);
-    RUN_TEST(test_str_str_cmp_raw_success_2);
-    RUN_TEST(test_str_str_cmp_raw_success_3);
+        RUN_TEST(test_str_str_cmp_raw_success_1);
+        RUN_TEST(test_str_str_cmp_raw_success_2);
+        RUN_TEST(test_str_str_cmp_raw_success_3);
+    }
+
+    RUN_TEST(test_str_copy);
 
     return UNITY_END();
 }

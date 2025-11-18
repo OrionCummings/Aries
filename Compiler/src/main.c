@@ -7,7 +7,7 @@
 
 int main(int argc, char** argv) {
 
-    const char* filename = "/home/orion/Projects/Aries/Compiler/code/example1.ari";
+    const char* filename = "/home/orion/Projects/Aries/Compiler/code/example0.ari";
 
     str* file_content = str_from_filename(filename);
     if (file_content == NULL) {
@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    // lex_print(lexer);
+    lex_print(lexer);
     
     // Parser* parser = parser_new(lexer->sym_list);
     // Parser* parser = NULL;

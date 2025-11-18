@@ -29,7 +29,6 @@ void test_sym_list_add_symbol_1() {
     TEST_ASSERT_EQUAL(5, l->sym_list->length);
 
     lex_free(l);
-    str_free(content);
     
     str_free(s1);
     str_free(s2);

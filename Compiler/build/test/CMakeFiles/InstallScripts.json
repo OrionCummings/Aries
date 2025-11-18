@@ -1,0 +1,18 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/orion/Projects/Aries/Compiler/build/test/cmake_install.cmake",
+		"/home/orion/Projects/Aries/Compiler/build/test/src/cmake_install.cmake",
+		"/home/orion/Projects/Aries/Compiler/build/test/lexer/cmake_install.cmake",
+		"/home/orion/Projects/Aries/Compiler/build/test/lexer/lexer/cmake_install.cmake",
+		"/home/orion/Projects/Aries/Compiler/build/test/parser/cmake_install.cmake",
+		"/home/orion/Projects/Aries/Compiler/build/test/parser/parser/cmake_install.cmake",
+		"/home/orion/Projects/Aries/Compiler/build/test/utils/cmake_install.cmake",
+		"/home/orion/Projects/Aries/Compiler/build/test/utils/utils/cmake_install.cmake",
+		"/home/orion/Projects/Aries/Compiler/build/test/external/cmake_install.cmake",
+		"/home/orion/Projects/Aries/Compiler/build/test/external/unity_cmake/cmake_install.cmake",
+		"/home/orion/Projects/Aries/Compiler/build/test/utils/utils_tests/cmake_install.cmake",
+		"/home/orion/Projects/Aries/Compiler/build/test/lexer/lexer_tests/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

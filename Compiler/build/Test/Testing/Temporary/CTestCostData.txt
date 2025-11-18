@@ -1,4 +1,0 @@
-Arena Tests 8 9.85107e-05
-String Tests 8 7.65821e-05
-Lexer Tests 7 9.27624e-05
----
