@@ -1,0 +1,4 @@
+ldi 255 A
+ldi 16 B
+st A B
+hlt

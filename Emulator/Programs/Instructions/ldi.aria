@@ -1,0 +1,13 @@
+ldi 1 A
+ldi 2 B
+ldi 4 C
+ldi 8 D
+ldi 16 E
+ldi 32 F
+ldi 64 G
+ldi 128 H
+ldi 256 I
+ldi 512 J
+ldi 1024 K
+ldi 2048 L
+hlt

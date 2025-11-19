@@ -1,0 +1,100 @@
+from __future__ import annotations
+from typing import SupportsIndex
+from option import Ok, Result
+from PrettyPrinting import bold, red
+from Utilities import trace
+
+class ByteBank():
+
+    def __init__(self, capacity_in_bytes: int, print_num_rows: int = 16):
+        self.print_num_rows = print_num_rows
+        self.capacity = capacity_in_bytes
+        self.content = bytearray(capacity_in_bytes)
+        self.highlight_range = None
+
+    def __eq__(self, other: ByteBank) -> bool:
+        return \
+            self.capacity == other.capacity and \
+            self.content == other.content
+
+    def __str__(self) -> str:
+
+        builder = ""
+        for index in range(0, self.capacity):
+
+            if index % self.print_num_rows == 0 and index != 0:
+                builder += '\n'
+            
+            if self.highlight_range is not None and index in self.highlight_range:
+                builder += red(bold("{:02X}".format(self.content[index])))
+            else:
+                builder += "{:02X}".format(self.content[index])
+
+            builder += " "
+
+        return builder
+
+    def set_highlight_range(self, highlight_range: range):
+        self.highlight_range = highlight_range
+
+    def get_byte(self, index: SupportsIndex) -> Result[bytearray, str]:
+        if index not in range(0, self.capacity): return trace("index out of range")
+        return Ok(self.content[index])
+
+    def get_bytes(self, source_range: range | list[SupportsIndex]) -> Result[bytearray, str]:
+
+        if isinstance(source_range, range):
+            source_range = list(source_range)
+
+        array = bytearray()
+        for index in source_range:
+            r_byt = self.get_byte(index)
+
+            if r_byt.is_err:
+                return trace("failed to get byte", r_byt.unwrap_err())
+
+            byt = r_byt.unwrap()
+            array.append(byt)
+
+        return Ok(array)
+
+    def set_byte(self, index: SupportsIndex, value: int) -> Result[None, str]:
+        if index not in range(0, self.capacity): return trace("index out of range")
+        if value not in range(0, 256): return trace(f"value '{value}' not a valid byte")
+
+        self.content[index] = value
+        
+        return Ok(None)
+
+    def set_bytes(self, dest_range: range | list[SupportsIndex], values: list[int]) -> Result[None, str]:
+
+        if isinstance(dest_range, range):
+            dest_range = list(dest_range)
+
+        len_dest_range = len(dest_range)
+
+        len_values = len(values)
+
+        if len_dest_range != len_values:
+            return trace(f"size of range ({len_dest_range}) and size of values ({len_values}) differ")
+
+        for (vindex, index) in enumerate(dest_range):
+            r_set_byte = self.set_byte(index, values[vindex])
+            if r_set_byte.is_err:
+                return trace("failed to set byte", r_set_byte.unwrap_err())
+
+        return Ok(None)
+    
+# if __name__ == '__main__':
+
+#     highlight_index = 4
+#     highlight_length = 7
+#     highlight_range = range(highlight_index, highlight_index + highlight_length)
+
+#     bank = ByteBank(64)
+
+#     bank.set_bytes(range(0, 17), 255)
+#     bank.set_highlight_range(highlight_range)
+
+#     print(bank)
+

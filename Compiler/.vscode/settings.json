@@ -1,0 +1,22 @@
+{
+    "files.associations": {
+        "stdio.h": "c",
+        "debug.h": "c",
+        "errno.h": "c",
+        "stdint.h": "c",
+        "stdint-gcc.h": "c",
+        "lexer.h": "c",
+        "symbol.h": "c",
+        "token.h": "c",
+        "sym_list.h": "c",
+        "ctype.h": "c",
+        "str.h": "c",
+        "unity.h": "c",
+        "file.h": "c",
+        "parser.h": "c",
+        "utils.h": "c",
+        "array": "c",
+        "string_view": "c",
+        "initializer_list": "c"
+    }
+}

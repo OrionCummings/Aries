@@ -1,0 +1,14 @@
+
+def struct Point {
+    f32 x,
+    f32 y,
+}
+
+def main(void) -> int {
+
+    Point p = { 279.2f, 280.0 };
+    p.norm();
+    print("({p.x}, {p.y})\n");
+
+    return 0;
+}

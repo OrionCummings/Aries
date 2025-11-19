@@ -1,0 +1,20 @@
+;; This is broken rn
+
+ldi 64 I         ; [I = 64] Load the value 64 into I
+
+loop:
+
+; Do whatever in the loop
+
+; Store the value of A at memory address 0
+st 0 A
+
+; Increment A by 1
+addi 1 A        ; [A++]
+
+; Compare A and I. If A and I are equal, hlt
+cmp A I         ; [while A != I] 
+bne loop        ; 
+
+
+hlt             ; Halt the program

@@ -1,0 +1,42 @@
+Placeholder {
+    height: 100%;
+    width: 100%;
+}
+
+WidgetRegisterFile {
+    min-height: 7;
+    min-width: 155;
+    border: round #e0e1dd;
+    align: center middle;
+}
+
+#main_view {
+    height: 100%;
+    width: 100%;
+    layout: grid;
+    grid-size: 8 8;
+    color: #e0e1dd;
+    background: black 100%;
+}
+
+#header {
+}
+
+#program_disassembly {
+    height: 100%;
+    row-span: 8;
+    column-span: 2;
+    border: round #e0e1dd;
+}
+
+#register_file {
+    row-span: 2;
+    column-span: 6;
+    border: round #e0e1dd;
+}
+
+#data_memory {
+    row-span: 6;
+    column-span: 6;
+    border: round #e0e1dd;
+}

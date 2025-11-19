@@ -1,0 +1,29 @@
+{
+    "version": 8,
+    "configurePresets": [
+        {
+            "name": "default",
+            "displayName": "Default",
+            "description": "The default configuration to build the Aries Compiler",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+                "CMAKE_C_COMPILER": "/usr/bin/gcc",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "TARGET_GROUP": "test"
+            }
+        },
+        {
+            "name": "test",
+            "displayName": "Tests",
+            "description": "The test configuration to build the Aries Compiler tests",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+                "CMAKE_C_COMPILER": "/usr/bin/gcc",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "TARGET_GROUP": "test"
+            }
+        }
+    ]
+}

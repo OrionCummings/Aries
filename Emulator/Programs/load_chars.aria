@@ -1,0 +1,33 @@
+; SPDX-FileCopyrightText: © 2025 Orion Cummings <orioncummings23@gmail.com>
+; SPDX-License-Identifier: MIT License
+
+; This program is designed to load all characters 0-255 into program (data) memory
+; and then halt. This will test:
+;   * 'st', 'bne', 'ldi', 'addi', 'cmp', and 'hat' instructions
+;   * loops
+;   * label resolution
+;   * memory object dump printing
+
+; Load 255 into B
+ldi 256 B
+
+; Temp!
+; ldi 252 A
+
+; Main loop
+loop:
+
+; Load the value of A into MEM[A]
+st A C
+
+; Increment A by 1
+addi 1 A
+
+; Increment C by 4
+addi 4 C
+
+; If A is not equal to B, then continue
+cmp A B
+bne loop
+
+hlt

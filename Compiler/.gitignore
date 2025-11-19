@@ -1,0 +1,5 @@
+build/*
+.meta
+.vscode
+CMakePresets.json
+.clang-format

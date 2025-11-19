@@ -1,0 +1,13 @@
+
+def Age as u8;
+
+def main(void) -> int {
+
+    u32 test = 2789;
+
+    if (test > 27) {
+        return -1;
+    }
+
+    return 0;
+}
