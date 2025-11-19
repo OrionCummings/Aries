@@ -29,6 +29,7 @@ void _arena_free(arena* a) {
 
         if (a->next != NULL) {
             _arena_free(a->next);
+            a->next = NULL;
         }
     }
 

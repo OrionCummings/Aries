@@ -101,6 +101,28 @@ void test_arena_alloc_failure_too_full(void) {
     arena_free(a);
 }
 
+void test_arena_alloc_forward_to_next_success(void) {
+    size_t initial_size = 1024;
+    arena* a = arena_new(initial_size);
+
+    void* ptr1 = arena_alloc(a, initial_size / 2);
+    void* ptr2 = arena_alloc(a, initial_size / 2);
+    void* ptr3 = arena_alloc(a, initial_size / 2);
+
+    TEST_ASSERT_NOT_NULL(a->next);
+    TEST_ASSERT_NOT_NULL(ptr1);
+    TEST_ASSERT_NOT_NULL(ptr2);
+    TEST_ASSERT_NOT_NULL(ptr3);
+    TEST_ASSERT_EQUAL(initial_size, a->size);
+    TEST_ASSERT_EQUAL(initial_size / 2, a->next->size);
+    TEST_ASSERT_EQUAL(initial_size, a->capacity);
+    TEST_ASSERT_EQUAL(initial_size, a->next->capacity);
+
+    arena_free(a);
+
+    TEST_ASSERT_NULL(a);
+}
+
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_arena_new_success);
@@ -110,5 +132,6 @@ int main(void) {
     RUN_TEST(test_arena_alloc_success_multi);
     RUN_TEST(test_arena_alloc_success_full);
     RUN_TEST(test_arena_alloc_failure_too_full);
+    RUN_TEST(test_arena_alloc_forward_to_next_success);
     return UNITY_END();
 }
