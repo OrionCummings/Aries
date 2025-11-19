@@ -29,6 +29,8 @@
 #define A_ERROR(X, ...)   __error(  X, __FILE__, __func__, __LINE__ __VA_OPT__(,) __VA_ARGS__)
 #define A_TRACE(...)   __trace(__FILE__, __func__, __LINE__)
 
+extern bool ENABLE_DEBUG_OUTPUT;
+
 void __error(const char* message, const char* file, const char* func, const uint64_t line, ...);
 void __warning(const char* message, const char* file, const char* func, const uint64_t line, ...);
 void __info(const char* message, const char* file, const char* func, const uint64_t line, ...);

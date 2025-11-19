@@ -13,6 +13,7 @@
         "str.h": "c",
         "unity.h": "c",
         "file.h": "c",
-        "parser.h": "c"
+        "parser.h": "c",
+        "utils.h": "c"
     }
 }

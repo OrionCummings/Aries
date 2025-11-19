@@ -2,9 +2,11 @@
 #include "utils.h"
 
 void setUp() {
+    ENABLE_DEBUG_OUTPUT = false;
 }
 
 void tearDown() {
+    ENABLE_DEBUG_OUTPUT = true;
 }
 
 void test_arena_new_success(void) {
@@ -14,7 +16,7 @@ void test_arena_new_success(void) {
     TEST_ASSERT_EQUAL_size_t(a->capacity, 1024);
     TEST_ASSERT_EQUAL_size_t(a->size, 0);
     TEST_ASSERT_NOT_NULL(a->data);
-    
+
     arena_free(a);
 }
 
@@ -60,11 +62,11 @@ void test_arena_alloc_success_multi(void) {
     void* ptr1 = arena_alloc(a, size1);
     TEST_ASSERT_NOT_NULL(ptr1);
     TEST_ASSERT_EQUAL(a->data + 0, ptr1);
-    
+
     void* ptr2 = arena_alloc(a, size2);
     TEST_ASSERT_NOT_NULL(ptr2);
     TEST_ASSERT_EQUAL(a->data + size1, ptr2);
-    
+
     void* ptr3 = arena_alloc(a, size3);
     TEST_ASSERT_NOT_NULL(ptr3);
     TEST_ASSERT_EQUAL(a->data + size1 + size2, ptr3);

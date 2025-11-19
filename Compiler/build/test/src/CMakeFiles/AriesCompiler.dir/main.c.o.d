@@ -43,4 +43,6 @@ src/CMakeFiles/AriesCompiler.dir/main.c.o: \
  /home/orion/Projects/Aries/Compiler/lexer/lexer/symbol.h \
  /home/orion/Projects/Aries/Compiler/lexer/lexer/token.h \
  /home/orion/Projects/Aries/Compiler/lexer/lexer/defs.h \
- /home/orion/Projects/Aries/Compiler/parser/parser/parser.h
+ /home/orion/Projects/Aries/Compiler/parser/parser/parser.h \
+ /home/orion/Projects/Aries/Compiler/utils/utils/arena.h \
+ /home/orion/Projects/Aries/Compiler/utils/utils/debug.h

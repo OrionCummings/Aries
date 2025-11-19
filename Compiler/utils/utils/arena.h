@@ -8,6 +8,7 @@ typedef struct arena {
     size_t size;
     size_t capacity;
     void* data;
+    struct arena* next; // TODO: Make this actually functional & tested
 } arena;
 
 /// @brief Create a new arena instance with the given capacity.

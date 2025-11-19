@@ -4,10 +4,14 @@
 #include "str.h"
 #include "lexer.h"
 #include "parser.h"
+#include <arena.h>
 
 int main(int argc, char** argv) {
 
     const char* filename = "/home/orion/Projects/Aries/Compiler/code/example0.ari";
+
+    // Create an arena with 1kB of memory
+    arena* arena_str = arena_new(1024);
 
     str* file_content = str_from_filename(filename);
     if (file_content == NULL) {
@@ -34,6 +38,7 @@ int main(int argc, char** argv) {
     
     lex_free(lexer);
     // parser_free(parser);
+    arena_free(arena_str);
 
     return 0;
 }

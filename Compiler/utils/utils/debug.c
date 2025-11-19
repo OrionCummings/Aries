@@ -1,7 +1,14 @@
 #include "debug.h"
 
+// true = the debug functions will print
+// false = the debug functions will NOT print
+bool ENABLE_DEBUG_OUTPUT = true;
+
 void __error(const char* message, const char* file, const char* func, const uint64_t line, ...) {
 #ifdef __ENABLE_ERROR
+
+    if (!ENABLE_DEBUG_OUTPUT) return;
+
     va_list args;
     va_start(args, line);
 
@@ -9,8 +16,7 @@ void __error(const char* message, const char* file, const char* func, const uint
     int res = snprintf(buffer, __DEBUG_MESSAGE_BUFFER_SIZE, "[ERROR] %s:%s():%" PRIu64 ": \"%s\"\n", file, func, line, message);
     if (res > __DEBUG_MESSAGE_BUFFER_SIZE) {
         printf("META: The following error message was longer than %d characters and has been truncated.\n", __DEBUG_MESSAGE_BUFFER_SIZE);
-    }
-    else if (res == -1) {
+    } else if (res == -1) {
         printf("META: The following error message contains an encoding error.\n");
     }
     vprintf(buffer, args);
@@ -22,6 +28,9 @@ void __error(const char* message, const char* file, const char* func, const uint
 
 void __warning(const char* message, const char* file, const char* func, const uint64_t line, ...) {
 #ifdef __ENABLE_WARNING
+
+    if (!ENABLE_DEBUG_OUTPUT) return;
+
     va_list args;
     va_start(args, line);
 
@@ -29,8 +38,7 @@ void __warning(const char* message, const char* file, const char* func, const ui
     int res = snprintf(buffer, __DEBUG_MESSAGE_BUFFER_SIZE, "[WARNING] %s:%s():%" PRIu64 ": \"%s\"\n", file, func, line, message);
     if (res > __DEBUG_MESSAGE_BUFFER_SIZE) {
         printf("META: The following warning message was longer than %d characters and has been truncated.\n", __DEBUG_MESSAGE_BUFFER_SIZE);
-    }
-    else if (res == -1) {
+    } else if (res == -1) {
         printf("META: The following warning message contains an encoding error.\n");
     }
     vprintf(buffer, args);
@@ -41,6 +49,9 @@ void __warning(const char* message, const char* file, const char* func, const ui
 
 void __info(const char* message, const char* file, const char* func, const uint64_t line, ...) {
 #ifdef __ENABLE_INFO
+
+    if (!ENABLE_DEBUG_OUTPUT) return;
+
     va_list args;
     va_start(args, line);
 
@@ -48,8 +59,7 @@ void __info(const char* message, const char* file, const char* func, const uint6
     int res = snprintf(buffer, __DEBUG_MESSAGE_BUFFER_SIZE, "[INFO] %s:%s():%" PRIu64 ": \"%s\"\n", file, func, line, message);
     if (res > __DEBUG_MESSAGE_BUFFER_SIZE) {
         printf("META: The following info message was longer than %d characters and has been truncated.\n", __DEBUG_MESSAGE_BUFFER_SIZE);
-    }
-    else if (res == -1) {
+    } else if (res == -1) {
         printf("META: The following info message contains an encoding error.\n");
     }
     vprintf(buffer, args);
@@ -61,12 +71,13 @@ void __info(const char* message, const char* file, const char* func, const uint6
 void __trace(const char* file, const char* func, const uint64_t line) {
 #ifdef __ENABLE_TRACE
 
+    if (!ENABLE_DEBUG_OUTPUT) return;
+
     char buffer[__DEBUG_MESSAGE_BUFFER_SIZE] = { 0 };
     int res = snprintf(buffer, __DEBUG_MESSAGE_BUFFER_SIZE, "[TRACE] %s:%s():%" PRIu64 "\n", file, func, line);
     if (res > __DEBUG_MESSAGE_BUFFER_SIZE) {
         printf("META: The following error message was longer than %d characters and has been truncated.\n", __DEBUG_MESSAGE_BUFFER_SIZE);
-    }
-    else if (res == -1) {
+    } else if (res == -1) {
         printf("META: The following error message contains an encoding error.\n");
     }
 
@@ -75,35 +86,35 @@ void __trace(const char* file, const char* func, const uint64_t line) {
 #endif
 }
 
-void print_byte(uint8_t byte){
+void print_byte(uint8_t byte) {
 
 }
 
-void print_bytes(uint8_t* bytes, size_t n){
+void print_bytes(uint8_t* bytes, size_t n) {
 
 }
 
-void print_word(uint16_t hword){
+void print_word(uint16_t hword) {
 
 }
 
-void print_words(uint16_t* hwords, size_t n){
+void print_words(uint16_t* hwords, size_t n) {
 
 }
 
-void print_dword(uint32_t word){
+void print_dword(uint32_t word) {
 
 }
 
-void print_dwords(uint32_t* words, size_t n){
+void print_dwords(uint32_t* words, size_t n) {
 
 }
 
-void print_qword(uint64_t dword){
+void print_qword(uint64_t dword) {
 
 }
 
-void print_qwords(uint64_t* dwords, size_t n){
+void print_qwords(uint64_t* dwords, size_t n) {
 
 }
 
