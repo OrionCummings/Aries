@@ -17,6 +17,10 @@
         "utils.h": "c",
         "array": "c",
         "string_view": "c",
-        "initializer_list": "c"
+        "initializer_list": "c",
+        "random": "c",
+        "system_error": "c",
+        "stdlib.h": "c",
+        "args.h": "c"
     }
 }

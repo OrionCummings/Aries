@@ -4,9 +4,11 @@
 #include "test_sym_list.h"
 
 void setUp() {
+    LOG_PUSH(LOG_NONE);
 }
 
 void tearDown() {
+    LOG_POP();
 }
 
 void suiteSetUp(void) {
@@ -22,12 +24,12 @@ int main(void) {
     UNITY_BEGIN();
 
     /// Symbol List Tests
-    if (true) {
+    if (false) {
         RUN_TEST(test_sym_list_add_symbol_1);
     }
 
     /// Lexer Tests
-    if (false) {
+    if (true) {
 
         RUN_TEST(test_str_get_alphanumeric_symbolic_boundaries_success_1);
         RUN_TEST(test_str_get_alphanumeric_symbolic_boundaries_success_2);

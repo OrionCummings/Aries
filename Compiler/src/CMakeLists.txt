@@ -1,5 +1,6 @@
 add_executable(AriesCompiler
     main.c
+    args.c
 )
 
 target_link_libraries(AriesCompiler PUBLIC

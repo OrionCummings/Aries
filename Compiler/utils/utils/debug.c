@@ -1,13 +1,12 @@
 #include "debug.h"
 
-// true = the debug functions will print
-// false = the debug functions will NOT print
-bool ENABLE_DEBUG_OUTPUT = true;
+LogLevel current_log_level = LOG_ALL;
+LogLevel previous_log_level = LOG_ALL;
 
 void __error(const char* message, const char* file, const char* func, const uint64_t line, ...) {
 #ifdef __ENABLE_ERROR
 
-    if (!ENABLE_DEBUG_OUTPUT) return;
+    if (current_log_level < LOG_ERROR) return;
 
     va_list args;
     va_start(args, line);
@@ -29,7 +28,7 @@ void __error(const char* message, const char* file, const char* func, const uint
 void __warning(const char* message, const char* file, const char* func, const uint64_t line, ...) {
 #ifdef __ENABLE_WARNING
 
-    if (!ENABLE_DEBUG_OUTPUT) return;
+    if (current_log_level < LOG_WARNING) return;
 
     va_list args;
     va_start(args, line);
@@ -50,7 +49,7 @@ void __warning(const char* message, const char* file, const char* func, const ui
 void __info(const char* message, const char* file, const char* func, const uint64_t line, ...) {
 #ifdef __ENABLE_INFO
 
-    if (!ENABLE_DEBUG_OUTPUT) return;
+    if (current_log_level < LOG_INFO) return;
 
     va_list args;
     va_start(args, line);
@@ -71,7 +70,7 @@ void __info(const char* message, const char* file, const char* func, const uint6
 void __trace(const char* file, const char* func, const uint64_t line) {
 #ifdef __ENABLE_TRACE
 
-    if (!ENABLE_DEBUG_OUTPUT) return;
+    if (current_log_level < LOG_TRACE) return;
 
     char buffer[__DEBUG_MESSAGE_BUFFER_SIZE] = { 0 };
     int res = snprintf(buffer, __DEBUG_MESSAGE_BUFFER_SIZE, "[TRACE] %s:%s():%" PRIu64 "\n", file, func, line);

@@ -2,13 +2,12 @@
 
 void test_lexer_new_success_1(void) {
     const size_t num_symbols = 24;
-    str* filename = str_new("/home/orion/Projects/Aries/Compiler/C Rewrite/lexer/lexer_tests/example1.ari");
+    const char* filename = "/home/orion/Projects/Aries/Compiler/C Rewrite/lexer/lexer_tests/example1.ari";
     Lexer* l = lex_new(filename);
     if (!lex(l)) { TEST_FAIL_MESSAGE("call to lex() failed!"); }
     if (l == NULL) { TEST_FAIL_MESSAGE("null lexer object!"); }
     if (l->sym_list == NULL) { TEST_FAIL_MESSAGE("null lexer symlist object!"); }
 
-    str_free(filename);
     lex_free(l);
 }
 
@@ -27,7 +26,7 @@ void test_sym_new_success_1(void) {
 void test_lexer_lex_success_1() {
 
     const size_t num_symbols = 24;
-    str* filename = str_new("/home/orion/Projects/Aries/Compiler/C Rewrite/lexer/lexer_tests/example1.ari");
+    const char* filename = "/home/orion/Projects/Aries/Compiler/C Rewrite/lexer/lexer_tests/example1.ari";
     Lexer* l = lex_new(filename);
     if (!lex(l)) { TEST_FAIL_MESSAGE("call to lex() failed!"); }
     if (l == NULL) { TEST_FAIL_MESSAGE("null lexer object!"); }
@@ -589,7 +588,7 @@ void test_str_is_char_literal() {
 }
 
 void test_lexer_add_symbol_1() {
-    str* filename = str_new("/home/orion/Projects/Aries/Compiler/C Rewrite/lexer/lexer_tests/example1.ari");
+    const char* filename = "/home/orion/Projects/Aries/Compiler/C Rewrite/lexer/lexer_tests/example1.ari";
 
     Lexer* l = lex_new(filename);
     Symbol* sym1 = sym_new(str_new("def"));
@@ -603,16 +602,27 @@ void test_lexer_add_symbol_1() {
     Symbol* sym9 = sym_new(str_new("f64"));
     Symbol* sym10 = sym_new(str_new("u8"));
 
-    lex_add_symbol(l, sym1);
-    lex_add_symbol(l, sym2);
-    lex_add_symbol(l, sym3);
-    lex_add_symbol(l, sym4);
-    lex_add_symbol(l, sym5);
-    lex_add_symbol(l, sym6);
-    lex_add_symbol(l, sym7);
-    lex_add_symbol(l, sym8);
-    lex_add_symbol(l, sym9);
-    lex_add_symbol(l, sym10);
+    TEST_ASSERT_NOT_NULL(sym1);
+    TEST_ASSERT_NOT_NULL(sym2);
+    TEST_ASSERT_NOT_NULL(sym3);
+    TEST_ASSERT_NOT_NULL(sym4);
+    TEST_ASSERT_NOT_NULL(sym5);
+    TEST_ASSERT_NOT_NULL(sym6);
+    TEST_ASSERT_NOT_NULL(sym7);
+    TEST_ASSERT_NOT_NULL(sym8);
+    TEST_ASSERT_NOT_NULL(sym9);
+    TEST_ASSERT_NOT_NULL(sym10);
+
+    lex_add_symbol(l, *sym1);
+    lex_add_symbol(l, *sym2);
+    lex_add_symbol(l, *sym3);
+    lex_add_symbol(l, *sym4);
+    lex_add_symbol(l, *sym5);
+    lex_add_symbol(l, *sym6);
+    lex_add_symbol(l, *sym7);
+    lex_add_symbol(l, *sym8);
+    lex_add_symbol(l, *sym9);
+    lex_add_symbol(l, *sym10);
 
     TEST_ASSERT_NOT_NULL(l->sym_list);
     TEST_ASSERT_EQUAL(l->sym_list->symbols[0].t, KEYWORD_DEF);
@@ -623,8 +633,6 @@ void test_lexer_add_symbol_1() {
     lex_free(l);
 
     TEST_ASSERT_NULL(l);
-
-    str_free(filename);
 }
 
 void test_lexer_example1() {

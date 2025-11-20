@@ -7,15 +7,16 @@
 #include "sym_list.h"
 
 typedef struct {
-    str* file_content; // TODO: Should the lexer even have this?
+    arena* arena; // TODO: Should this have a more specific scope? (symbols/strings?)
+    str* file_content; // TODO: Should the lexer even own this?
     size_t index;
     SymbolList* sym_list;
 } Lexer;
 
 /// @brief Creates a new lexer object.
-/// @param file_contents A pointer to a str object that contains a file to be lexed. The lexer takes ownership of this str object!
+/// @param filename A cstring filename.
 /// @return A pointer to a new lexer object. Returns NULL on failure.
-Lexer* lex_new(str* file_contents);
+Lexer* lex_new(const char* filename);
 
 void _lex_free(Lexer* lexer);
 #define lex_free(l) \
@@ -25,7 +26,7 @@ do {                \
 } while (0)
 
 bool lex(Lexer* lexer);
-bool lex_add_symbol(Lexer* const lex, const Symbol* const sym);
+bool lex_add_symbol(Lexer* const lex, Symbol sym);
 Token lex_buffer_to_token(char token_buffer[MAX_IDENTIFIER_LENGTH]);
 void lex_print(const Lexer* const lexer);
 

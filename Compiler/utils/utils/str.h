@@ -9,29 +9,47 @@
 #include <errno.h>
 #include <stdint.h>
 
-// TODO: Handle capitalized variants!
-#define PREFIX_BIN ("0b")
-#define PREFIX_OCT ("0o")
-#define PREFIX_HEX ("0x")
+#include "arena.h"
 
-#define U8_SUFFIX  ("u8")
-#define U16_SUFFIX ("u16")
-#define U32_SUFFIX ("u32")
-#define U64_SUFFIX ("u64")
+#define PREFIX_BIN_LOWER ("0b")
+#define PREFIX_OCT_LOWER ("0o")
+#define PREFIX_HEX_LOWER ("0x")
+#define PREFIX_BIN_UPPER ("0B")
+#define PREFIX_OCT_UPPER ("0O")
+#define PREFIX_HEX_UPPER ("0X")
 
-#define I8_SUFFIX  ("i8")
-#define I16_SUFFIX ("i16")
-#define I32_SUFFIX ("i32")
-#define I64_SUFFIX ("i64")
+#define U8_SUFFIX_LOWER  ("u8")
+#define U16_SUFFIX_LOWER ("u16")
+#define U32_SUFFIX_LOWER ("u32")
+#define U64_SUFFIX_LOWER ("u64")
+#define U8_SUFFIX_UPPER  ("U8")
+#define U16_SUFFIX_UPPER ("U16")
+#define U32_SUFFIX_UPPER ("U32")
+#define U64_SUFFIX_UPPER ("U64")
 
-#define F32_SUFFIX ("f32")
-#define F64_SUFFIX ("f64")
+#define I8_SUFFIX_LOWER  ("i8")
+#define I16_SUFFIX_LOWER ("i16")
+#define I32_SUFFIX_LOWER ("i32")
+#define I64_SUFFIX_LOWER ("i64")
+#define I8_SUFFIX_UPPER  ("I8")
+#define I16_SUFFIX_UPPER ("I16")
+#define I32_SUFFIX_UPPER ("I32")
+#define I64_SUFFIX_UPPER ("I64")
 
-#define BOOL_SUFFIX ("b") // TODO: is this something i want?
+#define F32_SUFFIX_LOWER ("f32")
+#define F64_SUFFIX_LOWER ("f64")
+#define F32_SUFFIX_UPPER ("F32")
+#define F64_SUFFIX_UPPER ("F64")
+
+typedef enum {
+    STACK,
+    HEAP,
+    ARENA
+} AllocationLocation;
 
 /// @brief An immutable string. Usually allocated on the heap.
 typedef struct {
-    bool heap;
+    AllocationLocation location;
     size_t length;
     char* data;
 } str;
@@ -43,6 +61,12 @@ typedef size_t index_t;
 /// @param s The target cstring.
 /// @return A heap-allocated str* instance.
 str* str_new(const char* s);
+
+/// @brief Allocates a new string instance based on the given cstring in the given arena.
+/// @param a The arena from which to request memory.
+/// @param s The target cstring.
+/// @return An arena-allocated str* instance.
+str* astr_new(arena* const a, const char* s);
 
 /// @brief Frees the given string and sets it to zero.
 /// @param s The string instance to free.
@@ -121,6 +145,14 @@ str* str_view(const str* const s, size_t start, size_t end);
 /// @return A new string instance.
 str* str_copy(const str* const s, size_t start, size_t end);
 
+/// @brief Returns a new copy of `s`.
+/// @param a The arena from which to request memory.
+/// @param s The string to copy.
+/// @param start The index at which to start the copy.
+/// @param end The index at which to end the copy.
+/// @return A new string instance.
+str* astr_copy(arena* const a, const str* const s, size_t start, size_t end);
+
 /// @brief NOT IMPLEMENTED; MAY BE USEFUL.
 str** str_split(const str* const s, char c);
 
@@ -135,9 +167,21 @@ char* str_raw(const str* const s);
 str* str_from_file(FILE* const file);
 
 /// @brief Returns a string instance containing the contents of `file`.
+/// @param a The arena from which to request memory.
+/// @param file The file to convert to a string.
+/// @return A string instance containing the contents of `file`.
+str* astr_from_file(arena* const a, FILE* const file);
+
+/// @brief Returns a string instance containing the contents of `file`.
 /// @param filename The filename of the file to convert to a string.
 /// @return A string instance containing the contents of the file `filename`.
 str* str_from_filename(const char* filename);
+
+/// @brief Returns a string instance containing the contents of `file`.
+/// @param a The arena from which to request memory.
+/// @param filename The filename of the file to convert to a string.
+/// @return An arena-allocated string instance containing the contents of the file `filename`.
+str* astr_from_filename(arena* const a, const char* filename);
 
 /// @brief Removes `c` from both the left and right ends of `s`. This function will modify the underlying string but will not reallocate any memory. This function will only remove one instance of `c` from either end. If `c` is not on the ends of `s`, then this function does nothing.
 /// 

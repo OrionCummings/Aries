@@ -4,41 +4,40 @@
 #include "str.h"
 #include "lexer.h"
 #include "parser.h"
-#include <arena.h>
+#include "arena.h"
+#include "args.h"
 
 int main(int argc, char** argv) {
 
+    // TODO: Make this actually work lol
+    // parse_arguments(argc, argv);
+
     const char* filename = "/home/orion/Projects/Aries/Compiler/code/example0.ari";
 
-    // Create an arena with 1kB of memory
-    arena* arena_str = arena_new(1024);
-
-    str* file_content = str_from_filename(filename);
-    if (file_content == NULL) {
-        A_WARNING("Failed to read file '%s'", filename);
-        return -1;
-    }
-
-    Lexer* lexer = lex_new(file_content);
+    Lexer* lexer = lex_new(filename);
     if (!lex(lexer)) {
         A_WARNING("Failed to lex file '%s'", filename);
         return -1;
     }
 
-    lex_print(lexer);
-    
-    // Parser* parser = parser_new(lexer->sym_list);
-    // Parser* parser = NULL;
-    // if (!parse(parser)) {
-    //     A_WARNING("Failed to parse file '%s'", filename);
-    //     return -2;
-    // }
+    // Extract the symlist from the lexer
+    SymbolList* symlist = lexer->sym_list;
+    if (symlist == NULL) {
+        A_WARNING("null symlist");
+        return -1;
+    }
 
-    // parser_print(parser);
-    
+    // Free the lexer
     lex_free(lexer);
-    // parser_free(parser);
-    arena_free(arena_str);
+    A_INFO("freed the lexer");
+    
+    // Make sure the symbols are still ok (they probably aren't because you missed something)
+    sym_list_print(*symlist);
+    A_INFO("printed the symlist");
+    
+    // Free the symbol list
+    sym_list_free(symlist);
+    A_INFO("freed the symlist");
 
     return 0;
 }

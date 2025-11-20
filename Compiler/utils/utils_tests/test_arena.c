@@ -2,11 +2,11 @@
 #include "utils.h"
 
 void setUp() {
-    ENABLE_DEBUG_OUTPUT = false;
+    LOG_PUSH(LOG_NONE);
 }
 
 void tearDown() {
-    ENABLE_DEBUG_OUTPUT = true;
+    LOG_POP();
 }
 
 void test_arena_new_success(void) {

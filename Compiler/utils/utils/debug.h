@@ -29,7 +29,30 @@
 #define A_ERROR(X, ...)   __error(  X, __FILE__, __func__, __LINE__ __VA_OPT__(,) __VA_ARGS__)
 #define A_TRACE(...)   __trace(__FILE__, __func__, __LINE__)
 
-extern bool ENABLE_DEBUG_OUTPUT;
+typedef enum {
+    LOG_NONE,
+    LOG_ERROR,
+    LOG_WARNING,
+    LOG_INFO,
+    LOG_TRACE,
+    LOG_ALL,
+} LogLevel;
+
+extern LogLevel current_log_level;
+extern LogLevel previous_log_level;
+
+/// @brief Determines the lowest log level that is written to stdout.
+#define LOG_PUSH(level)                     \
+{                                           \
+    previous_log_level = current_log_level; \
+    current_log_level = level;              \
+};
+
+/// @brief Restores the previous log level.
+#define LOG_POP()                           \
+{                                           \
+    current_log_level = previous_log_level; \
+};
 
 void __error(const char* message, const char* file, const char* func, const uint64_t line, ...);
 void __warning(const char* message, const char* file, const char* func, const uint64_t line, ...);

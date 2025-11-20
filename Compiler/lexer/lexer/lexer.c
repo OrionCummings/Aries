@@ -31,12 +31,13 @@ bool lex(Lexer* lexer) {
         }
 
         Symbol* sym = sym_new(s);
-        sym->location = (CharacterRange){ .line = line, .char_start = char_start, .char_stop = char_start + char_len };
-
         if (sym == NULL) {
             A_WARNING("failed to create symbol");
+            str_free(s);
+            free(boundaries);
             return false;
         }
+        sym->location = (CharacterRange){ .line = line, .char_start = char_start, .char_stop = char_start + char_len };
 
         char_start += char_len;
         if (sym->t == SYM_NEWLINE) {
@@ -44,50 +45,76 @@ bool lex(Lexer* lexer) {
             char_start = 0;
         }
 
-        lex_add_symbol(lexer, sym);
-        // sym_print(*sym);
+        lex_add_symbol(lexer, *sym);
 
-        str_free(s);     // Freeing these breaks the lexer!
-        // sym_free(sym);   // AHHHHHHHHHHHHHH
+        sym_free(sym);
+        str_free(s);
+
+        printf("");
     }
 
     free(boundaries);
 
+    A_INFO("performed lexing");
+
     return true;
 }
 
-Lexer* lex_new(str* file_contents) {
+Lexer* lex_new(const char* filename) {
 
-    Lexer* lexer = calloc(1, sizeof(*lexer));
+    arena* arena = arena_new(64 * sizeof(Symbol));
+    if (arena == NULL) {
+        A_ERROR("failed to create a new arena");
+        arena_free(arena);
+        return NULL;
+    }
+    A_INFO("created a new arena");
+
+    // The file content lives in the arena
+    str* file_content = astr_from_filename(arena, filename);
+    if (file_content == NULL) {
+        A_ERROR("failed to read file '%s'", filename);
+        arena_free(arena);
+        return NULL;
+    }
+    A_INFO("extracted file contents from '%s'", filename);
+
+    // TODO: Is this strange? Is that bad?? Is this good??????
+    // The lexer lives in the arena
+    Lexer* lexer = arena_alloc(arena, sizeof(*lexer));
     if (lexer == NULL) {
-        A_WARNING("failed to allocate new lexer");
+        A_ERROR("failed to allocate new lexer");
+        arena_free(arena);
         return NULL;
     }
+    A_INFO("created a new lexer");
 
-    void* temp = sym_list_new(SYM_LIST_DEFAULT_SIZE);
-    if (temp == NULL) {
-        A_WARNING("failed to allocate new symbol list");
-        lex_free(lexer);
+    // The symlist DOES NOT live in the arena because it must exist 
+    // after the lexer is destroyed. The lifetime of the symlist is 
+    // LONGER than that of the lexer.
+    SymbolList* sym_list = sym_list_new(SYM_LIST_DEFAULT_SIZE);
+    if (sym_list == NULL) {
+        A_ERROR("failed to allocate new symbol list");
+        arena_free(arena);
         return NULL;
     }
-    lexer->sym_list = temp;
-    lexer->file_content = file_contents;
+    A_INFO("created a new symlist");
+
+    lexer->arena = arena;
+    lexer->file_content = file_content;
+    lexer->sym_list = sym_list;
 
     return lexer;
 }
 
-// TODO: I'm not convinved that this is correct; add some tests
 void _lex_free(Lexer* l) {
-    if (l != NULL) {
-        str_free(l->file_content);
-        sym_list_free(l->sym_list);
-    }
-    free(l);
+    if (l == NULL) { return; }
+    arena_free(l->arena);
 }
 
 // TODO: sym could be const?
-bool lex_add_symbol(Lexer* const lex, const Symbol* const sym) {
-    if (lex == NULL || lex->sym_list == NULL || sym == NULL) { return false; }
+bool lex_add_symbol(Lexer* const lex, const Symbol const sym) {
+    if (lex == NULL || lex->sym_list == NULL) { return false; }
 
     sym_list_add(lex->sym_list, sym);
 
@@ -102,7 +129,6 @@ void lex_print(const Lexer* const lexer) {
         return;
     }
 
-    
     if (lexer->sym_list != NULL) {
         printf("(%lu/%lu):\n", lexer->sym_list->length, lexer->sym_list->capacity);
         sym_list_print(*lexer->sym_list);

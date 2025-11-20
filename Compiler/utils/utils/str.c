@@ -10,22 +10,43 @@ str* str_new(const char* s) {
 
     if (r != NULL) {
 
-        size_t len = strlen(s); // TODO: !
+        size_t len = strlen(s);
 
         r->data = calloc(len + 1, sizeof(*(r->data)));
 
         strncpy(r->data, s, len);
 
         r->length = len;
-        r->heap = true;
+        r->location = HEAP;
     }
+
+    return r;
+}
+
+str* astr_new(arena* const a, const char* s) {
+    if (s == NULL || a == NULL) { return NULL; }
+
+    str* r = arena_alloc(a, sizeof(*r));
+
+    if (r == NULL) { return NULL; }
+
+    size_t len = strlen(s);
+
+    r->data = arena_alloc(a, sizeof(*(r->data)));
+
+    strncpy(r->data, s, len);
+
+    r->length = len;
+    r->location = ARENA;
 
     return r;
 }
 
 void _str_free(str* s) {
 
-    if (s != NULL && s->heap) {
+    // Only free heap-allocated strings! Don't attempt to free a stack-allocated
+    // or arena-allocated string!
+    if (s != NULL && (s->location == HEAP)) {
         free(s->data);
     }
 
@@ -85,7 +106,7 @@ bool str_cmp_raw(const str* const s, const char* const cs) {
 }
 
 bool str_ident(const str* const s1, const str* const s2) {
-    return (s1 != NULL) && (s2 != NULL) && (s1->heap == s2->heap) &&
+    return (s1 != NULL) && (s2 != NULL) && (s1->location == s2->location) &&
         (s1->length == s2->length) && (str_cmp(s1, s2));
 }
 
@@ -159,7 +180,7 @@ char str_at(const str const* s, size_t index) {
 }
 
 str* str_append(const str* const s, const char c) {
-    if (s == NULL || !s->heap || c == '\0') {
+    if (s == NULL || (s->location != HEAP) || c == '\0') {
         return NULL;
     }
 
@@ -181,7 +202,7 @@ str* str_view(const str* const s, size_t start, size_t end) {
 
     // TODO: why does this allocate lmao
     str* view = calloc(1, sizeof(*view));
-    view->heap = false;
+    view->location = STACK;
     view->length = end - start;
     view->data = s->data + start;
     return view;
@@ -200,6 +221,21 @@ str* str_copy(const str* const s, size_t start, size_t end) {
     memcpy(substring, s->data + start, len_substring);
 
     return str_new((char*)substring);
+}
+
+str* astr_copy(arena* const a, const str* const s, size_t start, size_t end) {
+    if (s == NULL || a == NULL || start >= end) { return NULL; } // TODO: Are these conditions correct?
+
+    size_t len = str_len(s);
+    if (len == 0 || start > len || end > len) { return NULL; }
+
+    size_t len_substring = end - start;
+
+    char substring[len_substring + 1];
+    memset(substring, 0, len_substring + 1);
+    memcpy(substring, s->data + start, len_substring);
+
+    return astr_new(a, (char*)substring);
 }
 
 char* str_raw(const str* const s) {
@@ -227,7 +263,7 @@ str* str_from_file(FILE* const file) {
     size_t len = ftell(file);
     fseek(file, 0, SEEK_SET);
 
-    char* buffer = calloc(len, sizeof(*buffer) * len);
+    char* buffer = calloc(len, sizeof(*buffer));
     if (buffer == NULL) {
         return NULL;
     }
@@ -238,7 +274,28 @@ str* str_from_file(FILE* const file) {
     return s;
 }
 
+str* astr_from_file(arena* const a, FILE* const file) {
+    if (file == NULL) {
+        return NULL;
+    }
+
+    fseek(file, 0, SEEK_END);
+    size_t len = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    char* buffer = arena_alloc(a, sizeof(*buffer) * len);
+    if (buffer == NULL) {
+        return NULL;
+    }
+    fread(buffer, 1, len, file);
+
+    str* s = astr_new(a, buffer);
+    return s;
+}
+
 str* str_from_filename(const char* filename) {
+    if (filename == NULL) { return NULL; }
+
     FILE* file = fopen(filename, "r");
     if (file == NULL) {
         return NULL;
@@ -248,6 +305,24 @@ str* str_from_filename(const char* filename) {
     if (file == NULL) {
         return NULL;
     }
+
+    fclose(file);
+
+    return s;
+}
+
+str* astr_from_filename(arena* const a, const char* filename) {
+
+    if (a == NULL || filename == NULL) { return NULL; }
+
+    FILE* file = fopen(filename, "r");
+    if (file == NULL) { return NULL; }
+
+    // str* s = astr_from_file(a, file);
+    A_INFO("calling astr_from_file()");
+    str* s = astr_from_file(a, file);
+    A_INFO("called astr_from_file()");
+    // if (s == NULL) { return NULL; } // Removed!
 
     fclose(file);
 
