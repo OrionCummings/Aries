@@ -10,6 +10,7 @@
 #include <string.h>
 #include <assert.h>
 #include <stdbool.h>
+#include "colors.h"
 
 #define static_assert(condition, message) _Static_assert((condition), message)
 
@@ -40,6 +41,7 @@ typedef enum {
 
 extern LogLevel current_log_level;
 extern LogLevel previous_log_level;
+extern bool enable_ansi_color_codes;
 
 /// @brief Determines the lowest log level that is written to stdout.
 #define LOG_PUSH(level)                     \

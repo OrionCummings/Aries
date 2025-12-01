@@ -13,7 +13,7 @@ void test_str_new_success(void) {
 
     TEST_ASSERT_EQUAL(length, s->length);
     TEST_ASSERT_EQUAL_STRING(expected_string, s->data);
-    TEST_ASSERT_EQUAL(HEAP, s->location);
+    TEST_ASSERT_EQUAL(AL_HEAP, s->location);
 
     str_free(s);
 }
@@ -214,11 +214,11 @@ void test_str_append_success() {
 
     TEST_ASSERT_EQUAL_STRING("yee", s1->data);
     TEST_ASSERT_EQUAL(3, s1->length);
-    TEST_ASSERT_EQUAL(HEAP, s1->location);
+    TEST_ASSERT_EQUAL(AL_HEAP, s1->location);
 
     TEST_ASSERT_EQUAL_STRING("yeet", s2->data);
     TEST_ASSERT_EQUAL(4, s2->length);
-    TEST_ASSERT_EQUAL(HEAP, s2->location);
+    TEST_ASSERT_EQUAL(AL_HEAP, s2->location);
 
     str_free(s1);
     str_free(s2);
@@ -300,8 +300,8 @@ void test_str_cmp_success_same_text() {
     size_t len_s1 = str_len(s1);
     size_t len_s2 = str_len(s2);
 
-    s1->location = HEAP;
-    s2->location = STACK;
+    s1->location = AL_HEAP;
+    s2->location = AL_STACK;
 
     s1->length = 45;
 
@@ -311,8 +311,8 @@ void test_str_cmp_success_same_text() {
 
     // Restore the string state so free() works as expected; this test
     // isn't for free(), so why stress it.
-    s1->location = HEAP;
-    s2->location = HEAP;
+    s1->location = AL_HEAP;
+    s2->location = AL_HEAP;
 
     s1->length = len_s1;
     s2->length = len_s2;
@@ -435,8 +435,8 @@ void test_str_ident_failure_same_text() {
     size_t len_s1 = str_len(s1);
     size_t len_s2 = str_len(s2);
 
-    s1->location = HEAP;
-    s2->location = STACK;
+    s1->location = AL_HEAP;
+    s2->location = AL_STACK;
 
     s1->length = 45;
 
@@ -446,8 +446,8 @@ void test_str_ident_failure_same_text() {
 
     // Restore the string state so free() works as expected; this test
     // isn't for free(), so why stress it.
-    s1->location = HEAP;
-    s2->location = HEAP;
+    s1->location = AL_HEAP;
+    s2->location = AL_HEAP;
 
     s1->length = len_s1;
     s2->length = len_s2;
@@ -604,11 +604,11 @@ void test_str_view_success() {
     const char* expected_text = "some";
     const char* expected_data = s->data + start;
 
-    str* view = str_view(s, start, end);
+    const str view = str_view(s, start, end);
 
-    TEST_ASSERT_TRUE(str_cmp(s, view) == 0);
-    TEST_ASSERT_EQUAL(HEAP, view->location);
-    TEST_ASSERT_EQUAL(expected_data, view->data);
+    TEST_ASSERT_TRUE(str_cmp(s, &view) == 0);
+    TEST_ASSERT_EQUAL(AL_STACK, view.location);
+    TEST_ASSERT_EQUAL(expected_data, view.data);
 
     str_free(s);
 
@@ -623,19 +623,17 @@ void test_str_view_success_free() {
     const char* expected_text = "some";
     const char* expected_data = s->data + start;
 
-    str* view = str_view(s, start, end);
+    str view = str_view(s, start, end);
+    TEST_ASSERT_NOT_NULL(view.data);
 
-    TEST_ASSERT_TRUE(str_cmp(s, view) == 0);
-    TEST_ASSERT_EQUAL(HEAP, view->location);
-    TEST_ASSERT_EQUAL(expected_data, view->data);
+    TEST_ASSERT_TRUE(str_cmp(s, &view) == 0);
+    TEST_ASSERT_EQUAL(AL_STACK, view.location);
+    TEST_ASSERT_EQUAL(expected_data, view.data);
 
-    str_free(view);
-
-    TEST_ASSERT_NULL(view);
     TEST_ASSERT_NOT_NULL(s);
     TEST_ASSERT_NOT_NULL(s->data);
     TEST_ASSERT_EQUAL(s->length, strlen(text));
-    TEST_ASSERT_EQUAL(HEAP, s->location);
+    TEST_ASSERT_EQUAL(AL_HEAP, s->location);
 
     str_free(s);
 
@@ -648,9 +646,9 @@ void test_str_view_failure_start_greater_than_end() {
     size_t end = 13;
     str* s = str_new(text);
 
-    str* view = str_view(s, start, end);
+    str view = str_view(s, start, end);
 
-    TEST_ASSERT_NULL(view);
+    TEST_ASSERT_NULL(view.data);
 
     str_free(s);
 }
@@ -661,9 +659,9 @@ void test_str_view_failure_start_too_large() {
     size_t end = 400;
     str* s = str_new(text);
 
-    str* view = str_view(s, start, end);
+    str view = str_view(s, start, end);
 
-    TEST_ASSERT_NULL(view);
+    TEST_ASSERT_NULL(view.data);
 
     str_free(s);
 }
@@ -674,9 +672,9 @@ void test_str_view_failure_end_too_large() {
     size_t end = 400;
     str* s = str_new(text);
 
-    str* view = str_view(s, start, end);
+    str view = str_view(s, start, end);
 
-    TEST_ASSERT_NULL(view);
+    TEST_ASSERT_NULL(view.data);
 
     str_free(s);
 }
@@ -687,9 +685,9 @@ void test_str_view_failure_start_equal_to_end() {
     size_t end = 4;
     str* s = str_new(text);
 
-    str* view = str_view(s, start, end);
+    str view = str_view(s, start, end);
 
-    TEST_ASSERT_NULL(view);
+    TEST_ASSERT_NULL(view.data);
 
     str_free(s);
 }
@@ -764,8 +762,10 @@ void test_str_str_cmp_raw_success_3() {
 }
 
 void test_str_copy() {
-    size_t start_index = 11;
-    size_t end_index = 18;
+    const size_t start_index = 11;
+    const size_t end_index = 18;
+    const size_t len = end_index - start_index;
+    char pre_content[len];
     const char* text = "apples and oranges";
     const char* expected_text = "oranges";
 
@@ -781,28 +781,39 @@ void test_str_copy() {
         TEST_ASSERT_EQUAL(copy->data[index], expected_text[index]);
     }
 
-    TEST_ASSERT_EQUAL(HEAP, base->location);
-    TEST_ASSERT_EQUAL(18, base->length);
-    
-    TEST_ASSERT_EQUAL(HEAP, copy->location);
-    TEST_ASSERT_EQUAL((end_index - start_index), copy->length);
+    TEST_ASSERT_EQUAL(AL_HEAP, base->location);
+    TEST_ASSERT_EQUAL(end_index, base->length);
 
-    // Free the base
+    TEST_ASSERT_EQUAL(AL_HEAP, copy->location);
+    TEST_ASSERT_EQUAL(len, copy->length);
+
+    // Free the base and ensure the copy is not affected
+    void* pre_data = copy->data;
+    size_t pre_length = copy->length;
+    AllocationLocation pre_location = copy->location;
+    memcpy(pre_content, copy->data, copy->length);
+
     str_free(base);
+
     TEST_ASSERT_NULL(base);
     TEST_ASSERT_NOT_NULL(copy);
+    TEST_ASSERT_NOT_NULL(copy->data);
+    TEST_ASSERT_EQUAL(pre_data, copy->data);
+    TEST_ASSERT_EQUAL(pre_length, copy->length);
+    TEST_ASSERT_EQUAL(pre_location, copy->location);
 
     // Assert that they still match
     for (size_t index = 0; index < copy->length; index++) {
-        // NOTE: Removed direct check against the base because it's been free'd 
         TEST_ASSERT_EQUAL(copy->data[index], expected_text[index]);
+        TEST_ASSERT_EQUAL(copy->data[index], pre_content[index]);
     }
 
-    TEST_ASSERT_EQUAL(HEAP, copy->location);
-    TEST_ASSERT_EQUAL((end_index - start_index), copy->length);
+    TEST_ASSERT_EQUAL(AL_HEAP, copy->location);
+    TEST_ASSERT_EQUAL(len, copy->length);
 
     str_free(copy);
     TEST_ASSERT_NULL(base);
+    TEST_ASSERT_NULL(copy);
 }
 
 int main(void) {
@@ -861,13 +872,12 @@ int main(void) {
         RUN_TEST(test_str_append_failure_null_character);
         RUN_TEST(test_str_append_failure_null_str);
 
-        // TODO: revisit str views
-        // RUN_TEST(test_str_view_success);
-        // RUN_TEST(test_str_view_success_free);
-        // RUN_TEST(test_str_view_failure_start_greater_than_end);
-        // RUN_TEST(test_str_view_failure_start_too_large);
-        // RUN_TEST(test_str_view_failure_end_too_large);
-        // RUN_TEST(test_str_view_failure_start_equal_to_end);
+        RUN_TEST(test_str_view_success);
+        RUN_TEST(test_str_view_success_free);
+        RUN_TEST(test_str_view_failure_start_greater_than_end);
+        RUN_TEST(test_str_view_failure_start_too_large);
+        RUN_TEST(test_str_view_failure_end_too_large);
+        RUN_TEST(test_str_view_failure_start_equal_to_end);
 
         RUN_TEST(test_str_raw_success);
         RUN_TEST(test_str_raw_failure_null_string);
@@ -876,9 +886,10 @@ int main(void) {
         RUN_TEST(test_str_str_cmp_raw_success_1);
         RUN_TEST(test_str_str_cmp_raw_success_2);
         RUN_TEST(test_str_str_cmp_raw_success_3);
+
+        RUN_TEST(test_str_copy);
     }
 
-    RUN_TEST(test_str_copy);
 
     return UNITY_END();
 }

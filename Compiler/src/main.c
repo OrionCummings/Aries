@@ -12,29 +12,23 @@ int main(int argc, char** argv) {
     // TODO: Make this actually work lol
     // parse_arguments(argc, argv);
 
-    const char* filename = "/home/orion/Projects/Aries/Compiler/code/example0.ari";
+    const char* filename = "/home/orion/Projects/Aries/Compiler/code/example-1.ari";
+    str* file_content = str_from_filename(filename);
 
-    Lexer* lexer = lex_new(filename);
-    if (!lex(lexer)) {
-        A_WARNING("Failed to lex file '%s'", filename);
-        return -1;
-    }
-
-    // Extract the symlist from the lexer
-    SymbolList* symlist = lexer->sym_list;
+    SymbolList* symlist = lex(file_content);
     if (symlist == NULL) {
-        A_WARNING("null symlist");
+        A_WARNING("failed to lex file '%s'", filename);
         return -1;
     }
 
-    // Free the lexer
-    lex_free(lexer);
-    A_INFO("freed the lexer");
-    
+    // Free the file string
+    str_free(file_content);
+    A_INFO("freed the file content");
+
     // Make sure the symbols are still ok (they probably aren't because you missed something)
     sym_list_print(*symlist);
     A_INFO("printed the symlist");
-    
+
     // Free the symbol list
     sym_list_free(symlist);
     A_INFO("freed the symlist");

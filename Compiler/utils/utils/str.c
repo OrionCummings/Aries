@@ -17,7 +17,7 @@ str* str_new(const char* s) {
         strncpy(r->data, s, len);
 
         r->length = len;
-        r->location = HEAP;
+        r->location = AL_HEAP;
     }
 
     return r;
@@ -37,7 +37,7 @@ str* astr_new(arena* const a, const char* s) {
     strncpy(r->data, s, len);
 
     r->length = len;
-    r->location = ARENA;
+    r->location = AL_ARENA;
 
     return r;
 }
@@ -46,7 +46,7 @@ void _str_free(str* s) {
 
     // Only free heap-allocated strings! Don't attempt to free a stack-allocated
     // or arena-allocated string!
-    if (s != NULL && (s->location == HEAP)) {
+    if (s != NULL && (s->location == AL_HEAP)) {
         free(s->data);
     }
 
@@ -180,7 +180,7 @@ char str_at(const str const* s, size_t index) {
 }
 
 str* str_append(const str* const s, const char c) {
-    if (s == NULL || (s->location != HEAP) || c == '\0') {
+    if (s == NULL || (s->location != AL_HEAP) || c == '\0') {
         return NULL;
     }
 
@@ -194,21 +194,17 @@ str* str_append(const str* const s, const char c) {
     return str_new((char*)buffer); // get that nasty array away!!! Yuck!
 }
 
-str* str_view(const str* const s, size_t start, size_t end) {
-    if (s == NULL || start >= end) { return NULL; }
+str str_view(const str* const s, size_t start, size_t end) {
+    if (s == NULL || start >= end) { return STR_EMPTY; }
 
     size_t len = str_len(s);
-    if (len == 0 || start > len || end > len) { return NULL; }
+    if (len == 0 || start > len || end > len) { return STR_EMPTY; }
 
-    // TODO: why does this allocate lmao
-    str* view = calloc(1, sizeof(*view));
-    view->location = STACK;
-    view->length = end - start;
-    view->data = s->data + start;
+    str view = { .data = s->data + start, .length = end - start, .location = AL_STACK };
     return view;
 }
 
-str* str_copy(const str* const s, size_t start, size_t end) {
+str* str_copy(const str const* s, size_t start, size_t end) {
     if (s == NULL || start >= end) { return NULL; }
 
     size_t len = str_len(s);
@@ -223,7 +219,7 @@ str* str_copy(const str* const s, size_t start, size_t end) {
     return str_new((char*)substring);
 }
 
-str* astr_copy(arena* const a, const str* const s, size_t start, size_t end) {
+str* astr_copy(arena* const a, str* s, size_t start, size_t end) {
     if (s == NULL || a == NULL || start >= end) { return NULL; } // TODO: Are these conditions correct?
 
     size_t len = str_len(s);
@@ -341,11 +337,9 @@ bool str_has_prefix(const str* const s, const char* prefix) {
         return false;
     }
 
-    str* view_s = str_view(s, 0, len_prefix);
+    str view = str_view(s, 0, len_prefix);
 
-    bool has_prefix = str_cmp_raw(view_s, prefix);
-
-    str_free(view_s);
+    bool has_prefix = str_cmp_raw(&view, prefix);
 
     return has_prefix;
 }
@@ -362,11 +356,9 @@ bool str_has_suffix(const str* const s, const char* suffix) {
         return false;
     }
 
-    str* view_s = str_view(s, len_s - len_suffix, len_s);
+    str view = str_view(s, len_s - len_suffix, len_s);
 
-    bool has_suffix = str_cmp_raw(view_s, suffix);
-
-    str_free(view_s);
+    bool has_suffix = str_cmp_raw(&view, suffix);
 
     return has_suffix;
 }
@@ -414,6 +406,7 @@ index_t* str_get_alphanumeric_symbolic_boundaries(const str* const s) {
                 void* new_boundaries =
                     realloc(boundaries, capacity * sizeof(*boundaries));
                 if (new_boundaries == NULL) {
+                    free(boundaries);
                     return NULL;
                 }
                 boundaries = new_boundaries;
@@ -488,10 +481,12 @@ bool str_is_u8_literal(const str* const s) {
     // check the suffix
     if (!str_has_suffix(s, "u8")) { return false; }
 
-    str* view = str_view(s, 0, len - 2);
+    str view = str_view(s, 0, len - 2);
+
+    if (view.data == NULL) { return false; }
 
     char* buffer;
-    long value = strtol(view->data, &buffer, 10);
+    long value = strtol(view.data, &buffer, 10);
 
     return (value >= 0 && value <= 255);
 }
@@ -509,10 +504,10 @@ bool str_is_u16_literal(const str* const s) {
     // check the suffix
     if (!str_has_suffix(s, "u16")) { return false; }
 
-    str* view = str_view(s, 0, len - 3);
+    str view = str_view(s, 0, len - 3);
 
     char* buffer;
-    long value = strtol(s->data, &buffer, 10);
+    long value = strtol(view.data, &buffer, 10);
 
     return (value >= 0 && value <= 65535);
 }
@@ -530,19 +525,17 @@ bool str_is_u32_literal(const str* const s) {
     if (!isdigit(s->data[0])) { return false; }
 
     // check the suffix
-    str* view = NULL;
+    str view = STR_EMPTY;
     if (str_has_suffix(s, "u32")) {
         view = str_view(s, 0, len - 3);
     } else {
         view = str_view(s, 0, len); // TODO: Remove this; just use s?
     }
 
-    if (view == NULL) { return false; }
+    if (view.data == NULL) { return false; }
 
     char* buffer;
-    long value = strtol(view->data, &buffer, 10);
-
-    str_free(view);
+    long value = strtol(view.data, &buffer, 10);
 
     int has_suffix = strcmp(buffer, "u32");
     int lacks_suffix = strcmp(buffer, "");
@@ -566,10 +559,10 @@ bool str_is_u64_literal(const str* const s) {
     // check the suffix
     if (!str_has_suffix(s, "u64")) { return false; }
 
-    str* view = str_view(s, 0, len - 3);
+    str view = str_view(s, 0, len - 3);
 
     char* buffer;
-    long value = strtoul(s->data, &buffer, 10);
+    long value = strtoul(view.data, &buffer, 10);
 
     return (value >= 0UL && value <= 18446744073709551615UL);
 }

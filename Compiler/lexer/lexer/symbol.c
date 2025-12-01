@@ -1,5 +1,8 @@
 #include "symbol.h"
 
+/// @brief Create a new symbol. This function makes a copy of the given pointer and therefore does not take ownership of it.
+/// @param s The string on which to base the new symbol.
+/// @return A pointer to the new symbol. NULL on failure.
 Symbol* sym_new(const str* const s) {
 
     if (s == NULL) { return NULL; }
@@ -12,11 +15,15 @@ Symbol* sym_new(const str* const s) {
 
     sym->t = str_to_token(s);
     if (sym->t == INVALID) {
+        sym_free(sym);
         return NULL;
     }
 
     str* new_str = str_copy(s, 0, s->length);
-    if (new_str == NULL) { return NULL; }
+    if (new_str == NULL) {
+        sym_free(sym);
+        return NULL;
+    }
     sym->s = new_str;
 
     return sym;
@@ -51,7 +58,7 @@ bool sym_cmp(const Symbol s1, const Symbol s2) {
 }
 
 void sym_print(const Symbol s) {
-    printf("[%s:%d(%d-%d)]: ", TOKEN_NAMES[s.t], s.location.line, s.location.char_start, s.location.char_stop);
+    printf("[%s:%d(%d-%d)]: ", TOKEN_NAMES[s.t], s.location.line, s.location.start, s.location.end);
     if (s.t == SYM_NEWLINE) {
         printf("'\\n'\n");
     } else {

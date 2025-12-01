@@ -6,6 +6,7 @@
 
 void test_lexer_new_success_1(void);
 void test_sym_new_success_1(void);
+void test_sym_new_success_from_str_view(void);
 void test_lexer_lex_success_1(void);
 void test_str_to_token_success_1(void);
 void test_str_get_alphanumeric_symbolic_boundaries_success_1(void);
@@ -34,6 +35,5 @@ void test_str_is_u32_literal(void);
 void test_str_is_u64_literal(void);
 void test_str_is_char_literal(void);
 void test_lexer_add_symbol_1(void);
-void test_lexer_example1(void);
 
 #endif

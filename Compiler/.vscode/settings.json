@@ -21,6 +21,10 @@
         "random": "c",
         "system_error": "c",
         "stdlib.h": "c",
-        "args.h": "c"
-    }
+        "args.h": "c",
+        "test_lexer.h": "c",
+        "string": "c",
+        "vector": "c"
+    },
+    "workbench.editor.wrapTabs": true
 }

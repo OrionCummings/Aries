@@ -41,10 +41,13 @@
 #define F32_SUFFIX_UPPER ("F32")
 #define F64_SUFFIX_UPPER ("F64")
 
+#define STR_EMPTY ((str){.data = NULL, .length = 0, .location = AL_UNKNOWN})
+
 typedef enum {
-    STACK,
-    HEAP,
-    ARENA
+    AL_UNKNOWN,
+    AL_STACK,
+    AL_HEAP,
+    AL_ARENA
 } AllocationLocation;
 
 /// @brief An immutable string. Usually allocated on the heap.
@@ -131,12 +134,12 @@ char str_at(const str* const s, size_t index);
 /// @return Returns a new string instance if the character is appended; otherwise, return NULL.
 str* str_append(const str* const s, const char c);
 
-/// @brief Returns a view of `s`. The returned string has the `heap` field set to false! The return value of this function should never be passed as an argument to `str_free`. The behavior of this function is undefined if the underlying string is freed.
+/// @brief Returns a view of `s`. The return value of this function should never be passed as an argument to `str_free`. The behavior of this function is undefined if the underlying string is freed.
 /// @param s The underlying string.
 /// @param start The starting index of the view (inclusive).
 /// @param end The ending index of the view (inclusive).
 /// @return A new string instance referencing the characters from `start` to `end`, inclusive.
-str* str_view(const str* const s, size_t start, size_t end);
+str str_view(const str* const s, size_t start, size_t end);
 
 /// @brief Returns a new copy of `s`.
 /// @param s The string to copy.
@@ -151,7 +154,7 @@ str* str_copy(const str* const s, size_t start, size_t end);
 /// @param start The index at which to start the copy.
 /// @param end The index at which to end the copy.
 /// @return A new string instance.
-str* astr_copy(arena* const a, const str* const s, size_t start, size_t end);
+str* astr_copy(arena* const a, str* s, size_t start, size_t end);
 
 /// @brief NOT IMPLEMENTED; MAY BE USEFUL.
 str** str_split(const str* const s, char c);

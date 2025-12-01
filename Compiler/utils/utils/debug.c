@@ -2,6 +2,7 @@
 
 LogLevel current_log_level = LOG_ALL;
 LogLevel previous_log_level = LOG_ALL;
+bool enable_ansi_color_codes = true;
 
 void __error(const char* message, const char* file, const char* func, const uint64_t line, ...) {
 #ifdef __ENABLE_ERROR
@@ -12,7 +13,12 @@ void __error(const char* message, const char* file, const char* func, const uint
     va_start(args, line);
 
     char buffer[__DEBUG_MESSAGE_BUFFER_SIZE] = { 0 };
-    int res = snprintf(buffer, __DEBUG_MESSAGE_BUFFER_SIZE, "[ERROR] %s:%s():%" PRIu64 ": \"%s\"\n", file, func, line, message);
+    int res = 0;
+    if (enable_ansi_color_codes) {
+        res = snprintf(buffer, __DEBUG_MESSAGE_BUFFER_SIZE, "%s[ERROR] %s:%" PRIu64 " in %s(): \"%s\"%s\n", ANSI_COLOR_RED, file, line, func, message, ANSI_COLOR_RESET);
+    } else {
+        res = snprintf(buffer, __DEBUG_MESSAGE_BUFFER_SIZE, "[ERROR] %s:%" PRIu64 " in %s(): \"%s\"\n", file, line, func, message);
+    }
     if (res > __DEBUG_MESSAGE_BUFFER_SIZE) {
         printf("META: The following error message was longer than %d characters and has been truncated.\n", __DEBUG_MESSAGE_BUFFER_SIZE);
     } else if (res == -1) {
@@ -34,7 +40,12 @@ void __warning(const char* message, const char* file, const char* func, const ui
     va_start(args, line);
 
     char buffer[__DEBUG_MESSAGE_BUFFER_SIZE] = { 0 };
-    int res = snprintf(buffer, __DEBUG_MESSAGE_BUFFER_SIZE, "[WARNING] %s:%s():%" PRIu64 ": \"%s\"\n", file, func, line, message);
+    int res = 0;
+    if (enable_ansi_color_codes) {
+        res = snprintf(buffer, __DEBUG_MESSAGE_BUFFER_SIZE, "%s[WARNING] %s:%" PRIu64 " in %s(): \"%s\"%s\n", ANSI_COLOR_YELLOW, file, line, func, message, ANSI_COLOR_YELLOW);
+    } else {
+        res = snprintf(buffer, __DEBUG_MESSAGE_BUFFER_SIZE, "[WARNING] %s:%" PRIu64 " in %s(): \"%s\"\n", file, line, func, message);
+    }
     if (res > __DEBUG_MESSAGE_BUFFER_SIZE) {
         printf("META: The following warning message was longer than %d characters and has been truncated.\n", __DEBUG_MESSAGE_BUFFER_SIZE);
     } else if (res == -1) {
@@ -55,7 +66,7 @@ void __info(const char* message, const char* file, const char* func, const uint6
     va_start(args, line);
 
     char buffer[__DEBUG_MESSAGE_BUFFER_SIZE] = { 0 };
-    int res = snprintf(buffer, __DEBUG_MESSAGE_BUFFER_SIZE, "[INFO] %s:%s():%" PRIu64 ": \"%s\"\n", file, func, line, message);
+    int res = snprintf(buffer, __DEBUG_MESSAGE_BUFFER_SIZE, "[INFO] %s:%" PRIu64 " in %s(): \"%s\"\n", file, line, func, message);
     if (res > __DEBUG_MESSAGE_BUFFER_SIZE) {
         printf("META: The following info message was longer than %d characters and has been truncated.\n", __DEBUG_MESSAGE_BUFFER_SIZE);
     } else if (res == -1) {
@@ -73,7 +84,7 @@ void __trace(const char* file, const char* func, const uint64_t line) {
     if (current_log_level < LOG_TRACE) return;
 
     char buffer[__DEBUG_MESSAGE_BUFFER_SIZE] = { 0 };
-    int res = snprintf(buffer, __DEBUG_MESSAGE_BUFFER_SIZE, "[TRACE] %s:%s():%" PRIu64 "\n", file, func, line);
+    int res = snprintf(buffer, __DEBUG_MESSAGE_BUFFER_SIZE, "[TRACE] %s in %s() on line %" PRIu64 "\n", file, func, line);
     if (res > __DEBUG_MESSAGE_BUFFER_SIZE) {
         printf("META: The following error message was longer than %d characters and has been truncated.\n", __DEBUG_MESSAGE_BUFFER_SIZE);
     } else if (res == -1) {

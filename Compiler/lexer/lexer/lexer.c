@@ -1,128 +1,85 @@
 #include "lexer.h"
 
-bool lex(Lexer* lexer) {
+SymbolList* lex(const str const* file_content) {
 
-    if (lexer == NULL) {
-        A_WARNING("passed null parameter 'lexer'");
+    if (file_content == NULL) {
+        A_WARNING("passed null parameter 'file_content'");
         return false;
     }
 
-    size_t len = str_len(lexer->file_content);
-    index_t* boundaries = str_get_alphanumeric_symbolic_boundaries(lexer->file_content);
+    SymbolList* symlist = sym_list_new(8); // TODO: Magic number
+    if (symlist == NULL) {
+        A_ERROR("failed to create symlist"); // TODO: Refactor with goto cleanup
+        return NULL;
+    }
+    A_INFO("created symlist");
+
+    size_t file_len = str_len(file_content);
+    if (file_len == 0) {
+        A_ERROR("invalid file length");
+        return NULL;
+    }
+
+    index_t* boundaries = str_get_alphanumeric_symbolic_boundaries(file_content);
+
+    if (boundaries == NULL) {
+        A_ERROR("Failed to create alphanumeric symbolic boundaires");
+        sym_list_free(symlist);
+        return NULL;
+    }
 
     size_t index = 0;
     uint16_t line = 1;
     size_t char_start = 0;
-    char buffer[MAX_IDENTIFIER_LENGTH];
-    while (boundaries[index++] != len) {
+    while (boundaries[index++] != file_len) {
 
-        // Clear the char buffer
-        memset(buffer, 0, MAX_IDENTIFIER_LENGTH);
-
+        // Get the relavent boundaries in the file contents
         index_t start = boundaries[index - 1];
         index_t end = boundaries[index];
-
         size_t char_len = end - start;
 
-        str* s = str_copy(lexer->file_content, start, end);
-        if (s == NULL) {
-            A_WARNING("failed to copy string");
+        // Get a view of the content within those boundaries
+        str s = str_view(file_content, start, end);
+        if (s.data == NULL) {
+            A_ERROR("failed to create view");
             return false;
         }
 
-        Symbol* sym = sym_new(s);
+        // TODO: sym_new() copies a string, owns it, gets added to the sym list, and the freed thereby freeing memory that now belongs to the symlist!
+        // Create a new symbol from the given string view
+        Symbol* sym = sym_new(&s); 
         if (sym == NULL) {
             A_WARNING("failed to create symbol");
-            str_free(s);
             free(boundaries);
             return false;
         }
-        sym->location = (CharacterRange){ .line = line, .char_start = char_start, .char_stop = char_start + char_len };
 
+        // Update the current line count
         char_start += char_len;
         if (sym->t == SYM_NEWLINE) {
             line++;
             char_start = 0;
         }
 
-        lex_add_symbol(lexer, *sym);
+        // Update the symbol's location
+        sym->location = crange(line, char_start, char_start + char_len);
 
+        // Add the symbol to the symlist
+        sym_list_add(symlist, *sym);
+
+        // Free the symbol because it's no longer needed
         sym_free(sym);
-        str_free(s);
-
-        printf("");
     }
 
     free(boundaries);
 
     A_INFO("performed lexing");
 
-    return true;
-}
-
-Lexer* lex_new(const char* filename) {
-
-    arena* arena = arena_new(64 * sizeof(Symbol));
-    if (arena == NULL) {
-        A_ERROR("failed to create a new arena");
-        arena_free(arena);
-        return NULL;
-    }
-    A_INFO("created a new arena");
-
-    // The file content lives in the arena
-    str* file_content = astr_from_filename(arena, filename);
-    if (file_content == NULL) {
-        A_ERROR("failed to read file '%s'", filename);
-        arena_free(arena);
-        return NULL;
-    }
-    A_INFO("extracted file contents from '%s'", filename);
-
-    // TODO: Is this strange? Is that bad?? Is this good??????
-    // The lexer lives in the arena
-    Lexer* lexer = arena_alloc(arena, sizeof(*lexer));
-    if (lexer == NULL) {
-        A_ERROR("failed to allocate new lexer");
-        arena_free(arena);
-        return NULL;
-    }
-    A_INFO("created a new lexer");
-
-    // The symlist DOES NOT live in the arena because it must exist 
-    // after the lexer is destroyed. The lifetime of the symlist is 
-    // LONGER than that of the lexer.
-    SymbolList* sym_list = sym_list_new(SYM_LIST_DEFAULT_SIZE);
-    if (sym_list == NULL) {
-        A_ERROR("failed to allocate new symbol list");
-        arena_free(arena);
-        return NULL;
-    }
-    A_INFO("created a new symlist");
-
-    lexer->arena = arena;
-    lexer->file_content = file_content;
-    lexer->sym_list = sym_list;
-
-    return lexer;
-}
-
-void _lex_free(Lexer* l) {
-    if (l == NULL) { return; }
-    arena_free(l->arena);
-}
-
-// TODO: sym could be const?
-bool lex_add_symbol(Lexer* const lex, const Symbol const sym) {
-    if (lex == NULL || lex->sym_list == NULL) { return false; }
-
-    sym_list_add(lex->sym_list, sym);
-
-    return true;
+    return symlist;
 }
 
 void lex_print(const Lexer* const lexer) {
-    printf("Lexer ");
+    printf("Lexer: ");
 
     if (lexer == NULL) {
         printf("\t<null>\n");

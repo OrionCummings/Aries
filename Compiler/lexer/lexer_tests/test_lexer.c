@@ -1,16 +1,5 @@
 #include "test_lexer.h"
 
-void test_lexer_new_success_1(void) {
-    const size_t num_symbols = 24;
-    const char* filename = "/home/orion/Projects/Aries/Compiler/C Rewrite/lexer/lexer_tests/example1.ari";
-    Lexer* l = lex_new(filename);
-    if (!lex(l)) { TEST_FAIL_MESSAGE("call to lex() failed!"); }
-    if (l == NULL) { TEST_FAIL_MESSAGE("null lexer object!"); }
-    if (l->sym_list == NULL) { TEST_FAIL_MESSAGE("null lexer symlist object!"); }
-
-    lex_free(l);
-}
-
 void test_sym_new_success_1(void) {
     const char* cstr = "0";
     const Token expected_token = LIT_I32;
@@ -23,16 +12,35 @@ void test_sym_new_success_1(void) {
     str_free(s);
 }
 
+void test_sym_new_success_from_str_view(void) {
+    const char* cstr = "def i32 float";
+    size_t start_index = 4;
+    size_t end_index = 7;
+    size_t len = end_index - start_index;
+    const Token expected_token = KEYWORD_I32;
+    str* s = str_new(cstr);
+    str view = str_view(s, start_index, end_index);
+    Symbol* sym = sym_new(&view);
+
+    TEST_ASSERT_EQUAL(expected_token, sym->t);
+
+    for (size_t i = 0; i < len; i++){
+        TEST_ASSERT_EQUAL(s->data[i + start_index], sym->s->data[i]);
+    }
+    
+    sym_free(sym);
+    str_free(s);
+}
+
 void test_lexer_lex_success_1() {
 
     const size_t num_symbols = 24;
-    const char* filename = "/home/orion/Projects/Aries/Compiler/C Rewrite/lexer/lexer_tests/example1.ari";
-    Lexer* l = lex_new(filename);
-    if (!lex(l)) { TEST_FAIL_MESSAGE("call to lex() failed!"); }
-    if (l == NULL) { TEST_FAIL_MESSAGE("null lexer object!"); }
-    if (l->sym_list == NULL) { TEST_FAIL_MESSAGE("null lexer symlist object!"); }
 
-    TEST_ASSERT_EQUAL(num_symbols, l->sym_list->length);
+    str* filename = str_new("/home/orion/Projects/Aries/Compiler/C Rewrite/lexer/lexer_tests/example1.ari"); // TODO: Make this rely on a hard-coded string so there are no file dependencies!
+    SymbolList* sym_list = lex(filename);
+
+    TEST_ASSERT_NOT_NULL(sym_list);
+    TEST_ASSERT_EQUAL(num_symbols, sym_list->length);
 
     Symbol* symbols = calloc(num_symbols, sizeof(*symbols));
 
@@ -60,11 +68,10 @@ void test_lexer_lex_success_1() {
     symbols[21] = DEREF_SYMBOL(sym_new(str_new("}")));
 
     for (size_t index = 0; index < num_symbols; index++) {
-        TEST_ASSERT(sym_cmp(symbols[index], l->sym_list->symbols[index]));
+        TEST_ASSERT(sym_cmp(symbols[index], sym_list->symbols[index]));
     }
 
     free(symbols);
-    lex_free(l);
 }
 
 void test_str_to_token_success_1() {
@@ -585,56 +592,4 @@ void test_str_is_char_literal() {
     str_free(x2);
     str_free(x3);
 
-}
-
-void test_lexer_add_symbol_1() {
-    const char* filename = "/home/orion/Projects/Aries/Compiler/C Rewrite/lexer/lexer_tests/example1.ari";
-
-    Lexer* l = lex_new(filename);
-    Symbol* sym1 = sym_new(str_new("def"));
-    Symbol* sym2 = sym_new(str_new("void"));
-    Symbol* sym3 = sym_new(str_new("return"));
-    Symbol* sym4 = sym_new(str_new("i32"));
-    Symbol* sym5 = sym_new(str_new("opt"));
-    Symbol* sym6 = sym_new(str_new("str"));
-    Symbol* sym7 = sym_new(str_new("byte"));
-    Symbol* sym8 = sym_new(str_new("res"));
-    Symbol* sym9 = sym_new(str_new("f64"));
-    Symbol* sym10 = sym_new(str_new("u8"));
-
-    TEST_ASSERT_NOT_NULL(sym1);
-    TEST_ASSERT_NOT_NULL(sym2);
-    TEST_ASSERT_NOT_NULL(sym3);
-    TEST_ASSERT_NOT_NULL(sym4);
-    TEST_ASSERT_NOT_NULL(sym5);
-    TEST_ASSERT_NOT_NULL(sym6);
-    TEST_ASSERT_NOT_NULL(sym7);
-    TEST_ASSERT_NOT_NULL(sym8);
-    TEST_ASSERT_NOT_NULL(sym9);
-    TEST_ASSERT_NOT_NULL(sym10);
-
-    lex_add_symbol(l, *sym1);
-    lex_add_symbol(l, *sym2);
-    lex_add_symbol(l, *sym3);
-    lex_add_symbol(l, *sym4);
-    lex_add_symbol(l, *sym5);
-    lex_add_symbol(l, *sym6);
-    lex_add_symbol(l, *sym7);
-    lex_add_symbol(l, *sym8);
-    lex_add_symbol(l, *sym9);
-    lex_add_symbol(l, *sym10);
-
-    TEST_ASSERT_NOT_NULL(l->sym_list);
-    TEST_ASSERT_EQUAL(l->sym_list->symbols[0].t, KEYWORD_DEF);
-    TEST_ASSERT_EQUAL(l->sym_list->symbols[0].location.line, 0);
-    TEST_ASSERT_EQUAL(l->sym_list->symbols[0].location.char_start, 0);
-    TEST_ASSERT_EQUAL(l->sym_list->symbols[0].location.char_stop, 3);
-
-    lex_free(l);
-
-    TEST_ASSERT_NULL(l);
-}
-
-void test_lexer_example1() {
-    
 }

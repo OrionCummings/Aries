@@ -6,7 +6,7 @@
 #include "token.h"
 
 typedef struct {
-    CharacterRange location;
+    CharacterLocation location;
     Token t;
     str* s;
 } Symbol;
