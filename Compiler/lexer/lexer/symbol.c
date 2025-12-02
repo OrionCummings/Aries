@@ -41,7 +41,8 @@ Symbol* sym_copy(const Symbol* s) {
         A_WARNING("attempted to copy null symbol");
         return NULL;
     }
-    Symbol* sym = sym_new(s->s);
+    str* copy_str = str_copy(s->s, 0, str_len(s->s));
+    Symbol* sym = sym_new(copy_str);
     if (sym == NULL) {
         A_WARNING("failed to copy symbol");
         return NULL;

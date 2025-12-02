@@ -25,6 +25,9 @@ SymbolList* sym_list_new(const size_t capacity) {
 
 void _sym_list_free(SymbolList* sl) {
     if (sl != NULL) {
+        for (index_t index = 0; index < sl->length; index++) {
+            str_free(sl->symbols[index].s);
+        }
         free(sl->symbols);
     }
     free(sl);
@@ -46,14 +49,14 @@ void sym_list_add(SymbolList* symlist, Symbol sym) {
     }
 
     // Create a new string so the symbol owns it
-    str* copy = str_copy(sym.s, 0, str_len(sym.s));
+    str* copied_str = str_copy(sym.s, 0, str_len(sym.s));
 
     // Copy the symbol
     void* dest = &(symlist->symbols[symlist->length]);
     void* src = &sym;
     size_t nbytes = sizeof(sym);
     memcpy(dest, src, nbytes);
-    symlist->symbols[symlist->length].s = copy;
+    symlist->symbols[symlist->length].s = copied_str;
 
     symlist->length++;
 }
