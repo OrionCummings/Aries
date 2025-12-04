@@ -5,18 +5,24 @@
 #include <stdlib.h>
 #include <argp.h>
 #include "debug.h"
+#include "str.h"
 
 #define DEFAULT_GROUP (0)
 
-struct arguments {
-    char* args[4];
-    int silent, verbose;
+typedef struct {
+    char* args[2];
     LogLevel log_level;
-    char* output_file;
-};
+} CommandLineArguments;
 
+/// @brief Parse a single option.
+/// @param key 
+/// @param arg 
+/// @param state 
+/// @return Returns a non-zero error code on failure.
 error_t parse_opt(int key, char* arg, struct argp_state* state);
 
-void parse_arguments(int argc, char** argv);
+str* parse_arguments(int argc, char** restrict argv);
+
+void set_default_values(CommandLineArguments* args);
 
 #endif

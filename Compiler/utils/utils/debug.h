@@ -43,6 +43,8 @@ extern LogLevel current_log_level;
 extern LogLevel previous_log_level;
 extern bool enable_ansi_color_codes;
 
+void update_log_level(LogLevel level);
+
 /// @brief Determines the lowest log level that is written to stdout.
 #define LOG_PUSH(level)                     \
 {                                           \
@@ -55,6 +57,7 @@ extern bool enable_ansi_color_codes;
 {                                           \
     current_log_level = previous_log_level; \
 };
+
 
 void __error(const char* message, const char* file, const char* func, const uint64_t line, ...);
 void __warning(const char* message, const char* file, const char* func, const uint64_t line, ...);

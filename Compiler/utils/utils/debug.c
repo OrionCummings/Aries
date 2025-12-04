@@ -4,6 +4,11 @@ LogLevel current_log_level = LOG_ALL;
 LogLevel previous_log_level = LOG_ALL;
 bool enable_ansi_color_codes = true;
 
+void update_log_level(LogLevel level) {
+    previous_log_level = current_log_level;
+    current_log_level = level;
+}
+
 void __error(const char* message, const char* file, const char* func, const uint64_t line, ...) {
 #ifdef __ENABLE_ERROR
 

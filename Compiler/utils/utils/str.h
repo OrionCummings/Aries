@@ -210,8 +210,9 @@ bool str_has_prefix(const str* const s, const char* prefix);
 bool str_has_suffix(const str* const s, const char* suffix);
 
 /// @brief Prints the given string.
+/// @param prefix A cstring prefix to print before the target string.
 /// @param s The string to print.
-void str_print(const str* const s);
+void str_print(const char* prefix, const str* const s);
 
 /// @brief Returns a list of indices at which alphanumeric-symbolic boundaries occur in `s`. Symbolic character strings will always be split as individual characters. This function is guarenteed to return a monotonic sequence of integers (with the final entry being zero!)
 /// 

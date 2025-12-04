@@ -363,9 +363,9 @@ bool str_has_suffix(const str* const s, const char* suffix) {
     return has_suffix;
 }
 
-void str_print(const str* const s) {
+void str_print(const char* prefix, const str* const s) {
     if (s != NULL) {
-        printf("%.*s\n", (int)s->length, s->data);
+        printf("%s'%.*s'\n", prefix, (int)s->length, s->data);
     }
 }
 

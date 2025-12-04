@@ -1,48 +1,39 @@
 #include "args.h"
 
-static const char* program_version = "aires compiler 0.2.0";
+const char *argp_program_version = "Aires compiler 0.2.0";
 static const char* program_bug_address = "<bugs@airesproject.org>";
 static char doc[] = "Aries Compiler documentation";
-static char args_doc[] = "-f [file_name]";
+static char args_doc[] = "file";
 
 static struct argp_option options[] = {
-  {"file_name", 'f',      0, 0,  "The Aries source file (.ari) to be compiled", DEFAULT_GROUP},
-  {"verbose",   'v',      0, 0,  "Produce verbose output", DEFAULT_GROUP},
-  {"quiet",     'q',      0, 0,  "Don't produce any output", DEFAULT_GROUP },
-  {"log level", 'l',  "LOG", 0,  "Omit log messages up to and including the given level {ALL, ERROR, WARNING, INFO, TRACE, NONE}", DEFAULT_GROUP },
+  {"log_level", 'l',  "LOG", OPTION_ARG_OPTIONAL,  "Omit log messages up to and including the given level: ALL, ERROR, WARNING, INFO, TRACE, NONE", DEFAULT_GROUP },
   { 0 }
 };
 
+
 static struct argp argp = { options, parse_opt, args_doc, doc, NULL, NULL, NULL };
 
-/* Parse a single option. */
 error_t parse_opt(int key, char* arg, struct argp_state* state) {
-    /* Get the input argument from argp_parse, which we
-       know is a pointer to our arguments structure. */
-    struct arguments* arguments = state->input;
+
+    // A_INFO("parsing option");
+
+    CommandLineArguments* arguments = state->input;
 
     switch (key) {
-    case 'q':
-    case 's': {
-        arguments->silent = 1;
-        break;
-    }
-    case 'v': {
-        arguments->verbose = 1;
-        break;
-    }
     case 'l': {
-        if (strncmp(arg, "ALL", strlen("ALL"))) {
+        // A_INFO("parsing -l option");
+
+        if (strncmp(arg, "ALL", strlen("ALL")) == 0) {
             arguments->log_level = LOG_ALL;
-        } else if (strncmp(arg, "ERROR", strlen("ERROR"))) {
+        } else if (strncmp(arg, "ERROR", strlen("ERROR")) == 0) {
             arguments->log_level = LOG_ERROR;
-        } else if (strncmp(arg, "WARNING", strlen("WARNING"))) {
+        } else if (strncmp(arg, "WARNING", strlen("WARNING")) == 0) {
             arguments->log_level = LOG_WARNING;
-        } else if (strncmp(arg, "INFO", strlen("INFO"))) {
+        } else if (strncmp(arg, "INFO", strlen("INFO")) == 0) {
             arguments->log_level = LOG_INFO;
-        } else if (strncmp(arg, "TRACE", strlen("TRACE"))) {
+        } else if (strncmp(arg, "TRACE", strlen("TRACE")) == 0) {
             arguments->log_level = LOG_TRACE;
-        } else if (strncmp(arg, "NONE", strlen("NONE"))) {
+        } else if (strncmp(arg, "NONE", strlen("NONE")) == 0) {
             arguments->log_level = LOG_NONE;
         } else {
             arguments->log_level = LOG_ALL;
@@ -50,7 +41,9 @@ error_t parse_opt(int key, char* arg, struct argp_state* state) {
         break;
     }
     case ARGP_KEY_ARG: {
-        if (state->arg_num >= 3) {
+        // A_INFO("parsing ARGP_KEY_ARG option");
+
+        if (state->arg_num >= 1) {
             argp_usage(state);
         }
 
@@ -59,43 +52,51 @@ error_t parse_opt(int key, char* arg, struct argp_state* state) {
     }
 
     case ARGP_KEY_END: {
+        // A_INFO("parsing ARGP_KEY_END option");
 
         if (state->arg_num == 0) {
             argp_usage(state);
         }
+
+        // if (arguments->output_file == NULL){
+        //     argp_failure(state, 1, 0, "required -f. See --help for more information");
+        //     exit(ARGP_ERR_UNKNOWN);
+        // }
+
         break;
     }
 
     default: {
+        // A_INFO("parsing default option");
         return ARGP_ERR_UNKNOWN;
     }
     }
     return 0;
 }
 
-void parse_arguments(int argc, char** argv) {
+void set_default_values(CommandLineArguments* args) {
+    args->log_level = LOG_ALL;
+}
 
-    struct arguments arguments;
+str* parse_arguments(int argc, char** restrict argv) {
 
-    /* Default values. */
-    arguments.log_level = LOG_ALL;
-    arguments.silent = 0;
-    arguments.verbose = 0;
-    arguments.output_file = "-";
+    CommandLineArguments arguments;
+    set_default_values(&arguments);
 
-    /* Parse our arguments; every option seen by parse_opt will
-       be reflected in arguments. */
     argp_parse(&argp, argc, argv, 0, 0, &arguments);
+    error_t err = argp_parse(&argp, argc, argv, 0, 0, &arguments);
+    if (err) {
+        // A_ERROR("failed to parse arguments");
+        return NULL;
+    }
 
-    printf(
-        "ARG1 = %s\n" \
-        "ARG2 = %s\n" \
-        "OUTPUT_FILE = %s\n" \
-        "VERBOSE = %s\nSILENT = %s\n",
-        arguments.args[0],
-        arguments.args[1],
-        arguments.output_file,
-        arguments.verbose ? "yes" : "no",
-        arguments.silent ? "yes" : "no");
+    update_log_level(arguments.log_level);
 
+    str* s = str_new(arguments.args[0]);
+    if (s == NULL || s->data == NULL) {
+        // A_ERROR("failed to capture file path argument");
+        return NULL;
+    }
+
+    return s;
 }

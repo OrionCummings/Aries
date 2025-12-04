@@ -24,7 +24,9 @@
         "args.h": "c",
         "test_lexer.h": "c",
         "string": "c",
-        "vector": "c"
+        "vector": "c",
+        "string.h": "c",
+        "argp.h": "c"
     },
     "workbench.editor.wrapTabs": true
 }
