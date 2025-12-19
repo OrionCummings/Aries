@@ -10,19 +10,21 @@
 
 int main(int argc, char** argv) {
 
-    arena* a = arena_new(1024);
+    A_INFO("called main()");
 
-    size_t k = 6;
-    bfilter* f = bfilter_anew(a, k, hash);
+    // arena* a = arena_new(1024);
 
-    uint8_t data[10] = {0};
-    hash_object_t obj = {.n_bytes = 10, .bytes = data};
+    // size_t k = 6;
+    // bfilter* f = bfilter_anew(a, k, hash);
 
-    bfilter_in(f, obj);
-    bfilter_add(f, obj);
-    bfilter_in(f, obj);
+    // uint8_t data[10] = {0};
+    // hash_object_t obj = {.n_bytes = 10, .bytes = data};
 
-    arena_free(a);
+    // bfilter_in(f, obj);
+    // bfilter_add(f, obj);
+    // bfilter_in(f, obj);
+
+    // arena_free(a);
 
 
     ///////////////////
