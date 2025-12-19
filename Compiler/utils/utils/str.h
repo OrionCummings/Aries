@@ -214,6 +214,11 @@ bool str_has_suffix(const str* const s, const char* suffix);
 /// @param s The string to print.
 void str_print(const char* prefix, const str* const s);
 
+/// @brief Determines if the given string is valid.
+/// @param s The string to test.
+/// @return A boolean indicating the validity of `s`.
+bool str_valid(const str* s);
+
 /// @brief Returns a list of indices at which alphanumeric-symbolic boundaries occur in `s`. Symbolic character strings will always be split as individual characters. This function is guarenteed to return a monotonic sequence of integers (with the final entry being zero!)
 /// 
 /// Example: 

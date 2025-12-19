@@ -2,65 +2,78 @@
 #define __PARSER_H
 
 #include "str.h"
+#include "sym_list.h"
+#include "arena.h"
 
 typedef enum {
-    TYPE_UNKNOWN,
-    TYPE_VOID,
-    TYPE_BOOL,
-    TYPE_U8,
-    TYPE_U16,
-    TYPE_U32,
-    TYPE_U64,
-    TYPE_I8,
-    TYPE_I16,
-    TYPE_I32,
-    TYPE_I64,
-    TYPE_F32,
-    TYPE_F64,
-    TYPE_OPT,
-    TYPE_RES,
-    TYPE_STR,
-}BuiltinType;
+    BITYPE_UNKNOWN,
+    BITYPE_VOID,
+    BITYPE_BOOL,
+    BITYPE_U8,
+    BITYPE_U16,
+    BITYPE_U32,
+    BITYPE_U64,
+    BITYPE_I8,
+    BITYPE_I16,
+    BITYPE_I32,
+    BITYPE_I64,
+    BITYPE_F32,
+    BITYPE_F64,
+    BITYPE_OPT,
+    BITYPE_RES,
+    BITYPE_STR,
+} BuiltinType;
 
 typedef enum {
-    UNKNOWN_AST_NODE_VARIANT,
-    DECLARATION,
-    STATEMENT,
-    EXPRESSION,
+    ASTV_UNKNOWN,
+    ASTV_DECLARATION,
+    ASTV_STATEMENT,
+    ASTV_EXPRESSION,
 } ASTNodeVariant;
 
-typedef enum {
-    UNKNOWN_DECLARATION_TYPE,
-    VARIABLE
+typedef struct {
+    void* test;
+} Expression;
 
+typedef enum {
+    STMT_T_UNKNOWN
+} StatementType;
+
+typedef struct {
+    StatementType type;
+
+} Statement;
+
+typedef enum {
+    DT_UNKNOWN,
+    DT_VARIABLE,
+    DT_FUNCTION
 } DeclarationType;
 
 typedef struct {
     str* name;
-    BuiltinType type;
-    struct ParameterList* next;
-} ParameterList;
+    DeclarationType type;
+    Expression expr;
+    Statement statement;
+    struct Declaration* next;
+} Declaration;
 
 typedef struct {
     ASTNodeVariant var;
     struct ASTNode* children;
 } ASTNode;
 
-typedef struct {
-    ASTNode ast;
-    bool complete;
+// High-level functions
+ASTNode* parse(const SymbolList* const symlist);
 
-} Parser;
+// Memory functions
+Declaration* decl_anew(const arena* a, const str* name, const DeclarationType type, const Expression* expr, const Statement* stmt, const Declaration* next);
+Expression* expr_anew();
+Statement* stmt_anew();
 
-// Parser* parser_new(const SymList* const sym_list);
-void _parser_free(Parser* parser);
-#define parser_free(p) \
-do {                   \
-    _parser_free(p);   \
-    p = NULL;          \
-} while (0)
+// Utility functions
+void astnode_print(const ASTNode* const node);
 
-bool parse(Parser* parser);
-void parser_print(const Parser* const parser);
+
 
 #endif

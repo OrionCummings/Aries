@@ -3,6 +3,9 @@ add_library(utils_lib STATIC
     arena.c
     list.c
     str.c
+    map.c
+    bloom_filter.c
+    hash.c
 )
 
 message("CTEST_FULL_OUTPUT")

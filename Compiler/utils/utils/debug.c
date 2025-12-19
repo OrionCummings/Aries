@@ -47,7 +47,7 @@ void __warning(const char* message, const char* file, const char* func, const ui
     char buffer[__DEBUG_MESSAGE_BUFFER_SIZE] = { 0 };
     int res = 0;
     if (enable_ansi_color_codes) {
-        res = snprintf(buffer, __DEBUG_MESSAGE_BUFFER_SIZE, "%s[WARNING] %s:%" PRIu64 " in %s(): \"%s\"%s\n", ANSI_COLOR_YELLOW, file, line, func, message, ANSI_COLOR_YELLOW);
+        res = snprintf(buffer, __DEBUG_MESSAGE_BUFFER_SIZE, "%s[WARNING] %s:%" PRIu64 " in %s(): \"%s\"%s\n", ANSI_COLOR_YELLOW, file, line, func, message, ANSI_COLOR_RESET);
     } else {
         res = snprintf(buffer, __DEBUG_MESSAGE_BUFFER_SIZE, "[WARNING] %s:%" PRIu64 " in %s(): \"%s\"\n", file, line, func, message);
     }

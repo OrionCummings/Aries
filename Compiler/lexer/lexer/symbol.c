@@ -58,6 +58,15 @@ bool sym_cmp(const Symbol s1, const Symbol s2) {
     return (s1.t == s2.t && str_cmp(s1.s, s2.s));
 }
 
+bool symbol_valid(const Symbol* sym) {
+    if (sym == NULL) { return false; }
+    if (sym->t == INVALID) { return false; }
+    if (sym->location.start == sym->location.end) { return false; }
+    if (!str_valid(sym->s)) { return false; }
+    return true;
+}
+
+
 void sym_print(const Symbol s) {
     printf("[%s:%d(%d-%d)]: ", TOKEN_NAMES[s.t], s.location.line, s.location.start, s.location.end);
     if (s.t == SYM_NEWLINE) {

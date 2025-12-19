@@ -24,6 +24,8 @@ do {                                                                         \
 /// @param sym The symbol to be added.
 void sym_list_add(SymbolList* sl, Symbol sym);
 
+bool symlist_valid(const SymbolList* const symlist);
+
 void sym_list_print(const SymbolList sl);
 
 #endif

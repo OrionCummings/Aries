@@ -369,6 +369,13 @@ void str_print(const char* prefix, const str* const s) {
     }
 }
 
+bool str_valid(const str* s) {
+    if (s == NULL) { return false; }
+    if (s->data == NULL) { return false; }
+    if (s->location == AL_UNKNOWN) { return false; }
+    return true;
+}
+
 ////////// END OF LIBRARY FUNCTIONS //////////
 
 index_t* str_get_alphanumeric_symbolic_boundaries(const str* const s) {

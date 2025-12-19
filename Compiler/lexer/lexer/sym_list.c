@@ -61,6 +61,25 @@ void sym_list_add(SymbolList* symlist, Symbol sym) {
     symlist->length++;
 }
 
+bool symlist_valid(const SymbolList* const symlist) {
+    if (symlist == NULL) {
+        return false;
+    }
+
+    for (size_t index = 0; index < symlist->capacity; index++) {
+        if (index < symlist->length) {
+            if (!symbol_valid(&symlist->symbols[index])) {
+                return false;
+            }
+        } else {
+            if (symbol_valid(&symlist->symbols[index])) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 void sym_list_print(const SymbolList sl) {
     for (size_t index = 0; index < sl.length; index++) {
         sym_print(sl.symbols[index]);
