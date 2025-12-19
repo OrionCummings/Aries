@@ -1,5 +1,6 @@
 #include "unity.h"
-#include "utils.h"
+#include "debug.h"
+#include "arena.h"
 
 void setUp() {
     LOG_PUSH(LOG_NONE);

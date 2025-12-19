@@ -1,4 +1,4 @@
-#include "bloom_filter.h"
+#include "bfilter.h"
 
 bfilter* bfilter_anew(arena* a, size_t k, hash_function_t func) {
 

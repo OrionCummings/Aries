@@ -1,12 +1,12 @@
 #include "debug.h"
 #include <stdio.h>
 
-#include "str.h"
-#include "lexer.h"
-#include "parser.h"
-#include "arena.h"
-#include "args.h"
-#include "bloom_filter.h"
+// #include "str.h"
+// #include "lexer.h"
+// #include "parser.h"
+// #include "arena.h"
+// #include "args.h"
+// #include "bloom_filter.h"
 
 int main(int argc, char** argv) {
 

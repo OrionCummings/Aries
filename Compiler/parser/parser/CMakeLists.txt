@@ -4,7 +4,6 @@ add_library(parser_lib STATIC
 
 target_link_libraries(parser_lib
     lexer_lib
-    utils_lib
 )
 
 target_include_directories(parser_lib PUBLIC

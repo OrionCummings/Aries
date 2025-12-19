@@ -1,1 +1,8 @@
 add_subdirectory(unity_cmake)
+add_subdirectory(debug)
+add_subdirectory(arena)
+add_subdirectory(bint)
+add_subdirectory(str)
+add_subdirectory(map)
+add_subdirectory(hash)
+add_subdirectory(list)

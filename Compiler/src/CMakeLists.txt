@@ -4,7 +4,9 @@ add_executable(AriesCompiler
 )
 
 target_link_libraries(AriesCompiler PUBLIC
-    utils_lib
+    debug_lib
+    arena_lib
+    str_lib
     lexer_lib
     parser_lib
 )

@@ -6,7 +6,7 @@ add_library(lexer_lib STATIC
 )
 
 target_link_libraries(lexer_lib
-    utils_lib
+    str_lib
 )
 
 target_include_directories(lexer_lib PUBLIC
