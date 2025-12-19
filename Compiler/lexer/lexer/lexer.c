@@ -1,108 +1,91 @@
 #include "lexer.h"
 
-bool lex(Lexer* lexer) {
+SymbolList* lex(const str const* file_content) {
 
-    if (lexer == NULL) {
-        A_WARNING("passed null parameter 'lexer'");
+    if (file_content == NULL) {
+        A_WARNING("passed null parameter 'file_content'");
         return false;
     }
 
-    size_t len = str_len(lexer->file_content);
-    index_t* boundaries = str_get_alphanumeric_symbolic_boundaries(lexer->file_content);
+    SymbolList* symlist = sym_list_new(8); // TODO: Magic number
+    if (symlist == NULL) {
+        A_ERROR("failed to create symlist"); // TODO: Refactor with goto cleanup
+        return NULL;
+    }
+    A_INFO("created symlist");
+
+    size_t file_len = str_len(file_content);
+    if (file_len == 0) {
+        A_ERROR("invalid file length");
+        return NULL;
+    }
+
+    index_t* boundaries = str_get_alphanumeric_symbolic_boundaries(file_content);
+
+    if (boundaries == NULL) {
+        A_ERROR("Failed to create alphanumeric symbolic boundaires");
+        sym_list_free(symlist);
+        return NULL;
+    }
 
     size_t index = 0;
     uint16_t line = 1;
     size_t char_start = 0;
-    char buffer[MAX_IDENTIFIER_LENGTH];
-    while (boundaries[index++] != len) {
+    while (boundaries[index++] != file_len) {
 
-        // Clear the char buffer
-        memset(buffer, 0, MAX_IDENTIFIER_LENGTH);
-
+        // Get the relavent boundaries in the file contents
         index_t start = boundaries[index - 1];
         index_t end = boundaries[index];
-
         size_t char_len = end - start;
 
-        str* s = str_copy(lexer->file_content, start, end);
-        if (s == NULL) {
-            A_WARNING("failed to copy string");
+        // Get a view of the content within those boundaries
+        str s = str_view(file_content, start, end);
+        if (s.data == NULL) {
+            A_ERROR("failed to create view");
             return false;
         }
 
-        Symbol* sym = sym_new(s);
-        sym->location = (CharacterRange){ .line = line, .char_start = char_start, .char_stop = char_start + char_len };
-
+        // TODO: sym_new() copies a string, owns it, gets added to the sym list, and the freed thereby freeing memory that now belongs to the symlist!
+        // Create a new symbol from the given string view
+        Symbol* sym = sym_new(&s); 
         if (sym == NULL) {
             A_WARNING("failed to create symbol");
+            free(boundaries);
             return false;
         }
 
+        // Update the current line count
         char_start += char_len;
         if (sym->t == SYM_NEWLINE) {
             line++;
             char_start = 0;
         }
 
-        lex_add_symbol(lexer, sym);
-        // sym_print(*sym);
+        // Update the symbol's location
+        sym->location = crange(line, char_start, char_start + char_len);
 
-        str_free(s);     // Freeing these breaks the lexer!
-        // sym_free(sym);   // AHHHHHHHHHHHHHH
+        // Add the symbol to the symlist
+        sym_list_add(symlist, *sym);
+
+        // Free the symbol because it's no longer needed
+        sym_free(sym);
     }
 
     free(boundaries);
 
-    return true;
-}
+    A_INFO("performed lexing");
 
-Lexer* lex_new(str* file_contents) {
-
-    Lexer* lexer = calloc(1, sizeof(*lexer));
-    if (lexer == NULL) {
-        A_WARNING("failed to allocate new lexer");
-        return NULL;
-    }
-
-    void* temp = sym_list_new(SYM_LIST_DEFAULT_SIZE);
-    if (temp == NULL) {
-        A_WARNING("failed to allocate new symbol list");
-        lex_free(lexer);
-        return NULL;
-    }
-    lexer->sym_list = temp;
-    lexer->file_content = file_contents;
-
-    return lexer;
-}
-
-// TODO: I'm not convinved that this is correct; add some tests
-void _lex_free(Lexer* l) {
-    if (l != NULL) {
-        str_free(l->file_content);
-        sym_list_free(l->sym_list);
-    }
-    free(l);
-}
-
-// TODO: sym could be const?
-bool lex_add_symbol(Lexer* const lex, const Symbol* const sym) {
-    if (lex == NULL || lex->sym_list == NULL || sym == NULL) { return false; }
-
-    sym_list_add(lex->sym_list, sym);
-
-    return true;
+    return symlist;
 }
 
 void lex_print(const Lexer* const lexer) {
-    printf("Lexer ");
+    printf("Lexer: ");
 
     if (lexer == NULL) {
         printf("\t<null>\n");
         return;
     }
 
-    
     if (lexer->sym_list != NULL) {
         printf("(%lu/%lu):\n", lexer->sym_list->length, lexer->sym_list->capacity);
         sym_list_print(*lexer->sym_list);

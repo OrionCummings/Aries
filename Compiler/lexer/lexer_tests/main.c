@@ -4,9 +4,11 @@
 #include "test_sym_list.h"
 
 void setUp() {
+    LOG_PUSH(LOG_NONE);
 }
 
 void tearDown() {
+    LOG_POP();
 }
 
 void suiteSetUp(void) {
@@ -20,6 +22,8 @@ int suiteTearDown(int num_failures) {
 
 int main(void) {
     UNITY_BEGIN();
+
+    RUN_TEST(test_sym_new_success_from_str_view);
 
     /// Symbol List Tests
     if (true) {
@@ -69,8 +73,6 @@ int main(void) {
         
         // RUN_TEST(test_sym_new_success_1);
         // sym_new with "0" passed fails!
-
-        RUN_TEST(test_lexer_example1);
     }
 
     return UNITY_END();

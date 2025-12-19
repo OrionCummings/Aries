@@ -1,0 +1,20 @@
+def struct Point {
+    int x, y;
+}
+
+def main() -> int {
+
+    Point p = {2, 6};
+
+    int z = p.x;
+
+    // This is a test
+    int x, y = 6;
+    if (x > 4) {
+        y = 10;
+    } else { // here's other test
+        y = 11;
+    }
+
+    return 0;
+}

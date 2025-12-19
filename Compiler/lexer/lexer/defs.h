@@ -6,8 +6,8 @@
 #define MAX_IDENTIFIER_LENGTH (8)
 #define NULL_SYMBOL ((Symbol){.location = NULL_CHAR_RANGE, .s = NULL, .t = 0})
 #define DEREF_SYMBOL(s) ((s != NULL) ? *s : NULL_SYMBOL)
-#define NULL_CHAR_RANGE ((CharacterRange){.char_start = 0, .char_stop = 0, .line = 0})
-#define CR(st, sp, ln) ((CharacterRange){.char_start = st, .char_stop = sp, .line = ln})
+#define NULL_CHAR_RANGE ((CharacterLocation){.line = 0, .start = 0, .end = 0})
+#define crange(l, s, e) ((CharacterLocation){.line = l, .start = s, .end = e})
 
 typedef enum {
     INVALID, // Used for internal errors
@@ -97,9 +97,9 @@ typedef enum {
 
 typedef struct {
     uint16_t line;
-    uint16_t char_start;
-    uint16_t char_stop;
-} CharacterRange;
+    uint16_t start;
+    uint16_t end;
+} CharacterLocation;
 
 static const char* const TOKEN_NAMES[] = {
     [INVALID] = "INVALID",

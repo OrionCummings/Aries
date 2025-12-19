@@ -1,0 +1,46 @@
+def main() -> int {
+
+    int A = 3;
+    int B = 5;
+
+    bool C = false;
+    bool D = true;
+
+    uint E = 10;
+    uint F = 0b010010;
+
+    int a1 = A + B;
+    int a2 = A - B;
+    int a3 = A / B;
+    int a4 = A * B;
+    int a5 = A % B;
+
+    bool b0 = !C;
+    bool b1 = C == D;
+    bool b2 = C != D;
+    bool b3 = C < D;
+    bool b4 = C <= D;
+    bool b5 = C > D;
+    bool b6 = C >= D;
+    bool b7 = C && D;
+    bool b8 = C || D;
+
+    uint c1 = E & F;
+    uint c2 = E | F;
+    uint c3 = E ^ F;
+    uint c4 = E << 1;
+    uint c5 = 1 >> 4;
+    uint c6 = 4 <<< 1;
+    uint c7 = 1 >>> 4;
+
+    int d1 = A++;
+    int d2 = B--;
+
+    d1 += 5;
+    d1 -= 5;
+    d1 *= 5;
+    d1 /= 5;
+    d1 %= 5;
+
+    return 0;
+}

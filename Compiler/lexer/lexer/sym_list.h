@@ -19,7 +19,12 @@ do {                                                                         \
     sl = NULL;                                                               \
 } while (0)
 
-void sym_list_add(SymbolList* sl, const Symbol* sym);
+/// @brief Addds `sym` to the given symbol list. This function creates a new symbol (and str!) such that it does not take ownership of `sym`.
+/// @param sl The symbol list in which to add `sym`.
+/// @param sym The symbol to be added.
+void sym_list_add(SymbolList* sl, Symbol sym);
+
+bool symlist_valid(const SymbolList* const symlist);
 
 void sym_list_print(const SymbolList sl);
 

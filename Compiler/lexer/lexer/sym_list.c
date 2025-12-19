@@ -18,41 +18,66 @@ SymbolList* sym_list_new(const size_t capacity) {
         return NULL;
     }
 
+    A_INFO("created new symlist");
+
     return sl;
 }
 
 void _sym_list_free(SymbolList* sl) {
     if (sl != NULL) {
+        for (index_t index = 0; index < sl->length; index++) {
+            str_free(sl->symbols[index].s);
+        }
         free(sl->symbols);
     }
     free(sl);
 }
 
-void sym_list_add(SymbolList* sl, const Symbol* sym) {
-    if (sl == NULL) { A_WARNING("cannot add symbol to NULL symbol list"); return; }
-    if (sym == NULL) { A_WARNING("cannot add NULL symbol to symbol list"); return; }
-    if (sl->symbols == NULL) { A_WARNING("cannot add symbol to NULL symbol list ptr"); return; }
+void sym_list_add(SymbolList* symlist, Symbol sym) {
+    if (symlist == NULL) { A_WARNING("cannot add symbol to NULL symbol list"); return; }
+    if (symlist->symbols == NULL) { A_WARNING("cannot add symbol to NULL symbol list ptr"); return; }
 
-    if (sl->length == sl->capacity) {
-        void* temp = realloc(sl->symbols, (sl->capacity * 2) * sizeof(*(sl->symbols)));
-
-        if (temp == NULL) { A_WARNING("failed to reallocate symbol list"); return; }
-
-        sl->symbols = temp;
-        sl->capacity *= 2;
+    if (symlist->length == symlist->capacity) {
+        void* temp = realloc(symlist->symbols, symlist->capacity * 2 * sizeof(*(symlist->symbols)));
+        if (temp == NULL) {
+            sym_list_free(symlist);
+            A_ERROR("failed to reallocate symlist");
+            return;
+        }
+        symlist->symbols = temp;
+        symlist->capacity *= 2;
     }
 
-    // TODO: Add null checks
-    str* temp_str = str_copy(sym->s, 0, str_len(sym->s));
+    // Create a new string so the symbol owns it
+    str* copied_str = str_copy(sym.s, 0, str_len(sym.s));
 
-    size_t offset = (sl->length);
-    void* next = sl->symbols + offset;
-    memcpy(next, sym, sizeof(*sym));
-    // memcpy();
+    // Copy the symbol
+    void* dest = &(symlist->symbols[symlist->length]);
+    void* src = &sym;
+    size_t nbytes = sizeof(sym);
+    memcpy(dest, src, nbytes);
+    symlist->symbols[symlist->length].s = copied_str;
 
-    sym_free(sym);
+    symlist->length++;
+}
 
-    sl->length++;
+bool symlist_valid(const SymbolList* const symlist) {
+    if (symlist == NULL) {
+        return false;
+    }
+
+    for (size_t index = 0; index < symlist->capacity; index++) {
+        if (index < symlist->length) {
+            if (!symbol_valid(&symlist->symbols[index])) {
+                return false;
+            }
+        } else {
+            if (symbol_valid(&symlist->symbols[index])) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 void sym_list_print(const SymbolList sl) {

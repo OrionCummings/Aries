@@ -1,0 +1,21 @@
+def struct Point {
+    int x,
+    int y,
+
+    def Normalize() {
+        float mag = sqrt(x * x + y * y);
+        x = x / mag;
+        y = y / mag;
+    }
+};
+
+def main() -> int {
+
+    Point P;
+    P.x = 123;
+    P.y = -27;
+    P.Normalize();
+    Point.Normalize(P);
+
+    return 0;
+}
