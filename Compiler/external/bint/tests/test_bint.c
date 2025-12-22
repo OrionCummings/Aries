@@ -10,7 +10,8 @@ static arena* scratchpad;
 void setUp() {
     arena_reset(scratchpad);
 }
-void tearDown() {}
+void tearDown() {
+}
 
 void init_suite() {
     LOG_PUSH(LOG_NONE);
@@ -30,7 +31,7 @@ int main(void) {
     run_bint_obj_tests();
 
     // Bitwise operations
-    // run_bint_not_tests();
+    run_bint_not_tests();
     // run_bint_and_tests();
     // run_bint_nand_tests();
     // run_bint_or_tests();

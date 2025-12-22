@@ -1,4 +1,6 @@
 add_executable(bint_test
+    ../bint.c
+    
     test_bint.c
 
     test_bint_obj.c
@@ -28,6 +30,7 @@ add_executable(bint_test
 
 target_include_directories(bint_test PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}
+    ${CMAKE_CURRENT_LIST_DIR}/..
 )
 
 target_link_libraries(bint_test

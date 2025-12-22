@@ -9,6 +9,7 @@ target_include_directories(bint_lib PUBLIC
 target_link_libraries(bint_lib
     debug_lib
     str_lib
+    arena_lib
 )
 
 add_subdirectory(tests)

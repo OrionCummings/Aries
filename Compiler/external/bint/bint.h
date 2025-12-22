@@ -4,35 +4,40 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "str.h"
+#include "arena.h"
+#include "debug.h"
 
-// An arbitrary bit signed 2's complement integer
+// An arbitrary-bit signed integer
 // This implementation is not designed to be efficient; it's only goals are to be easy to use and to be correct.
 
 typedef enum bint_error_t {
 
+    // Indicates that there is no error.
+    BINTE_NONE = 0,
+
     // Indicate that the current state is not known but it is nonetheless an error. Additional enum fields should be added to notify users of specific errors. This state is not intended to be permanent; don't use it and don't rely on it.
-    BINTE_UNKNOWN = 0,
+    BINTE_UNKNOWN = 1,
 
     // Indicates that the operation has overflowed and therefore that the result should not be used.
-    BINTE_OVERFLOW = 1,
+    BINTE_OVERFLOW = 2,
 
     // Indicates that the operation has underflowed and therefore that the result should not be used.
-    BINTE_UNDERFLOW = 2,
+    BINTE_UNDERFLOW = 3,
 
     // Indicates that the operation attempted to divide by zero.
-    BINTE_DIV_BY_ZERO = 3,
+    BINTE_DIV_BY_ZERO = 4,
 
     // Indicates that the operation attempted to use zero as a modulus.
-    BINTE_MOD_BY_ZERO = 4,
+    BINTE_MOD_BY_ZERO = 5,
 
     // Indicates that the operation has lost some information.
-    BINTE_LOST_INFO = 5,
+    BINTE_LOST_INFO = 6,
 
     // Indicates that the operation failed to allocate memory
-    BINTE_MEMORY_ALLOCATION_FAILURE = 6,
+    BINTE_MEMORY_ALLOCATION_FAILURE = 7,
 
     // Indicates that the operation failed to write the result into the given space (via the `result` parameter).
-    BINTE_INSUFFICIENT_RESULT_SIZE = 7,
+    BINTE_INSUFFICIENT_RESULT_SIZE = 8,
 } bint_error_t;
 
 /// @brief The base of the bint. Used for printing.
@@ -46,11 +51,14 @@ typedef enum bint_base_t {
 
 typedef struct bint_state_t {
 
-    // Is the number positive?
+    // Is the number positive? Zero is positive.
     uint8_t positive : 1;
 
     // Has the number (over|under)flowed? If so, this number can NOT be used in computation and any attempts to do so will generate/propagate errors. If you find yourself often encountering 'flows' then you should increase the size of your bints.
     uint8_t flowed : 1;
+
+    // Is this number allocated in an arena? If so, we cannot free it ourselves!
+    uint8_t managed : 1;
 } bint_state_t;
 
 typedef struct bint_t {
@@ -66,6 +74,12 @@ typedef struct bint_t {
 /// @return A new bint.
 bint_t* bint_new(size_t bytes);
 
+/// @brief Creates a new bint of the specified size.
+/// @param arena The arena in which to allocate this bint.
+/// @param bytes The size of the new bint in bytes.
+/// @return A new bint.
+bint_t* bint_anew(arena* const arena, size_t bytes);
+
 /// @brief Creates a new bint from the given string.
 /// @param s A string containing the digits of the desired bint.
 /// @return A new bint.
@@ -77,14 +91,44 @@ bint_t* bint_new_str(const str* const s);
 bint_t* bint_new_cstr(const char* const s);
 
 /// @brief Private function; do not use directly. Use `bint_free(...)`.
-void _bint_free(bint_t* b);
+/// @return True if the b pointer was freed and false if it was not.
+bool _bint_free(bint_t* b);
 
 /// @brief Frees the given bint and sets it to zero.
 /// @param b The bint instance to free.
-#define bint_free(b) do{ \
-    _bint_free(b);       \
-    b = NULL;            \
-} while(0)               \
+#define bint_free(b) do{             \
+    if (_bint_free(b)) { b = NULL; } \
+} while(0)                           \
+
+/// @brief Converts `a` into a str instance.
+/// @param a An aribtrary-bit integer.
+/// @param base The base in which to print the value of `a`.
+/// @return The string instance containing `a`.
+str* bint_to_str(const bint_t a, bint_base_t base);
+
+/// @brief Converts `a` into a str instance.
+/// @param arena The arena in which to allocate the str.
+/// @param a An aribtrary-bit integer.
+/// @param base The base in which to print the value of `a`.
+/// @return The string instance containing `a`.
+str* bint_to_astr(arena* const arena, const bint_t a, bint_base_t base);
+
+/// @brief Prints the bint `a`.
+/// @param a An aribtrary-bit integer.
+/// @param base The base in which to print the value of `a`.
+/// @return The number of digits that were printed.
+uint64_t bint_print(const bint_t a, bint_base_t base);
+
+/// @brief Directly sets the bytes of `b`. This function is not meant to be used outside of test setups.
+/// @param b The bint to modify.
+/// @param bytes The bytes to write into `b`.
+/// @param n_bytes The number of bytes to write into `b`.
+/// @param offset The offset at which to write the bytes into `b`.
+void bint_set_bytes(bint_t* const b, uint8_t* bytes, size_t n_bytes, size_t offset);
+
+/// @brief Logs the given error.
+/// @param err The error to be logged.
+void bint_log_error(bint_error_t err);
 
 //////////////////// Bitwise Operations ////////////////////
 
@@ -215,11 +259,5 @@ bint_error_t bint_sqrt(bint_t* const result, const bint_t* const a);
 /// @param b An aribtrary-bit integer.
 /// @return Zero on success; otherwise, an error code.
 bint_error_t bint_pow(bint_t* const result, const bint_t* const a, const bint_t* const b);
-
-/// @brief Prints the bint `a`.
-/// @param a An aribtrary-bit integer.
-/// @param base The base in which to print the value of `a`.
-/// @return The number of digits that were printed.
-uint64_t bint_print(const bint_t a, bint_base_t base);
 
 #endif
