@@ -32,4 +32,8 @@ void _arena_free(arena* arena);
 /// @return A pointer to the allocated memory.
 void* arena_alloc(arena* arena, size_t size);
 
+/// @brief Resets the given arena. Does not deallocate the arena.
+/// @param arena The arena to reset.
+void arena_reset(arena* const arena);
+
 #endif

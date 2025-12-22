@@ -96,3 +96,17 @@ void* arena_alloc(arena* a, size_t size) {
 
     return ptr;
 }
+
+void arena_reset(arena* const arena) {
+    if (arena == NULL) {
+        A_ERROR("passed null arena");
+        return;
+    }
+
+    if (arena->next != NULL) {
+        arena_reset(arena->next);
+    }
+
+    A_INFO("reset arena");
+    arena->size = 0; // TODO: This behavior breaks a previous invariant: unused memory was previously zero! Is this ok? What value does this invariant bring? Are we relying on it?
+}

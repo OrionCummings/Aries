@@ -28,5 +28,6 @@
         "string.h": "c",
         "argp.h": "c"
     },
-    "workbench.editor.wrapTabs": true
+    "workbench.editor.wrapTabs": true,
+    "C_Cpp.errorSquiggles": "enabled"
 }

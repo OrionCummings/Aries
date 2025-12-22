@@ -1,0 +1,9 @@
+#include "test_bint_xnor.h"
+
+void run_bint_xnor_tests(void) {
+    RUN_TEST(test_bint_xnor);
+}
+
+void test_bint_xnor(void) {
+    TEST_ASSERT_MESSAGE(false, "NOT IMPLEMENTED");
+}
