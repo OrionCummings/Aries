@@ -69,7 +69,7 @@ bint_t* bint_new_str(const str* const s) {
         scale = bint_new(64); // TODO: Magic number!
         digit = bint_new(64); // TODO: Magic number!
 
-        bint_error_t err = bint_mul(placed_digit, digit, scale);
+        bint_error_t err = bint_mul(&placed_digit, digit, scale);
         if (err) {
             bint_log_error(err);
             A_ERROR("failed to place digit");
@@ -127,29 +127,24 @@ str* bint_to_astr(arena* const arena, const bint_t a, bint_base_t base) {
     return NULL;
 }
 
-uint64_t bint_print(const bint_t a, bint_base_t base) {
+void bint_print(const bint_t a, bint_base_t base) {
 
     str* s = bint_to_str(a, base);
-
-    if (s == NULL || s->data == NULL) { return 0; }
+    if (s == NULL || s->data == NULL) { return; }
 
     str_print("", s);
 
     str_free(s);
-
-    return 0; // TODO: Make this follow the docstring (or update the docstring).
+    return;
 }
 
 void bint_set_bytes(bint_t* const b, uint8_t* bytes, size_t n_bytes, size_t offset) {
     if (b == NULL || b->bytes == NULL) { return; }
+    if (bytes == NULL) { return; }
     if (n_bytes + offset > b->n_bytes) { return; }
     if (n_bytes == 0) { return; }
 
     memcpy(&b->bytes[offset], bytes, n_bytes);
-    // for (index_t i = 0; i < n_bytes; i++) {
-    //     b->bytes[offset + i] = bytes[i];
-    // }
-
 }
 
 void bint_log_error(bint_error_t err) {
@@ -186,7 +181,7 @@ void bint_log_error(bint_error_t err) {
     }
 
     case (BINTE_LOST_INFO): {
-        A_ERROR("bint operation lost information");
+        A_ERROR("bint operation has lost or may lose information");
         break;
     }
 
@@ -199,85 +194,102 @@ void bint_log_error(bint_error_t err) {
         A_ERROR("insufficient bint result size");
         break;
     }
+
+    case (BINTE_INVALID_PARAM): {
+        A_ERROR("invalid parameter encountered");
+        break;
+    }
     }
 
 }
 
 //////////////////// Bitwise Operations ////////////////////
 
-bint_error_t bint_not(bint_t* const result, const bint_t* const a) {
+bint_error_t bint_not(bint_t** result, const bint_t* const a) {
+    if (a == NULL || a->bytes == NULL || a->n_bytes == 0 || result == NULL) { return BINTE_INVALID_PARAM; }
+    if (*result != NULL) { return BINTE_LOST_INFO; }
+
+    *result = bint_new(a->n_bytes);
+    if (result == NULL || *result == NULL || (*result)->bytes == NULL) { return BINTE_MEMORY_ALLOCATION_FAILURE; }
+
+    for (index_t index = 0; index < a->n_bytes; index++) {
+        uint8_t byte = a->bytes[index];
+        uint8_t ibyte = ~byte;
+        (*result)->bytes[index] = ibyte;
+    }
+
+    return BINTE_NONE;
+}
+
+bint_error_t bint_and(bint_t** result, const bint_t* const a, const bint_t* const b) {
     return BINTE_UNKNOWN;
 }
 
-bint_error_t bint_and(bint_t* const result, const bint_t* const a, const bint_t* const b) {
+bint_error_t bint_or(bint_t** result, const bint_t* const a, const bint_t* const b) {
     return BINTE_UNKNOWN;
 }
 
-bint_error_t bint_or(bint_t* const result, const bint_t* const a, const bint_t* const b) {
+bint_error_t bint_nor(bint_t** result, const bint_t* const a, const bint_t* const b) {
     return BINTE_UNKNOWN;
 }
 
-bint_error_t bint_nor(bint_t* const result, const bint_t* const a, const bint_t* const b) {
+bint_error_t bint_nand(bint_t** result, const bint_t* const a, const bint_t* const b) {
     return BINTE_UNKNOWN;
 }
 
-bint_error_t bint_nand(bint_t* const result, const bint_t* const a, const bint_t* const b) {
+bint_error_t bint_xor(bint_t** result, const bint_t* const a, const bint_t* const b) {
     return BINTE_UNKNOWN;
 }
 
-bint_error_t bint_xor(bint_t* const result, const bint_t* const a, const bint_t* const b) {
+bint_error_t bint_xnor(bint_t** result, const bint_t* const a, const bint_t* const b) {
     return BINTE_UNKNOWN;
 }
 
-bint_error_t bint_xnor(bint_t* const result, const bint_t* const a, const bint_t* const b) {
+bint_error_t bint_shl(bint_t** result, const bint_t* const a, const uint64_t bits) {
     return BINTE_UNKNOWN;
 }
 
-bint_error_t bint_shl(bint_t* const result, const bint_t* const a, const uint64_t bits) {
+bint_error_t bint_shr(bint_t** result, const bint_t* const a, const uint64_t bits) {
     return BINTE_UNKNOWN;
 }
 
-bint_error_t bint_shr(bint_t* const result, const bint_t* const a, const uint64_t bits) {
+bint_error_t bint_rotr(bint_t** result, const bint_t* const a, const uint64_t bits) {
     return BINTE_UNKNOWN;
 }
 
-bint_error_t bint_rotr(bint_t* const result, const bint_t* const a, const uint64_t bits) {
-    return BINTE_UNKNOWN;
-}
-
-bint_error_t bint_rotl(bint_t* const result, const bint_t* const a, const uint64_t bits) {
+bint_error_t bint_rotl(bint_t** result, const bint_t* const a, const uint64_t bits) {
     return BINTE_UNKNOWN;
 }
 
 //////////////////// Simple Operations ////////////////////
 
-bint_error_t bint_add(bint_t* const result, const bint_t* const a, const bint_t* const b) {
+bint_error_t bint_add(bint_t** result, const bint_t* const a, const bint_t* const b) {
     return BINTE_UNKNOWN;
 }
 
-bint_error_t bint_sub(bint_t* const result, const bint_t* const a, const bint_t* const b) {
+bint_error_t bint_sub(bint_t** result, const bint_t* const a, const bint_t* const b) {
     return BINTE_UNKNOWN;
 }
 
-bint_error_t bint_mul(bint_t* const result, const bint_t* const a, const bint_t* const b) {
+bint_error_t bint_mul(bint_t** result, const bint_t* const a, const bint_t* const b) {
     return BINTE_UNKNOWN;
 }
 
-bint_error_t bint_div(bint_t* const result, const bint_t* const a, const bint_t* const b) {
+bint_error_t bint_div(bint_t** result, const bint_t* const a, const bint_t* const b) {
     return BINTE_UNKNOWN;
 }
 
-bint_error_t bint_mod(bint_t* const result, const bint_t* const a, const bint_t* const b) {
+bint_error_t bint_mod(bint_t** result, const bint_t* const a, const bint_t* const b) {
     return BINTE_UNKNOWN;
 }
 
 //////////////////// Complex Operations ////////////////////
 
-bint_error_t bint_sqrt(bint_t* const result, const bint_t* const a) {
+bint_error_t bint_sqrt(bint_t** result, const bint_t* const a) {
     return BINTE_UNKNOWN;
 }
 
-bint_error_t bint_pow(bint_t* const result, const bint_t* const a, const bint_t* const b) {
+bint_error_t bint_pow(bint_t** result, const bint_t* const a, const bint_t* const b) {
     return BINTE_UNKNOWN;
 }
 

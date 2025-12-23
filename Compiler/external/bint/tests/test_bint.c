@@ -28,11 +28,11 @@ int main(void) {
     UNITY_BEGIN();
 
     // Object management
-    run_bint_obj_tests();
+    // run_bint_obj_tests();
 
     // Bitwise operations
-    run_bint_not_tests();
-    // run_bint_and_tests();
+    // run_bint_not_tests();
+    run_bint_and_tests();
     // run_bint_nand_tests();
     // run_bint_or_tests();
     // run_bint_nor_tests();

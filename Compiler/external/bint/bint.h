@@ -12,33 +12,52 @@
 
 typedef enum bint_error_t {
 
+    // Indicate that the current state is not known but it is nonetheless an error. Additional enum fields should be added to notify users of specific errors. This state is not intended to be permanent; don't use it and don't rely on it.
+    BINTE_UNKNOWN = -1,
+
     // Indicates that there is no error.
     BINTE_NONE = 0,
 
-    // Indicate that the current state is not known but it is nonetheless an error. Additional enum fields should be added to notify users of specific errors. This state is not intended to be permanent; don't use it and don't rely on it.
-    BINTE_UNKNOWN = 1,
-
     // Indicates that the operation has overflowed and therefore that the result should not be used.
-    BINTE_OVERFLOW = 2,
+    BINTE_OVERFLOW,
 
     // Indicates that the operation has underflowed and therefore that the result should not be used.
-    BINTE_UNDERFLOW = 3,
+    BINTE_UNDERFLOW,
 
     // Indicates that the operation attempted to divide by zero.
-    BINTE_DIV_BY_ZERO = 4,
+    BINTE_DIV_BY_ZERO,
 
     // Indicates that the operation attempted to use zero as a modulus.
-    BINTE_MOD_BY_ZERO = 5,
+    BINTE_MOD_BY_ZERO,
 
-    // Indicates that the operation has lost some information.
-    BINTE_LOST_INFO = 6,
+    // Indicates that the operation has lost or would lose some information in an unexpected (and therefore undesirable) manner.
+    BINTE_LOST_INFO,
 
     // Indicates that the operation failed to allocate memory
-    BINTE_MEMORY_ALLOCATION_FAILURE = 7,
+    BINTE_MEMORY_ALLOCATION_FAILURE,
 
     // Indicates that the operation failed to write the result into the given space (via the `result` parameter).
-    BINTE_INSUFFICIENT_RESULT_SIZE = 8,
+    BINTE_INSUFFICIENT_RESULT_SIZE,
+
+    // Indicates that an operation was provided an invalid parameter and cannot continue. This may be a null parameter or a zero length where a non-zero length was expected.
+    BINTE_INVALID_PARAM,
+
 } bint_error_t;
+
+typedef enum bint_comp_t {
+
+    // Indiates that the state of a comparison is unknown and is therefore an error.
+    BINTC_UNKNOWN = -1,
+
+    // The result of a comparison was false.
+    BINTC_FALSE = 0,
+
+    // The result of a comparison was true.
+    BINTC_TRUE = 1,
+
+    // TODO: Add more variations.
+
+} bint_comp_t;
 
 /// @brief The base of the bint. Used for printing.
 typedef enum bint_base_t {
@@ -116,8 +135,7 @@ str* bint_to_astr(arena* const arena, const bint_t a, bint_base_t base);
 /// @brief Prints the bint `a`.
 /// @param a An aribtrary-bit integer.
 /// @param base The base in which to print the value of `a`.
-/// @return The number of digits that were printed.
-uint64_t bint_print(const bint_t a, bint_base_t base);
+void bint_print(const bint_t a, bint_base_t base);
 
 /// @brief Directly sets the bytes of `b`. This function is not meant to be used outside of test setups.
 /// @param b The bint to modify.
@@ -136,77 +154,121 @@ void bint_log_error(bint_error_t err);
 /// @param result The location in which to place the result of `~a`.
 /// @param a An aribtrary-bit integer.
 /// @return Zero on success; otherwise, an error code.
-bint_error_t bint_not(bint_t* const result, const bint_t* const a);
+bint_error_t bint_not(bint_t** result, const bint_t* const a);
 
 /// @brief Calculates the bitwise AND of the value of `a`.
 /// @param result The location in which to place the result of `a & b`.
 /// @param a An aribtrary-bit integer.
 /// @param b An aribtrary-bit integer.
 /// @return Zero on success; otherwise, an error code.
-bint_error_t bint_and(bint_t* const result, const bint_t* const a, const bint_t* const b);
+bint_error_t bint_and(bint_t** result, const bint_t* const a, const bint_t* const b);
 
 /// @brief Calculates the bitwise OR of the value of `a`.
 /// @param result The location in which to place the result of `a | b`.
 /// @param a An aribtrary-bit integer.
 /// @param b An aribtrary-bit integer.
 /// @return Zero on success; otherwise, an error code.
-bint_error_t bint_or(bint_t* const result, const bint_t* const a, const bint_t* const b);
+bint_error_t bint_or(bint_t** result, const bint_t* const a, const bint_t* const b);
 
 /// @brief Calculates the bitwise NOR of the value of `a`.
 /// @param result The location in which to place the result of `~(a | b)`.
 /// @param a An aribtrary-bit integer.
 /// @param b An aribtrary-bit integer.
 /// @return Zero on success; otherwise, an error code.
-bint_error_t bint_nor(bint_t* const result, const bint_t* const a, const bint_t* const b);
+bint_error_t bint_nor(bint_t** result, const bint_t* const a, const bint_t* const b);
 
 /// @brief Calculates the bitwise NAND of the value of `a`.
 /// @param result The location in which to place the result of `~(a & b)`.
 /// @param a An aribtrary-bit integer.
 /// @param b An aribtrary-bit integer.
 /// @return Zero on success; otherwise, an error code.
-bint_error_t bint_nand(bint_t* const result, const bint_t* const a, const bint_t* const b);
+bint_error_t bint_nand(bint_t** result, const bint_t* const a, const bint_t* const b);
 
 /// @brief Calculates the bitwise XOR of the value of `a`.
 /// @param result The location in which to place the result of `a ^ b`.
 /// @param a An aribtrary-bit integer.
 /// @param b An aribtrary-bit integer.
 /// @return Zero on success; otherwise, an error code.
-bint_error_t bint_xor(bint_t* const result, const bint_t* const a, const bint_t* const b);
+bint_error_t bint_xor(bint_t** result, const bint_t* const a, const bint_t* const b);
 
 /// @brief Calculates the bitwise XNOR of the value of `a`.
 /// @param result The location in which to place the result of `~(a ^ b)`.
 /// @param a An aribtrary-bit integer.
 /// @param b An aribtrary-bit integer.
 /// @return Zero on success; otherwise, an error code.
-bint_error_t bint_xnor(bint_t* const result, const bint_t* const a, const bint_t* const b);
+bint_error_t bint_xnor(bint_t** result, const bint_t* const a, const bint_t* const b);
 
 /// @brief Calculates the bitwise left shift of the value of `a` by `bits` bits.
 /// @param result The location in which to place the result of `a << bits`.
 /// @param a An aribtrary-bit integer.
 /// @param bits The number of bits to shift.
 /// @return Zero on success; otherwise, an error code.
-bint_error_t bint_shl(bint_t* const result, const bint_t* const a, const uint64_t bits);
+bint_error_t bint_shl(bint_t** result, const bint_t* const a, const uint64_t bits);
 
 /// @brief Calculates the bitwise right shift of the value of `a` by `bits` bits.
 /// @param result The location in which to place the result of `a >> bits`.
 /// @param a An aribtrary-bit integer.
 /// @param bits The number of bits to shift.
 /// @return Zero on success; otherwise, an error code.
-bint_error_t bint_shr(bint_t* const result, const bint_t* const a, const uint64_t bits);
+bint_error_t bint_shr(bint_t** result, const bint_t* const a, const uint64_t bits);
 
 /// @brief Calculates the bitwise left rotation of the value of `a` by `bits` bits.
 /// @param result The location in which to place the result of `a <<< bits`.
 /// @param a An aribtrary-bit integer.
 /// @param bits The number of bits to shift.
 /// @return Zero on success; otherwise, an error code.
-bint_error_t bint_rotr(bint_t* const result, const bint_t* const a, const uint64_t bits);
+bint_error_t bint_rotr(bint_t** result, const bint_t* const a, const uint64_t bits);
 
 /// @brief Calculates the bitwise right rotation of the value of `a` by `bits` bits.
 /// @param result The location in which to place the result of `a >>> bits`.
 /// @param a An aribtrary-bit integer.
 /// @param bits The number of bits to shift.
 /// @return Zero on success; otherwise, an error code.
-bint_error_t bint_rotl(bint_t* const result, const bint_t* const a, const uint64_t bits);
+bint_error_t bint_rotl(bint_t** result, const bint_t* const a, const uint64_t bits);
+
+//////////////////// Comparison Operations ////////////////////
+
+/// @brief Determines if two bints are equal.
+/// @param comp The result of a comparison.
+/// @param a An aribtrary-bit integer.
+/// @param b An aribtrary-bit integer.
+/// @return Zero on success; otherwise, an error code.
+bint_error_t bint_eq(bint_comp_t* const comp, const bint_t* const a, const bint_t* const b);
+
+/// @brief Determines if two bints are not equal.
+/// @param comp The result of a comparison.
+/// @param a An aribtrary-bit integer.
+/// @param a An aribtrary-bit integer.
+/// @return Zero on success; otherwise, an error code.
+bint_error_t bint_neq(bint_comp_t* const comp, const bint_t* const a, const bint_t* const b);
+
+/// @brief Given two bints `a` and `b`, determines if `a < b`.
+/// @param comp The result of a comparison.
+/// @param a An aribtrary-bit integer.
+/// @param a An aribtrary-bit integer.
+/// @return Zero on success; otherwise, an error code.
+bint_error_t bint_lt(bint_comp_t* const comp, const bint_t* const a, const bint_t* const b);
+
+/// @brief Given two bints `a` and `b`, determines if `a <= b`.
+/// @param comp The result of a comparison.
+/// @param a An aribtrary-bit integer.
+/// @param a An aribtrary-bit integer.
+/// @return Zero on success; otherwise, an error code.
+bint_error_t bint_lte(bint_comp_t* const comp, const bint_t* const a, const bint_t* const b);
+
+/// @brief Given two bints `a` and `b`, determines if `a > b`.
+/// @param comp The result of a comparison.
+/// @param a An aribtrary-bit integer.
+/// @param a An aribtrary-bit integer.
+/// @return Zero on success; otherwise, an error code.
+bint_error_t bint_gt(bint_comp_t* const comp, const bint_t* const a, const bint_t* const b);
+
+/// @brief Given two bints `a` and `b`, determines if `a >= b`.
+/// @param comp The result of a comparison.
+/// @param a An aribtrary-bit integer.
+/// @param a An aribtrary-bit integer.
+/// @return Zero on success; otherwise, an error code.
+bint_error_t bint_gte(bint_comp_t* const comp, const bint_t* const a, const bint_t* const b);
 
 //////////////////// Simple Operations ////////////////////
 
@@ -215,35 +277,35 @@ bint_error_t bint_rotl(bint_t* const result, const bint_t* const a, const uint64
 /// @param a An aribtrary-bit integer.
 /// @param b An aribtrary-bit integer.
 /// @return Zero on success; otherwise, an error code.
-bint_error_t bint_add(bint_t* const result, const bint_t* const a, const bint_t* const b);
+bint_error_t bint_add(bint_t** result, const bint_t* const a, const bint_t* const b);
 
 /// @brief Subtracts the value of `b` from the value of `a`.
 /// @param result The location in which to place the result of `b - a`.
 /// @param a An aribtrary-bit integer.
 /// @param b An aribtrary-bit integer.
 /// @return Zero on success; otherwise, an error code.
-bint_error_t bint_sub(bint_t* const result, const bint_t* const a, const bint_t* const b);
+bint_error_t bint_sub(bint_t** result, const bint_t* const a, const bint_t* const b);
 
 /// @brief Multiplies the value of `a` with the value of `b`.
 /// @param result The location in which to place the result of `a * b`.
 /// @param a An aribtrary-bit integer.
 /// @param b An aribtrary-bit integer.
 /// @return Zero on success; otherwise, an error code.
-bint_error_t bint_mul(bint_t* const result, const bint_t* const a, const bint_t* const b);
+bint_error_t bint_mul(bint_t** result, const bint_t* const a, const bint_t* const b);
 
 /// @brief Divides the value of `a` by the value of `b`.
 /// @param result The location in which to place the result of `a / b`.
 /// @param a An aribtrary-bit integer.
 /// @param b An aribtrary-bit integer.
 /// @return Zero on success; otherwise, an error code.
-bint_error_t bint_div(bint_t* const result, const bint_t* const a, const bint_t* const b);
+bint_error_t bint_div(bint_t** result, const bint_t* const a, const bint_t* const b);
 
 /// @brief Calculates the modulo of the value of `a` by the value of `b`.
 /// @param result The location in which to place the result of `a % b`.
 /// @param a An aribtrary-bit integer.
 /// @param b An aribtrary-bit integer.
 /// @return Zero on success; otherwise, an error code.
-bint_error_t bint_mod(bint_t* const result, const bint_t* const a, const bint_t* const b);
+bint_error_t bint_mod(bint_t** result, const bint_t* const a, const bint_t* const b);
 
 //////////////////// Complex Operations ////////////////////
 
@@ -251,13 +313,13 @@ bint_error_t bint_mod(bint_t* const result, const bint_t* const a, const bint_t*
 /// @param result The location in which to place the result of `sqrt(a)`.
 /// @param a An aribtrary-bit integer.
 /// @return Zero on success; otherwise, an error code.
-bint_error_t bint_sqrt(bint_t* const result, const bint_t* const a);
+bint_error_t bint_sqrt(bint_t** result, const bint_t* const a);
 
 /// @brief Calculates `a` to the `b`-th power.
 /// @param result The location in which to place the result of `a^b`.
 /// @param a An aribtrary-bit integer.
 /// @param b An aribtrary-bit integer.
 /// @return Zero on success; otherwise, an error code.
-bint_error_t bint_pow(bint_t* const result, const bint_t* const a, const bint_t* const b);
+bint_error_t bint_pow(bint_t** result, const bint_t* const a, const bint_t* const b);
 
 #endif

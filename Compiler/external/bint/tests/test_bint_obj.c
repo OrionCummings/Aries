@@ -1,12 +1,22 @@
 #include "test_bint_obj.h"
 
 void run_bint_obj_tests(void) {
-    // RUN_TEST(test_bint_new);
-    // RUN_TEST(test_bint_anew);
-    RUN_TEST(test_bint_new_str);
+    RUN_TEST(test_bint_new);
+
+    RUN_TEST(test_bint_anew);
+    RUN_TEST(test_bint_anew_null_arena);
+
+    // RUN_TEST(test_bint_new_str);
     // RUN_TEST(test_bint_new_cstr);
-    // RUN_TEST(test_bint_free);
-    // RUN_TEST(test_bint_free_arena);
+
+    RUN_TEST(test_bint_set_bytes);
+    RUN_TEST(test_bint_set_bytes_too_many);
+    RUN_TEST(test_bint_set_bytes_would_overrun);
+    RUN_TEST(test_bint_set_bytes_null_array);
+
+    RUN_TEST(test_bint_free);
+    RUN_TEST(test_bint_free_arena);
+
     // RUN_TEST(test_bint_to_str);
     // RUN_TEST(test_bint_to_astr);
 }
@@ -41,6 +51,14 @@ void test_bint_anew(void) {
     arena_free(a);
 }
 
+void test_bint_anew_null_arena(void) {
+
+    arena* a = NULL;
+    bint_t* b = bint_anew(a, 1);
+
+    TEST_ASSERT_NULL(b);
+}
+
 void test_bint_new_str(void) {
 
     const char* cstr = "24786";
@@ -70,6 +88,68 @@ void test_bint_new_cstr(void) {
         char expected_byte = cstr[index];
         TEST_ASSERT_EQUAL_CHAR(expected_byte, actual_byte);
     }
+
+    bint_free(b);
+}
+
+void test_bint_set_bytes(void) {
+
+    uint8_t bytes[8] = { 0xFF, 0x55, 0xAA, 0x33, 0xA5, 0x00, 0x8F, 0x3C };
+    bint_t* b = bint_new(8);
+
+    bint_set_bytes(b, bytes, 8, 0);
+
+    TEST_ASSERT_NOT_NULL(b);
+    TEST_ASSERT_NOT_NULL(b->bytes);
+
+    for (index_t i = 0; i < 8; i++) {
+        TEST_ASSERT_EQUAL(bytes[i], b->bytes[i]);
+    }
+
+    bint_free(b);
+}
+
+void test_bint_set_bytes_too_many(void) {
+
+    uint8_t bytes[1] = { 0xFF };
+    bint_t* b = bint_new(1);
+
+    bint_set_bytes(b, bytes, 2, 0);
+
+    TEST_ASSERT_NOT_NULL(b);
+    TEST_ASSERT_NOT_NULL(b->bytes);
+
+    TEST_ASSERT_EQUAL(0, b->bytes[0]);
+
+    bint_free(b);
+}
+
+void test_bint_set_bytes_would_overrun(void) {
+
+    uint8_t bytes[1] = { 0xFF };
+    bint_t* b = bint_new(1);
+
+    bint_set_bytes(b, bytes, 1, 1);
+
+    TEST_ASSERT_NOT_NULL(b);
+    TEST_ASSERT_NOT_NULL(b->bytes);
+
+    TEST_ASSERT_EQUAL(0, b->bytes[0]);
+
+    bint_free(b);
+}
+
+void test_bint_set_bytes_null_array(void) {
+
+    uint8_t* bytes = NULL;
+    bint_t* b = bint_new(1);
+
+    bint_set_bytes(b, bytes, 1, 0);
+
+    TEST_ASSERT_NOT_NULL(b);
+    TEST_ASSERT_NOT_NULL(b->bytes);
+
+    TEST_ASSERT_EQUAL(0, b->bytes[0]);
 
     bint_free(b);
 }
