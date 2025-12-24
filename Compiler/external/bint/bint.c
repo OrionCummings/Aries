@@ -239,15 +239,27 @@ bint_error_t bint_and(bint_t** result, const bint_t* const a, const bint_t* cons
     return BINTE_NONE;
 }
 
+bint_error_t bint_nand(bint_t** result, const bint_t* const a, const bint_t* const b) {
+    if (!bint_valid(a) || !bint_valid(b) || result == NULL) { return BINTE_INVALID_PARAM; }
+    if (*result != NULL) { return BINTE_LOST_INFO; }
+
+    bint_t* r1 = NULL;
+    bint_error_t err;
+    
+    err = bint_and(&r1, a, b);
+    if (err) { return err; }
+    
+    err = bint_not(result, r1);
+    if (err) { return err; }
+
+    return BINTE_NONE;
+}
+
 bint_error_t bint_or(bint_t** result, const bint_t* const a, const bint_t* const b) {
     return BINTE_UNKNOWN;
 }
 
 bint_error_t bint_nor(bint_t** result, const bint_t* const a, const bint_t* const b) {
-    return BINTE_UNKNOWN;
-}
-
-bint_error_t bint_nand(bint_t** result, const bint_t* const a, const bint_t* const b) {
     return BINTE_UNKNOWN;
 }
 
