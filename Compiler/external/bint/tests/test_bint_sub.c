@@ -15,45 +15,45 @@ void run_bint_sub_tests(void) {
 }
 
 void test_bint_sub(void) {
-    TEST_FAIL_MESSAGE("NOT IMPLEMENTED");
+    TEST_IGNORE_MESSAGE("NOT IMPLEMENTED");
 }
 
 void test_bint_sub_increment_no_overflow(void) {
-    TEST_FAIL_MESSAGE("NOT IMPLEMENTED");
+    TEST_IGNORE_MESSAGE("NOT IMPLEMENTED");
 }
 
 void test_bint_sub_decrement_no_underflow(void) {
-    TEST_FAIL_MESSAGE("NOT IMPLEMENTED");
+    TEST_IGNORE_MESSAGE("NOT IMPLEMENTED");
 }
 
 void test_bint_sub_increment_overflow(void) {
-    TEST_FAIL_MESSAGE("NOT IMPLEMENTED");
+    TEST_IGNORE_MESSAGE("NOT IMPLEMENTED");
 }
 
 void test_bint_sub_decrement_underflow(void) {
-    TEST_FAIL_MESSAGE("NOT IMPLEMENTED");
+    TEST_IGNORE_MESSAGE("NOT IMPLEMENTED");
 }
 
 void test_bint_sub_overflow_first_byte(void) {
-    TEST_FAIL_MESSAGE("NOT IMPLEMENTED");
+    TEST_IGNORE_MESSAGE("NOT IMPLEMENTED");
 }
 
 void test_bint_sub_overflow_mid_byte(void) {
-    TEST_FAIL_MESSAGE("NOT IMPLEMENTED");
+    TEST_IGNORE_MESSAGE("NOT IMPLEMENTED");
 }
 
 void test_bint_sub_overflow_last_byte(void) {
-    TEST_FAIL_MESSAGE("NOT IMPLEMENTED");
+    TEST_IGNORE_MESSAGE("NOT IMPLEMENTED");
 }
 
 void test_bint_sub_underflow_first_byte(void) {
-    TEST_FAIL_MESSAGE("NOT IMPLEMENTED");
+    TEST_IGNORE_MESSAGE("NOT IMPLEMENTED");
 }
 
 void test_bint_sub_underflow_mid_byte(void) {
-    TEST_FAIL_MESSAGE("NOT IMPLEMENTED");
+    TEST_IGNORE_MESSAGE("NOT IMPLEMENTED");
 }
 
 void test_bint_sub_underflow_last_byte(void) {
-    TEST_FAIL_MESSAGE("NOT IMPLEMENTED");
+    TEST_IGNORE_MESSAGE("NOT IMPLEMENTED");
 }

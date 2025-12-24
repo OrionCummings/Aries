@@ -28,5 +28,6 @@
 #include "test_bint_pow.h"
 #include "test_bint_sqrt.h"
 #include "test_bint_log.h"
+#include "test_bint_exp.h"
 
 #endif

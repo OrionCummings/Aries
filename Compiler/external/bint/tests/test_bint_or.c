@@ -5,5 +5,5 @@ void run_bint_or_tests(void) {
 }
 
 void test_bint_or(void) {
-    TEST_FAIL_MESSAGE("NOT IMPLEMENTED");
+    TEST_IGNORE_MESSAGE("NOT IMPLEMENTED");
 }

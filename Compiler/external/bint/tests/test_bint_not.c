@@ -2,10 +2,12 @@
 
 void run_bint_not_tests(void) {
     RUN_TEST(test_bint_not);
+    RUN_TEST(test_bint_not_bad_parameters);
 }
 
 void test_bint_not(void) {
 
+    // TODO: Fix this test! It stores bytes in the wrong order!!!!
     // TODO: Make these sizes adapt?
     const uint8_t size1 = 13;
     const uint8_t size2 = 13;
@@ -67,4 +69,30 @@ void test_bint_not(void) {
     bint_free(b1_expected);
     bint_free(b2_expected);
     bint_free(b3_expected);
+}
+
+void test_bint_not_bad_parameters(void) {
+
+    bint_t* a;
+    bint_t* r;
+    bint_error_t err;
+
+    // Null parameter
+    a = NULL;
+    r = NULL;
+    err = bint_not(&r, a);
+
+    TEST_ASSERT_EQUAL(BINTE_INVALID_PARAM, err);
+    TEST_ASSERT_NULL(r);
+
+    // Valid operand bints but invalid result bint
+    a = bint_new(2);
+    r = bint_new(2);
+    err = bint_not(&r, a);
+
+    TEST_ASSERT_EQUAL(BINTE_LOST_INFO, err);
+    TEST_ASSERT_NOT_NULL(r);
+
+    bint_free(a);
+    bint_free(r);
 }

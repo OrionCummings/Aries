@@ -5,5 +5,5 @@ void run_bint_rotl_tests(void) {
 }
 
 void test_bint_rotl(void) {
-    TEST_FAIL_MESSAGE("NOT IMPLEMENTED");
+    TEST_IGNORE_MESSAGE("NOT IMPLEMENTED");
 }

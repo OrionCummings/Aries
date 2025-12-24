@@ -80,6 +80,10 @@ typedef struct bint_state_t {
     uint8_t managed : 1;
 } bint_state_t;
 
+/// @brief A big-integer struct.
+///
+/// Note that the contained bytes are stored such that the least significant byte is at index 0.
+/// For example, the number 672345 = 0x0A4259 should be stored such that bytes = [0x59, 0x42, 0x0A]
 typedef struct bint_t {
     bint_state_t state;
     size_t n_bytes;

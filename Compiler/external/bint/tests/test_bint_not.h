@@ -8,5 +8,6 @@
 void run_bint_not_tests(void);
 
 void test_bint_not(void);
+void test_bint_not_bad_parameters(void);
 
 #endif

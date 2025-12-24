@@ -3,6 +3,7 @@
 void run_bint_and_tests(void) {
     RUN_TEST(test_bint_and_equal_sizes);
     RUN_TEST(test_bint_and_unequal_sizes);
+    RUN_TEST(test_bint_and_bad_parameters);
 }
 
 void test_bint_and_equal_sizes(void) {
@@ -43,18 +44,17 @@ void test_bint_and_unequal_sizes(void) {
 
     // Test unequal size bints (|a| != |b| == |result| because AND cannot expand/carry!)
     const uint8_t size_a = 1;
-    const uint8_t size_b = 2;
-    const uint8_t size_expected = 2;
+    const uint8_t size_b = 3;
+    const uint8_t size_expected = 3;
 
     bint_t* a = bint_new(size_a);
     bint_t* b = bint_new(size_b);
     bint_t* expected_bint = bint_new(size_expected);
     bint_t* actual_bint = NULL;
 
-    // NOTE: This is wrong/misinformed because the bytes may need to be swapped!!!!!!! Consider the order in which bytes are stored and make a decision on how to store them going forward!!!!
     uint8_t a_bytes[] = { 0x8F };
-    uint8_t b_bytes[] = { 0xA0, 0xFF };
-    uint8_t expected_bytes[] = { 0x00, 0x80 };
+    uint8_t b_bytes[] = { 0xA0, 0xFF, 0xFF };
+    uint8_t expected_bytes[] = { 0x80, 0x00, 0x00 };
 
     bint_set_bytes(a, a_bytes, size_a, 0);
     bint_set_bytes(b, b_bytes, size_b, 0);
@@ -73,4 +73,56 @@ void test_bint_and_unequal_sizes(void) {
     bint_free(b);
     bint_free(expected_bint);
     bint_free(actual_bint);
+}
+
+void test_bint_and_bad_parameters(void) {
+
+    bint_t* a;
+    bint_t* b;
+    bint_t* r;
+    bint_error_t err;
+
+    // Null first parameter
+    a = NULL;
+    b = bint_new(2);
+    r = NULL;
+    err = bint_and(&r, a, b);
+
+    TEST_ASSERT_EQUAL(BINTE_INVALID_PARAM, err);
+    TEST_ASSERT_NULL(r);
+
+    bint_free(b);
+
+    // Null second parameter
+    a = NULL;
+    b = bint_new(2);
+    r = NULL;
+    err = bint_and(&r, b, a);
+
+    TEST_ASSERT_EQUAL(BINTE_INVALID_PARAM, err);
+    TEST_ASSERT_NULL(r);
+
+    bint_free(b);
+
+    // Both null parameters
+    a = NULL;
+    b = NULL;
+    r = NULL;
+    err = bint_and(&r, b, a);
+
+    TEST_ASSERT_EQUAL(BINTE_INVALID_PARAM, err);
+    TEST_ASSERT_NULL(r);
+
+    // Valid operand bints but invalid result bint
+    a = bint_new(2);
+    b = bint_new(2);
+    r = bint_new(2);
+    err = bint_and(&r, b, a);
+
+    TEST_ASSERT_EQUAL(BINTE_LOST_INFO, err);
+    TEST_ASSERT_NOT_NULL(r);
+
+    bint_free(a);
+    bint_free(b);
+    bint_free(r);
 }

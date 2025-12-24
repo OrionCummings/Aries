@@ -9,5 +9,6 @@ void run_bint_and_tests(void);
 
 void test_bint_and_equal_sizes(void);
 void test_bint_and_unequal_sizes(void);
+void test_bint_and_bad_parameters(void);
 
 #endif
