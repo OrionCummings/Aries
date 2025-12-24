@@ -3,9 +3,11 @@
 
 #include "unity.h"
 #include "debug.h"
+#include "bint.h"
 
 void run_bint_and_tests(void);
 
-void test_bint_and(void);
+void test_bint_and_equal_sizes(void);
+void test_bint_and_unequal_sizes(void);
 
 #endif

@@ -5,5 +5,5 @@ void run_bint_shl_tests(void) {
 }
 
 void test_bint_shl(void) {
-    TEST_ASSERT_MESSAGE(false, "NOT IMPLEMENTED");
+    TEST_FAIL_MESSAGE("NOT IMPLEMENTED");
 }

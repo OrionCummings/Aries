@@ -6,9 +6,9 @@ void run_bint_mod_tests(void) {
 }
 
 void test_bint_mod(void) {
-    TEST_ASSERT_MESSAGE(false, "NOT IMPLEMENTED");
+    TEST_FAIL_MESSAGE("NOT IMPLEMENTED");
 }
 
 void test_bint_mod_by_zero(void) {
-    TEST_ASSERT_MESSAGE(false, "NOT IMPLEMENTED");
+    TEST_FAIL_MESSAGE("NOT IMPLEMENTED");
 }

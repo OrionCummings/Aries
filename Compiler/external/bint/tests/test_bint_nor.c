@@ -5,5 +5,5 @@ void run_bint_nor_tests(void) {
 }
 
 void test_bint_nor(void) {
-    TEST_ASSERT_MESSAGE(false, "NOT IMPLEMENTED");
+    TEST_FAIL_MESSAGE("NOT IMPLEMENTED");
 }

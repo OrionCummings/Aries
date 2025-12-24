@@ -26,6 +26,7 @@ add_executable(bint_test
     test_bint_pow.c
     test_bint_sqrt.c
     test_bint_log.c
+    test_bint_exp.c
 )
 
 target_include_directories(bint_test PUBLIC

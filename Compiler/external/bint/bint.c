@@ -147,6 +147,10 @@ void bint_set_bytes(bint_t* const b, uint8_t* bytes, size_t n_bytes, size_t offs
     memcpy(&b->bytes[offset], bytes, n_bytes);
 }
 
+bool bint_valid(const bint_t* const b) {
+    return !(b == NULL || b->bytes == NULL || b->n_bytes == 0);
+}
+
 void bint_log_error(bint_error_t err) {
 
     switch (err) {
@@ -206,23 +210,33 @@ void bint_log_error(bint_error_t err) {
 //////////////////// Bitwise Operations ////////////////////
 
 bint_error_t bint_not(bint_t** result, const bint_t* const a) {
-    if (a == NULL || a->bytes == NULL || a->n_bytes == 0 || result == NULL) { return BINTE_INVALID_PARAM; }
+    if (!bint_valid(a) || result == NULL) { return BINTE_INVALID_PARAM; }
     if (*result != NULL) { return BINTE_LOST_INFO; }
 
     *result = bint_new(a->n_bytes);
     if (result == NULL || *result == NULL || (*result)->bytes == NULL) { return BINTE_MEMORY_ALLOCATION_FAILURE; }
 
     for (index_t index = 0; index < a->n_bytes; index++) {
-        uint8_t byte = a->bytes[index];
-        uint8_t ibyte = ~byte;
-        (*result)->bytes[index] = ibyte;
+        (*result)->bytes[index] = ~(a->bytes[index]);
     }
 
     return BINTE_NONE;
 }
 
 bint_error_t bint_and(bint_t** result, const bint_t* const a, const bint_t* const b) {
-    return BINTE_UNKNOWN;
+    if (!bint_valid(a) || !bint_valid(b) || result == NULL) { return BINTE_INVALID_PARAM; }
+    if (*result != NULL) { return BINTE_LOST_INFO; }
+
+    size_t max_size = (a->n_bytes > b->n_bytes) ? a->n_bytes : b->n_bytes;
+
+    *result = bint_new(max_size);
+    if (result == NULL || *result == NULL || (*result)->bytes == NULL) { return BINTE_MEMORY_ALLOCATION_FAILURE; }
+
+    for (index_t index = 0; index < max_size; index++) {
+        (*result)->bytes[index] = (a->bytes[index] & b->bytes[index]);
+    }
+
+    return BINTE_NONE;
 }
 
 bint_error_t bint_or(bint_t** result, const bint_t* const a, const bint_t* const b) {

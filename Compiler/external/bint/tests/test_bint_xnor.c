@@ -5,5 +5,5 @@ void run_bint_xnor_tests(void) {
 }
 
 void test_bint_xnor(void) {
-    TEST_ASSERT_MESSAGE(false, "NOT IMPLEMENTED");
+    TEST_FAIL_MESSAGE("NOT IMPLEMENTED");
 }

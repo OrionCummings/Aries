@@ -5,5 +5,5 @@ void run_bint_log_tests(void) {
 }
 
 void test_bint_log(void) {
-    TEST_ASSERT_MESSAGE(false, "NOT IMPLEMENTED");
+    TEST_FAIL_MESSAGE("NOT IMPLEMENTED");
 }

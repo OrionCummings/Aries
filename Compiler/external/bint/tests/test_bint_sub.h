@@ -3,6 +3,7 @@
 
 #include "unity.h"
 #include "debug.h"
+#include "bint.h"
 
 void run_bint_sub_tests(void);
 

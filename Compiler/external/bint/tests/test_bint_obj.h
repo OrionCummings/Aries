@@ -1,9 +1,9 @@
 #ifndef __TEST_BINT_OBJ_H
 #define __TEST_BINT_OBJ_H
 
-#include "bint.h"
 #include "unity.h"
 #include "debug.h"
+#include "bint.h"
 
 void run_bint_obj_tests(void);
 

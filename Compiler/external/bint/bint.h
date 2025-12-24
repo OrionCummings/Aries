@@ -144,6 +144,11 @@ void bint_print(const bint_t a, bint_base_t base);
 /// @param offset The offset at which to write the bytes into `b`.
 void bint_set_bytes(bint_t* const b, uint8_t* bytes, size_t n_bytes, size_t offset);
 
+/// @brief Determines if the given bint_t is valid.
+/// @param b An aribtrary-bit integer.
+/// @return True if `b` is valid and false if `b` is not valid.
+bool bint_valid(const bint_t* const b);
+
 /// @brief Logs the given error.
 /// @param err The error to be logged.
 void bint_log_error(bint_error_t err);
