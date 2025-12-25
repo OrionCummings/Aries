@@ -7,6 +7,8 @@
 
 void run_bint_nor_tests(void);
 
-void test_bint_nor(void);
+void test_bint_nor_equal_sizes(void);
+void test_bint_nor_unequal_sizes(void);
+void test_bint_nor_bad_parameters(void);
 
 #endif

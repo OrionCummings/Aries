@@ -31,11 +31,11 @@ int main(void) {
     // run_bint_obj_tests();
 
     // Bitwise operations
-    run_bint_not_tests();
+    // run_bint_not_tests();
     run_bint_and_tests();
     run_bint_nand_tests();
-    // run_bint_or_tests();
-    // run_bint_nor_tests();
+    run_bint_or_tests();
+    run_bint_nor_tests();
     // run_bint_xor_tests();
     // run_bint_xnor_tests();
     // run_bint_shl_tests();

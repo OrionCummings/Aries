@@ -7,6 +7,8 @@
 
 void run_bint_or_tests(void);
 
-void test_bint_or(void);
+void test_bint_or_equal_sizes(void);
+void test_bint_or_unequal_sizes(void);
+void test_bint_or_bad_parameters(void);
 
 #endif
