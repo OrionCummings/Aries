@@ -5,9 +5,17 @@
 #include "debug.h"
 
 typedef struct arena {
+
+    // The current size of the arena
     size_t size;
+
+    // The maximum capacity of the arena
     size_t capacity;
+
+    // The data contained within this arena.
     void* data;
+
+    // The next arena.
     struct arena* next; // TODO: Make this actually functional & tested
 } arena;
 

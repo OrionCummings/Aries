@@ -7,11 +7,74 @@ void run_bint_nor_tests(void) {
 }
 
 void test_bint_nor_equal_sizes(void) {
-    TEST_IGNORE_MESSAGE("NOT IMPLEMENTED");
+
+    // Test equal size bints (|a| == |b| = |result|)
+    const uint8_t size = 3;
+
+    // Set up expectations
+    bint_t* a = bint_new(size);
+    bint_t* b = bint_new(size);
+    bint_t* expected_bint = bint_new(size);
+
+    uint8_t a_bytes[] = { 0xA2, 0xFF, 0x18 };
+    uint8_t b_bytes[] = { 0x78, 0x18, 0xD2 };
+    uint8_t expected_bytes[] = { 0x05, 0x00, 0x25 };
+
+    bint_set_bytes(a, a_bytes, size, 0);
+    bint_set_bytes(b, b_bytes, size, 0);
+    bint_set_bytes(expected_bint, expected_bytes, size, 0);
+
+    // Perform the OR operation
+    bint_t* actual_bint = NULL;
+    bint_error_t err1 = bint_nor(&actual_bint, a, b);
+
+    TEST_ASSERT_EQUAL(BINTE_NONE, err1);
+    TEST_ASSERT_EQUAL(expected_bint->n_bytes, actual_bint->n_bytes);
+
+    for (index_t i = 0; i < expected_bint->n_bytes; i++)
+        TEST_ASSERT_EQUAL(expected_bint->bytes[i], actual_bint->bytes[i]);
+
+    bint_free(expected_bint);
+    bint_free(actual_bint);
+    bint_free(a);
+    bint_free(b);
 }
 
 void test_bint_nor_unequal_sizes(void) {
-    TEST_IGNORE_MESSAGE("NOT IMPLEMENTED");
+
+    // Test equal size bints (|a| != |b| = |result|)
+    const uint8_t size_a = 1;
+    const uint8_t size_b = 2;
+
+    // Set up expectations
+    bint_t* a = bint_new(size_a + 1);
+    bint_t* b = bint_new(size_b);
+    bint_t* expected_bint = bint_new(size_b);
+
+    uint8_t a_bytes[] = { 0xD3, 0xFF };
+    uint8_t b_bytes[] = { 0x99, 0x8D };
+    uint8_t expected_bytes[] = { 0x24, 0x00 };
+
+    bint_set_bytes(a, a_bytes, size_a + 1, 0);
+    bint_set_bytes(b, b_bytes, size_b, 0);
+    bint_set_bytes(expected_bint, expected_bytes, size_b, 0);
+
+    a->n_bytes = size_a;
+
+    // Perform the NOR operation
+    bint_t* actual_bint = NULL;
+    bint_error_t err1 = bint_nor(&actual_bint, a, b);
+
+    TEST_ASSERT_EQUAL(BINTE_NONE, err1);
+    TEST_ASSERT_EQUAL(expected_bint->n_bytes, actual_bint->n_bytes);
+
+    for (index_t i = 0; i < expected_bint->n_bytes; i++)
+        TEST_ASSERT_EQUAL(expected_bint->bytes[i], actual_bint->bytes[i]);
+
+    bint_free(expected_bint);
+    bint_free(actual_bint);
+    bint_free(a);
+    bint_free(b);
 }
 
 void test_bint_nor_bad_parameters(void) {

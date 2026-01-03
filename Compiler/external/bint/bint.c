@@ -46,7 +46,7 @@ bint_t* bint_new_str(const str* const s) {
     if (s == NULL) { return NULL; }
     if (s->data == NULL) { return NULL; }
 
-    arena* scratchpad = arena_new(2048);
+    arena* scratchpad = arena_new(2048); // TODO: Magic number!
     size_t len = str_len(s);
 
     // TODO: Use the string length to calculate an upper bound on allocated bytes.
@@ -95,11 +95,13 @@ bint_t* bint_new_str(const str* const s) {
 
 bint_t* bint_new_cstr(const char* const s) {
 
-    str* st = str_new(s);
-    if (st == NULL || st->data == NULL) { return NULL; }
+    str* str = str_new(s);
+    if (str == NULL || str->data == NULL) { return NULL; }
 
-    bint_t* b = bint_new_str(st);
+    bint_t* b = bint_new_str(str);
     if (b == NULL || b->bytes == NULL) { return NULL; }
+
+    str_free(str);
 
     return b;
 }
