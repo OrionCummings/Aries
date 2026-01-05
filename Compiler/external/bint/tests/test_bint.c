@@ -1,7 +1,7 @@
 #include "unity.h"
 #include "arena.h"
 #include "debug.h"
-#include "tests.h"
+#include "test_bint.h"
 
 #define TEST_ARENA_SIZE_BYTES (1024)
 
