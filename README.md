@@ -1,6 +1,6 @@
 # ♈ The Aries Project
 
-The Aires Project aims to make complex topics in computer science, electrical & computer engineering, and systems engineering more accessible by exposing ever aspect of a modern computing ecosystem. My hope is that anyone seeking to learn more about complex topics in these fields can learn from this project and create their own new and beautiful projects.
+The Aires Project aims to make complex topics in computer science, electrical & computer engineering, and systems engineering more accessible by exposing every aspect of a modern computing ecosystem. My hope is that anyone seeking to learn more about complex topics in these fields can learn from this project and create their own new and beautiful projects.
 
 I understand that this effort is enormous. I do not expect this project to *ever* be 'finished'. Frankly, my goal is not to finish this project: it's to help myself and others understand technical topics that I find facinating. If you are looking to contribute to the project, start looking around for improvements to further this educational goal!
 
