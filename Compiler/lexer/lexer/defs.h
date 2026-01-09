@@ -10,9 +10,9 @@
 #define crange(l, s, e) ((CharacterLocation){.line = l, .start = s, .end = e})
 
 typedef enum {
-    INVALID, // Used for internal errors
-    NONE,
-    IDENTIFIER,
+    TOKEN_INVALID, // Used for internal errors
+    TOKEN_NONE,
+    TOKEN_IDENTIFIER,
 
     SYM_SPACE,
     SYM_NEWLINE,
@@ -70,7 +70,7 @@ typedef enum {
     KEYWORD_I64,    // i64
     KEYWORD_F32,    // f32
     KEYWORD_F64,    // f64
-    KEYWORD_BOOL,     // bool
+    KEYWORD_BOOL,   // bool
 
     KEYWORD_BREAK,    // break
     KEYWORD_CASE,     // case
@@ -86,7 +86,7 @@ typedef enum {
     KEYWORD_STATIC,   // static
     KEYWORD_STRUCT,   // struct
     KEYWORD_SWITCH,   // switch
-    KEYWORD_DEF,      // def
+    KEYWORD_DECL,     // decl
     KEYWORD_WHILE,    // while
     KEYWORD_OVERLOAD, // overload
     KEYWORD_ASM,      // asm
@@ -102,9 +102,9 @@ typedef struct {
 } CharacterLocation;
 
 static const char* const TOKEN_NAMES[] = {
-    [INVALID] = "INVALID",
-    [NONE] = "NONE",
-    [IDENTIFIER] = "IDENTIFIER",
+    [TOKEN_INVALID] = "TOKEN_INVALID",
+    [TOKEN_NONE] = "TOKEN_NONE",
+    [TOKEN_IDENTIFIER] = "TOKEN_IDENTIFIER",
     [SYM_SPACE] = "SYM_SPACE",
     [SYM_NEWLINE] = "SYM_NEWLINE",
     [SYM_SEMICOLON] = "SYM_SEMICOLON",
@@ -175,7 +175,7 @@ static const char* const TOKEN_NAMES[] = {
     [KEYWORD_STATIC] = "KEYWORD_STATIC",
     [KEYWORD_STRUCT] = "KEYWORD_STRUCT",
     [KEYWORD_SWITCH] = "KEYWORD_SWITCH",
-    [KEYWORD_DEF] = "KEYWORD_DEF",
+    [KEYWORD_DECL] = "KEYWORD_DECL",
     [KEYWORD_WHILE] = "KEYWORD_WHILE",
     [KEYWORD_OVERLOAD] = "KEYWORD_OVERLOAD",
     [KEYWORD_ASM] = "KEYWORD_ASM",
@@ -239,7 +239,7 @@ static const char* const SYM_CHARS[] = {
     [KEYWORD_STATIC] = "static",
     [KEYWORD_STRUCT] = "struct",
     [KEYWORD_SWITCH] = "switch",
-    [KEYWORD_DEF] = "def",
+    [KEYWORD_DECL] = "def",
     [KEYWORD_WHILE] = "while",
     [KEYWORD_OVERLOAD] = "overload",
     [KEYWORD_ASM] = "asm",

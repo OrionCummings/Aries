@@ -2,23 +2,20 @@
 
 str* str_new(const char* s) {
 
-    if (s == NULL) {
-        return NULL;
-    }
+    if (s == NULL) { return NULL; }
 
     str* r = calloc(1, sizeof(*r));
 
-    if (r != NULL) {
+    if (r == NULL) { return NULL; }
 
-        size_t len = strlen(s);
+    size_t len = strlen(s);
 
-        r->data = calloc(len + 1, sizeof(*(r->data)));
+    r->data = calloc(len, sizeof(*(r->data)));
 
-        strncpy(r->data, s, len);
+    strncpy(r->data, s, len);
 
-        r->length = len;
-        r->location = AL_HEAP;
-    }
+    r->length = len;
+    r->location = AL_HEAP;
 
     return r;
 }
@@ -259,14 +256,16 @@ str* str_from_file(FILE* const file) {
     size_t len = ftell(file);
     fseek(file, 0, SEEK_SET);
 
-    char* buffer = calloc(len, sizeof(*buffer));
+    char* buffer = calloc(len + 1, sizeof(*buffer));
     if (buffer == NULL) {
         return NULL;
     }
     fread(buffer, 1, len, file);
+    buffer[len] = '\0';
 
     str* s = str_new(buffer);
     free(buffer);
+
     return s;
 }
 
@@ -363,9 +362,10 @@ bool str_has_suffix(const str* const s, const char* suffix) {
     return has_suffix;
 }
 
+// TODO: Make this variadic.
 void str_print(const char* prefix, const str* const s) {
     if (s != NULL) {
-        printf("%s'%.*s'\n", prefix, (int)s->length, s->data);
+        printf("%s'%.*s'", prefix, (int)s->length, s->data);
     }
 }
 

@@ -14,7 +14,7 @@ Symbol* sym_new(const str* const s) {
     }
 
     sym->t = str_to_token(s);
-    if (sym->t == INVALID) {
+    if (sym->t == TOKEN_INVALID) {
         sym_free(sym);
         return NULL;
     }
@@ -58,11 +58,10 @@ bool sym_cmp(const Symbol s1, const Symbol s2) {
     return (s1.t == s2.t && str_cmp(s1.s, s2.s));
 }
 
-bool symbol_valid(const Symbol* sym) {
-    if (sym == NULL) { return false; }
-    if (sym->t == INVALID) { return false; }
-    if (sym->location.start == sym->location.end) { return false; }
-    if (!str_valid(sym->s)) { return false; }
+bool symbol_valid(const Symbol sym) {
+    if (sym.t == TOKEN_INVALID) { return false; }
+    if (sym.location.start == sym.location.end) { return false; }
+    if (!str_valid(sym.s)) { return false; }
     return true;
 }
 
@@ -74,4 +73,24 @@ void sym_print(const Symbol s) {
     } else {
         printf("'%.*s'\n", (int)s.s->length, s.s->data);
     }
+}
+
+bool sym_is_built_in_type(const Symbol sym) {
+    Token t = sym.t;
+    return (
+        (t == KEYWORD_OPT)
+        || (t == KEYWORD_VOID)
+        || (t == KEYWORD_BYTE)
+        || (t == KEYWORD_STRING)
+        || (t == KEYWORD_U8)
+        || (t == KEYWORD_U16)
+        || (t == KEYWORD_U32)
+        || (t == KEYWORD_U64)
+        || (t == KEYWORD_I8)
+        || (t == KEYWORD_I16)
+        || (t == KEYWORD_I32)
+        || (t == KEYWORD_I64)
+        || (t == KEYWORD_F32)
+        || (t == KEYWORD_F64)
+        || (t == KEYWORD_BOOL));
 }

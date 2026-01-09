@@ -21,7 +21,9 @@ do {                                                                         \
 
 Symbol* sym_copy(const Symbol* s);
 bool sym_cmp(const Symbol s1, const Symbol s2);
-bool symbol_valid(const Symbol* sym);
-void sym_print(const Symbol);
+bool symbol_valid(const Symbol sym);
+void sym_print(const Symbol sym);
+
+bool sym_is_built_in_type(const Symbol sym);
 
 #endif

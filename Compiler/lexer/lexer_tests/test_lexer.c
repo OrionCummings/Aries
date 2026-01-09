@@ -90,8 +90,8 @@ void test_str_to_token_success_1() {
     const char* cs13 = "-167429836784i64";
     const char* cs14 = "0";
     const char* cs15 = "201";
-    const Token expected_token1 = KEYWORD_DEF;
-    const Token expected_token2 = IDENTIFIER;
+    const Token expected_token1 = KEYWORD_DECL;
+    const Token expected_token2 = TOKEN_IDENTIFIER;
     const Token expected_token3 = KEYWORD_F32;
     const Token expected_token4 = KEYWORD_STRUCT;
     const Token expected_token5 = KEYWORD_VOID;

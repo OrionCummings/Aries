@@ -3,11 +3,24 @@
 
 #include "symbol.h"
 
+// TODO: Magic number!
 #define SYM_LIST_DEFAULT_SIZE ((size_t)64)
 
 typedef struct {
+
+    // The base index (used by the parser).
+    index_t base_index;
+
+    // The lookahead index (used by the parser).
+    index_t la_index;
+
+    // The maximum capacity of the symbol list
     size_t capacity;
+
+    // The current number of elements in the symbol list
     size_t length;
+
+    // The symbols in the symbol list
     Symbol* symbols;
 } SymbolList;
 

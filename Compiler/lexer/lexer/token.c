@@ -2,7 +2,7 @@
 
 Token str_to_token(const str* const s) {
     if (s == NULL || s->data == NULL) {
-        return INVALID;
+        return TOKEN_INVALID;
     }
 
     for (size_t index = 3; index < TOKEN_COUNT; index++) {
@@ -12,7 +12,7 @@ Token str_to_token(const str* const s) {
     }
 
     if (str_is_identifier(s)) {
-        return IDENTIFIER;
+        return TOKEN_IDENTIFIER;
     }
 
     return str_is_literal(s);

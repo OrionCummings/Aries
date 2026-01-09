@@ -17,6 +17,7 @@ SymbolList* lex(const str const* file_content) {
     size_t file_len = str_len(file_content);
     if (file_len == 0) {
         A_ERROR("invalid file length");
+        sym_list_free(symlist);
         return NULL;
     }
 
@@ -45,15 +46,15 @@ SymbolList* lex(const str const* file_content) {
             return false;
         }
 
-        // TODO: sym_new() copies a string, owns it, gets added to the sym list, and the freed thereby freeing memory that now belongs to the symlist!
         // Create a new symbol from the given string view
-        Symbol* sym = sym_new(&s); 
+        Symbol* sym = sym_new(&s);
         if (sym == NULL) {
             A_WARNING("failed to create symbol");
             free(boundaries);
             return false;
         }
 
+        // TODO: There is something wrong with this approach; many character numbers are too high!
         // Update the current line count
         char_start += char_len;
         if (sym->t == SYM_NEWLINE) {
@@ -64,8 +65,10 @@ SymbolList* lex(const str const* file_content) {
         // Update the symbol's location
         sym->location = crange(line, char_start, char_start + char_len);
 
-        // Add the symbol to the symlist
-        sym_list_add(symlist, *sym);
+        // If the previous symbol was a space and the current symbol is a space, then don't add it to the sym list!
+        if (sym->t != SYM_SPACE) {
+            sym_list_add(symlist, *sym);
+        }
 
         // Free the symbol because it's no longer needed
         sym_free(sym);
@@ -76,21 +79,6 @@ SymbolList* lex(const str const* file_content) {
     A_INFO("performed lexing");
 
     return symlist;
-}
-
-void lex_print(const Lexer* const lexer) {
-    printf("Lexer: ");
-
-    if (lexer == NULL) {
-        printf("\t<null>\n");
-        return;
-    }
-
-    if (lexer->sym_list != NULL) {
-        printf("(%lu/%lu):\n", lexer->sym_list->length, lexer->sym_list->capacity);
-        sym_list_print(*lexer->sym_list);
-    }
-    printf("\n");
 }
 
 Token str_is_literal(const str* const s) {
@@ -117,5 +105,5 @@ Token str_is_literal(const str* const s) {
         return LIT_I64;
     }
 
-    return INVALID;
+    return TOKEN_INVALID;
 }

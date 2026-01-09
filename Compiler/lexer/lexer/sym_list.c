@@ -8,9 +8,12 @@ SymbolList* sym_list_new(const size_t capacity) {
         return NULL;
     }
 
+    sl->base_index = 0;
+    sl->la_index = 0;
+
     sl->capacity = capacity;
     sl->length = 0;
-    sl->symbols = calloc(capacity, sizeof(*sl->symbols));
+    sl->symbols = calloc(capacity, sizeof(*(sl->symbols)));
 
     if (sl->symbols == NULL) {
         A_WARNING("failed to allocate new symbol list in a sym list object");
@@ -62,22 +65,13 @@ void sym_list_add(SymbolList* symlist, Symbol sym) {
 }
 
 bool symlist_valid(const SymbolList* const symlist) {
-    if (symlist == NULL) {
-        return false;
-    }
+    if (symlist == NULL) { return false; }
 
-    for (size_t index = 0; index < symlist->capacity; index++) {
-        if (index < symlist->length) {
-            if (!symbol_valid(&symlist->symbols[index])) {
-                return false;
-            }
-        } else {
-            if (symbol_valid(&symlist->symbols[index])) {
-                return false;
-            }
-        }
+    bool valid = false;
+    for (size_t index = 0; index < symlist->length; index++) {
+        valid |= symbol_valid(symlist->symbols[index]);
     }
-    return true;
+    return valid;
 }
 
 void sym_list_print(const SymbolList sl) {

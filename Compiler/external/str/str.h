@@ -57,7 +57,7 @@ typedef struct {
     char* data;
 } str;
 
-/// @brief 
+/// @brief A type to be used for indices.
 typedef size_t index_t;
 
 /// @brief Allocates a new string instance based on the given cstring.
