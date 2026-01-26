@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
     A_INFO("freed the file content");
 
     // Make sure the symbols are still ok
-    sym_list_print(*symlist);
+    symlist_print(*symlist);
     A_INFO("printed the symlist");
 
     ///////////////////
@@ -41,14 +41,22 @@ int main(int argc, char** argv) {
         A_WARNING("failed to allocate a parsing arena");
     }
 
-    Declaration* root = parse(parsing_arena, symlist);
-    if (root == NULL) {
-        A_WARNING("failed to parse symlist");
+    // DEBUG: TEMP
+    Expression* e = expr_parse(parsing_arena, symlist);
+    if (e == NULL) {
+            A_WARNING("temp: failed to parse expr from symlist");
     } else {
-        decl_print(*root);
+        expr_print(*e);
     }
 
-    sym_list_free(symlist);
+    // Declaration* root = parse(parsing_arena, symlist);
+    // if (root == NULL) {
+    //     A_WARNING("failed to parse symlist");
+    // } else {
+    //     decl_print(*root);
+    // }
+
+    symlist_free(symlist);
     A_INFO("freed the symlist");
 
     arena_free(parsing_arena);

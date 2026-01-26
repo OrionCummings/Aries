@@ -8,7 +8,7 @@ Declaration* parse(arena* arena, SymbolList* const symlist) {
         return NULL;
     }
 
-    return decl_parse(arena, symlist);
+    return decl_parse(arena, symlist); // NOTE: This is correct, but not for current testing!
 }
 
 Declaration* decl_parse(arena* arena, SymbolList* const symlist) {
@@ -68,14 +68,23 @@ Expression* expr_parse(arena* arena, SymbolList* const symlist) {
     // TODO: Add some bounds checking to the symlist base and look-ahead indices.
 
     Expression* expr = arena_alloc(arena, sizeof(*expr));
-
+    if (!expr) { A_WARNING("failed to allocate memory for an expression"); return NULL; }
+    
     Symbol sym = symlist->symbols[symlist->base_index];
-
+    if (!sym_valid(sym)) { A_WARNING("failed to get valid symbol"); return NULL; }
+    
     sym_print(sym);
 
-    // expr->int_value = 
+    uint64_t value = 0; // TODO: This *probably shouldn't* be a 64-bit int?
+    bool success = str_to_integer_value(sym.s, &value);
+    if (!success) {
+        A_WARNING("failed to convert str to int value");
+        return NULL;
+    }
 
-    return NULL;
+    expr->int_value = value;
+
+    return expr;
 }
 
 void decl_print(const Declaration decl) {

@@ -107,6 +107,7 @@ void arena_reset(arena* const arena) {
         arena_reset(arena->next);
     }
 
-    A_INFO("reset arena");
+    memset(arena->data, 0, arena->capacity); // TODO: Figure out of this is a bad idea? Is this slow? Do I care?
     arena->size = 0; // TODO: This behavior breaks a previous invariant: unused memory was previously zero! Is this ok? What value does this invariant bring? Are we relying on it?
+    A_INFO("reset arena");
 }

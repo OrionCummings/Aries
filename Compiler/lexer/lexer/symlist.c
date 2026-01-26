@@ -1,6 +1,6 @@
-#include "sym_list.h"
+#include "symlist.h"
 
-SymbolList* sym_list_new(const size_t capacity) {
+SymbolList* symlist_new(const size_t capacity) {
     SymbolList* sl = calloc(1, sizeof(*sl));
 
     if (sl == NULL) {
@@ -26,7 +26,7 @@ SymbolList* sym_list_new(const size_t capacity) {
     return sl;
 }
 
-void _sym_list_free(SymbolList* sl) {
+void _symlist_free(SymbolList* sl) {
     if (sl != NULL) {
         for (index_t index = 0; index < sl->length; index++) {
             str_free(sl->symbols[index].s);
@@ -36,14 +36,14 @@ void _sym_list_free(SymbolList* sl) {
     free(sl);
 }
 
-void sym_list_add(SymbolList* symlist, Symbol sym) {
+void symlist_add(SymbolList* symlist, Symbol sym) {
     if (symlist == NULL) { A_WARNING("cannot add symbol to NULL symbol list"); return; }
     if (symlist->symbols == NULL) { A_WARNING("cannot add symbol to NULL symbol list ptr"); return; }
 
     if (symlist->length == symlist->capacity) {
         void* temp = realloc(symlist->symbols, symlist->capacity * 2 * sizeof(*(symlist->symbols)));
         if (temp == NULL) {
-            sym_list_free(symlist);
+            symlist_free(symlist);
             A_ERROR("failed to reallocate symlist");
             return;
         }
@@ -69,12 +69,12 @@ bool symlist_valid(const SymbolList* const symlist) {
 
     bool valid = false;
     for (size_t index = 0; index < symlist->length; index++) {
-        valid |= symbol_valid(symlist->symbols[index]);
+        valid |= sym_valid(symlist->symbols[index]);
     }
     return valid;
 }
 
-void sym_list_print(const SymbolList sl) {
+void symlist_print(const SymbolList sl) {
     for (size_t index = 0; index < sl.length; index++) {
         sym_print(sl.symbols[index]);
     }

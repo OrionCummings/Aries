@@ -37,10 +37,10 @@ void test_lexer_lex_success_1() {
     const size_t num_symbols = 24;
 
     str* filename = str_new("/home/orion/Projects/Aries/Compiler/C Rewrite/lexer/lexer_tests/example1.ari"); // TODO: Make this rely on a hard-coded string so there are no file dependencies!
-    SymbolList* sym_list = lex(filename);
+    SymbolList* symlist = lex(filename);
 
-    TEST_ASSERT_NOT_NULL(sym_list);
-    TEST_ASSERT_EQUAL(num_symbols, sym_list->length);
+    TEST_ASSERT_NOT_NULL(symlist);
+    TEST_ASSERT_EQUAL(num_symbols, symlist->length);
 
     Symbol* symbols = calloc(num_symbols, sizeof(*symbols));
 
@@ -68,7 +68,7 @@ void test_lexer_lex_success_1() {
     symbols[21] = DEREF_SYMBOL(sym_new(str_new("}")));
 
     for (size_t index = 0; index < num_symbols; index++) {
-        TEST_ASSERT(sym_cmp(symbols[index], sym_list->symbols[index]));
+        TEST_ASSERT(sym_cmp(symbols[index], symlist->symbols[index]));
     }
 
     free(symbols);

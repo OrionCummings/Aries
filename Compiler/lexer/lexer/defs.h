@@ -4,9 +4,9 @@
 #include <stdint.h>
 
 #define MAX_IDENTIFIER_LENGTH (8)
-#define NULL_SYMBOL ((Symbol){.location = NULL_CHAR_RANGE, .s = NULL, .t = 0})
+#define NULL_SYMBOL ((Symbol){.location = NULL_CHAR_LOC, .s = NULL, .t = 0})
 #define DEREF_SYMBOL(s) ((s != NULL) ? *s : NULL_SYMBOL)
-#define NULL_CHAR_RANGE ((CharacterLocation){.line = 0, .start = 0, .end = 0})
+#define NULL_CHAR_LOC ((CharacterLocation){.line = 0, .start = 0, .end = 0})
 #define crange(l, s, e) ((CharacterLocation){.line = l, .start = s, .end = e})
 
 typedef enum {
@@ -239,7 +239,7 @@ static const char* const SYM_CHARS[] = {
     [KEYWORD_STATIC] = "static",
     [KEYWORD_STRUCT] = "struct",
     [KEYWORD_SWITCH] = "switch",
-    [KEYWORD_DECL] = "def",
+    [KEYWORD_DECL] = "decl",
     [KEYWORD_WHILE] = "while",
     [KEYWORD_OVERLOAD] = "overload",
     [KEYWORD_ASM] = "asm",

@@ -79,14 +79,20 @@ str* str_concat(str* s1, str* s2) {
 
 bool str_cmp(const str* const s1, const str* const s2) {
 
-    if (s1 == NULL || s2 == NULL) {
-        return false;
-    }
+    if (s1 == NULL || s2 == NULL) { return false; }
 
     size_t len_s1 = str_len(s1);
     size_t len_s2 = str_len(s2);
-    size_t len_min = (len_s1 < len_s2) ? len_s1 : len_s2;
-    return (strncmp(s1->data, s2->data, len_min) == 0) ? true : false;
+    if (len_s1 != len_s2) { return false; }
+
+    for (index_t i = 0; i < len_s1; i++) {
+        char a = s1->data[i];
+        char b = s2->data[i];
+        if (a != b) {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool str_cmp_raw(const str* const s, const char* const cs) {
@@ -636,5 +642,22 @@ bool str_is_char_literal(const str* const s) {
     }
 
     return false;
+}
+
+// TODO: FIX THIS FUNCTION; IT SUCKS!!!!
+// TODO: this requires a more general solution!
+bool str_to_integer_value(const str* const s, uint64_t* value) {
+
+    // Work backward; ignore the last TWO bytes as those will be u8 <-- STUPID ASSUMPTION
+    index_t n = s->length - 2;
+    for (index_t i = n; i > 0; i--) {
+        char digit = s->data[i - 1];
+
+        if (!isdigit(digit)) return false;
+
+        *value += ((digit - '0') * ipow(10, n - i));
+    }
+
+    return true;
 }
 

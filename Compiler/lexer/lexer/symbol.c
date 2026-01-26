@@ -58,7 +58,7 @@ bool sym_cmp(const Symbol s1, const Symbol s2) {
     return (s1.t == s2.t && str_cmp(s1.s, s2.s));
 }
 
-bool symbol_valid(const Symbol sym) {
+bool sym_valid(const Symbol sym) {
     if (sym.t == TOKEN_INVALID) { return false; }
     if (sym.location.start == sym.location.end) { return false; }
     if (!str_valid(sym.s)) { return false; }

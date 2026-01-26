@@ -4,7 +4,7 @@
 #include <ctype.h>
 #include <stddef.h>
 #include "debug.h"
-#include "sym_list.h"
+#include "symlist.h"
 
 SymbolList* lex(const str* file_content);
 

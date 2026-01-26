@@ -1,4 +1,4 @@
 #include "unity.h"
 #include "lexer.h"
 
-void test_sym_list_add_symbol_1();
+void test_symlist_add_symbol_1();

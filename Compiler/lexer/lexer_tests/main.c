@@ -1,7 +1,7 @@
 #include "unity.h"
 #include "lexer.h"
 #include "test_lexer.h"
-#include "test_sym_list.h"
+#include "test_symlist.h"
 
 void setUp() {
     LOG_PUSH(LOG_NONE);
@@ -23,15 +23,18 @@ int suiteTearDown(int num_failures) {
 int main(void) {
     UNITY_BEGIN();
 
-    RUN_TEST(test_sym_new_success_from_str_view);
+    /// Misc Tests
+    if (true) {
+        RUN_TEST(test_sym_new_success_from_str_view);
+    }
 
     /// Symbol List Tests
     if (true) {
-        RUN_TEST(test_sym_list_add_symbol_1);
+        RUN_TEST(test_symlist_add_symbol_1);
     }
 
     /// Lexer Tests
-    if (false) {
+    if (true) {
 
         RUN_TEST(test_str_get_alphanumeric_symbolic_boundaries_success_1);
         RUN_TEST(test_str_get_alphanumeric_symbolic_boundaries_success_2);
@@ -69,8 +72,8 @@ int main(void) {
 
         // RUN_TEST(test_lexer_lex_success_1);
 
-        RUN_TEST(test_str_to_token_success_1);
-        
+        // RUN_TEST(test_str_to_token_success_1);
+
         // RUN_TEST(test_sym_new_success_1);
         // sym_new with "0" passed fails!
     }

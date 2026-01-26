@@ -1,7 +1,7 @@
 add_executable(test_lexer_lib
     main.c
     test_lexer.c
-    test_sym_list.c
+    test_symlist.c
 )
 
 target_link_libraries(test_lexer_lib

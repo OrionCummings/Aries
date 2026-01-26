@@ -2,7 +2,7 @@
 #define __PARSER_H
 
 #include "str.h"
-#include "sym_list.h"
+#include "symlist.h"
 #include "arena.h"
 
 typedef enum parsing_error_t : char {

@@ -10,6 +10,7 @@
 #include <stdint.h>
 
 #include "arena.h"
+#include "ipow.h"
 
 #define PREFIX_BIN_LOWER ("0b")
 #define PREFIX_OCT_LOWER ("0o")
@@ -87,7 +88,7 @@ void _str_free(str* s);
 /// @return A new string instance of the form s1s2.
 str* str_concat(str* s1, str* s2);
 
-/// @brief Compares two strings s1 and s2 character-wise. This does not account for differences in length (which shouldn't happen?), capacity, or heap status; this function only checks character content. If strict equality is required, use `str_ident()`.
+/// @brief Compares two strings s1 and s2 character-wise. This does not account for differences in capacity or heap status; this function only checks character content. Safely checking character content requires matching lengths. If strict equality is required, use `str_ident()`.
 /// @param s1 A string.
 /// @param s2 A string.
 /// @return Returns true if the string data in both strings are equal and false otherwise.
@@ -314,5 +315,7 @@ bool str_is_opt_literal(const str* const s);
 /// @param s The string to check.
 /// @return Returns `true` if `s` is a valid result literal. Otherwise, returns `false`.
 bool str_is_res_literal(const str* const s);
+
+bool str_to_integer_value(const str* const s, uint64_t* value);
 
 #endif

@@ -292,7 +292,7 @@ void test_str_cmp_success_ident_str() {
     str_free(s2);
 }
 
-void test_str_cmp_success_same_text() {
+void test_str_cmp_failure_same_text_different_length() {
 
     const char* text = "this is a test string!";
     str* s1 = str_new(text);
@@ -308,7 +308,7 @@ void test_str_cmp_success_same_text() {
 
     bool equal = str_cmp(s1, s2);
 
-    TEST_ASSERT_TRUE(equal);
+    TEST_ASSERT_FALSE(equal);
 
     // Restore the string state so free() works as expected; this test
     // isn't for free(), so why stress it.
@@ -833,7 +833,7 @@ int main(void) {
         RUN_TEST(test_str_concat_malformed_parameter);
 
         RUN_TEST(test_str_cmp_success_ident_str);
-        RUN_TEST(test_str_cmp_success_same_text);
+        RUN_TEST(test_str_cmp_failure_same_text_different_length);
         RUN_TEST(test_str_cmp_failure_different_str);
         RUN_TEST(test_str_cmp_failure_different_text);
         RUN_TEST(test_str_cmp_failure_one_null);
