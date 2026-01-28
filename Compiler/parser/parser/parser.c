@@ -66,23 +66,44 @@ Declaration* decl_parse(arena* arena, SymbolList* const symlist) {
 Expression* expr_parse(arena* arena, SymbolList* const symlist) {
 
     // TODO: Add some bounds checking to the symlist base and look-ahead indices.
+    if (arena == NULL) { A_WARNING("invalid arena"); return NULL; }
+    if (symlist == NULL) { A_WARNING("invalid symlist"); return NULL; }
+    if (symlist->la_index > symlist->length) { A_WARNING("invalid symlist la index"); return NULL; }
 
     Expression* expr = arena_alloc(arena, sizeof(*expr));
     if (!expr) { A_WARNING("failed to allocate memory for an expression"); return NULL; }
-    
+
     Symbol sym = symlist->symbols[symlist->base_index];
     if (!sym_valid(sym)) { A_WARNING("failed to get valid symbol"); return NULL; }
-    
+
     sym_print(sym);
 
-    uint64_t value = 0; // TODO: This *probably shouldn't* be a 64-bit int?
-    bool success = str_to_integer_value(sym.s, &value);
-    if (!success) {
-        A_WARNING("failed to convert str to int value");
-        return NULL;
-    }
+    switch (sym.t) {
 
-    expr->int_value = value;
+        case(SYM_PAREN_OPEN): {
+
+            // Increment the look ahead index!
+            symlist->la_index++;
+            Expression* e = expr_parse(arena, symlist);
+            if (!e) { A_WARNING("failed to allocate memory for an expression"); return NULL; }
+
+        }
+
+        case(LIT_U8):
+        case(LIT_U16):
+        case(LIT_U32):
+        case(LIT_U64): {
+            uint64_t value = 0; // TODO: This *probably shouldn't* be a 64-bit int?
+            bool success = str_to_integer_value(sym.s, &value);
+            if (!success) {
+                A_WARNING("failed to convert str to int value");
+                return NULL;
+            }
+
+            expr->int_value = value;
+            expr->type = EXPR_T_LIT_U8; // TODO: Make this actually work with other types LOL
+        }
+    }
 
     return expr;
 }

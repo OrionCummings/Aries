@@ -36,12 +36,12 @@ typedef enum BuiltinType : char {
 
 typedef enum ExpressionType : char {
     EXPR_T_UNKNOWN = 0,
-    EXPR_T_LIT_INT
+    EXPR_T_LIT_U8
 } ExpressionType;
 
 static const char* const EXPR_T_NAMES[] = {
     [EXPR_T_UNKNOWN] = "EXPR_T_UNKNOWN",
-    [EXPR_T_LIT_INT] = "EXPR_T_LIT_INT",
+    [EXPR_T_LIT_U8] = "EXPR_T_LIT_U8",
 };
 
 typedef enum StatementType : char {
