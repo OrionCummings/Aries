@@ -11,4 +11,5 @@ add_compile_definitions(false=0)
 add_compile_definitions(true=1)
 
 add_subdirectory(src)
+add_subdirectory(external)
 

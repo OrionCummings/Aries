@@ -1,10 +1,10 @@
 #ifndef CONTROL_UNIT_H
 #define CONTROL_UNIT_H
 
-#include "decoder.h"
+// #include "decoder.h"
 
-typedef struct {
-    decoder dec;
-} control_unit;
+// typedef struct {
+//     decoder_t dec;
+// } control_unit_t;
 
 #endif

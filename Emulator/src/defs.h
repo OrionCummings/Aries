@@ -2,63 +2,21 @@
 #define DEFS_H
 
 #include <stdint.h>
+#include "debug.h"
 
-typedef uint32_t address;
-typedef uint32_t instruction;
-typedef uint32_t reg;
+#define PAGE_SIZE (4096)
 
-typedef enum : uint8_t {
+typedef uint8_t u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
 
-    UNKNOWN = 0xFF,
+typedef u32 address_t;
+typedef u32 instruction_t;
+typedef u32 reg_t;
 
-    // Logical operations
-    NOT = 0x00,
-    AND,
-    NAND,
-    OR,
-    NOR,
-    XOR,
-    XNOR,
+typedef u8 pin_t;
 
-    // Arithmetic operations
-    ADD = 0x10,
-    SUB,
-    MUL,
-    DIV,
-    MOD,
-
-} operation;
-
-static const char* const OPERATION_NAMES[] = {
-    [UNKNOWN] = "UNKNOWN",
-    [NOT] = "NOT",
-    [AND] = "AND",
-    [NAND] = "NAND",
-    [OR] = "OR",
-    [NOR] = "NOR",
-    [XOR] = "XOR",
-    [XNOR] = "XNOR",
-    [ADD] = "ADD",
-    [SUB] = "SUB",
-    [MUL] = "MUL",
-    [DIV] = "DIV",
-    [MOD] = "MOD",
-};
-
-static const char* const OPERATION_SYM[] = {
-    [UNKNOWN] = "?",
-    [NOT] = "!",
-    [AND] = "&",
-    [NAND] = "!&",
-    [OR] = "|",
-    [NOR] = "!|",
-    [XOR] = "^",
-    [XNOR] = "!^",
-    [ADD] = "+",
-    [SUB] = "-",
-    [MUL] = "*",
-    [DIV] = "/",
-    [MOD] = "%%",
-};
+typedef u8 page_t[PAGE_SIZE];
 
 #endif

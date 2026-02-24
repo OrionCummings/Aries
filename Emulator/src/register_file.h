@@ -1,38 +1,41 @@
-#ifndef REGISTER_FILE_H
-#define REGISTER_FILE_H
+#ifndef reg_tISTER_FILE_H
+#define reg_tISTER_FILE_H
 
+#include <stdio.h>
 #include <stdint.h>
 #include "defs.h"
 
 typedef struct {
-    reg a;
-    reg b;
-    reg c;
-    reg d;
-    reg e;
-    reg f;
-    reg g;
-    reg h;
-    reg i;
-    reg j;
-    reg k;
-    reg l;
-    reg stack_pointer;
-    reg base_pointer;
-    reg program_counter;
+    reg_t a;
+    reg_t b;
+    reg_t c;
+    reg_t d;
+    reg_t e;
+    reg_t f;
+    reg_t g;
+    reg_t h;
+    reg_t i;
+    reg_t j;
+    reg_t k;
+    reg_t l;
+    reg_t stack_pointer;
+    reg_t base_pointer;
+    reg_t program_counter;
     union {
-        reg flags;
+        reg_t flags;
         struct {
-            reg zero : 1;
-            reg carry : 1;
-            reg parity : 1;
-            reg sign : 1;
-            reg overflow : 1;
-            reg interrupt : 1;
-            reg trap : 1;
-            reg hpc : 1;
+            reg_t zero : 1;
+            reg_t carry : 1;
+            reg_t parity : 1;
+            reg_t sign : 1;
+            reg_t overflow : 1;
+            reg_t interrupt : 1;
+            reg_t trap : 1;
+            reg_t hpc : 1;
         };
-    } flags;
-} register_file;
+    };
+} register_file_t;
+
+void register_file_print(const register_file_t reg_file, bool verbose);
 
 #endif
