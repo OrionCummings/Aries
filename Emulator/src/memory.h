@@ -6,6 +6,7 @@
 #define MEMORY_SIZE_ZERO_BYTES (1)
 #define MEMORY_SIZE_PROGRAM_BYTES (32768)
 #define MEMORY_SIZE_SCRATCH_BYTES (32759)
+#define MEMORY_SIZE_VIDEO_BYTES ()
 #define MEMORY_SIZE_MEMMAP_BYTES (8)
 #define MEMORY_SIZE_ALL_BYTES (MEMORY_SIZE_ZERO_BYTES + MEMORY_SIZE_PROGRAM_BYTES + MEMORY_SIZE_SCRATCH_BYTES + MEMORY_SIZE_MEMMAP_BYTES)
 #define MEMORY_ZERO_START    ((address_t)(0))
@@ -97,6 +98,8 @@ void memory_print(memory_t* const memory);
 
 bool memory_read(const memory_t* memory, u8* data, address_t address);
 bool memory_write(memory_t* memory, u8 data, address_t address);
+
+bool memory_load_bytes(memory_t* memory,u8* data, size_t num, address_t address);
 
 /// @brief Private function. Prints a hex dump of the given object. Based on https://gist.github.com/ccbrown/9722406.
 /// @param data The object to be dumped.

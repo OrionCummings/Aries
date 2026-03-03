@@ -74,14 +74,6 @@ void loop(void) {
 int main(void) {
 
     init();
-
-    // TODO: TEST CODE
-    for (u32 i = 0; i <= 0xFF; ++i) {
-        memory_write(&memory, i & 0xFF, (address_t)i);
-    }
-
-    memory_print(&memory);
-
     loop();
     deinit();
 

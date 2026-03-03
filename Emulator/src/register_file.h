@@ -31,7 +31,7 @@ typedef struct {
             reg_t overflow : 1;
             reg_t interrupt : 1;
             reg_t trap : 1;
-            reg_t hpc : 1;
+            reg_t _reserved : 1;
         };
     };
 } register_file_t;

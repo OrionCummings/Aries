@@ -13,5 +13,7 @@ typedef struct {
 } backplane_t;
 
 void backplane_reset(backplane_t* backplane);
+bool backplane_bus_active(backplane_t* backplane);
+bool backplane_(backplane_t* backplane);
 
 #endif
