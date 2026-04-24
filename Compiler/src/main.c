@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
 
     ///////////////////
 
-    const char* filename = "/home/orion/Projects/Aries/Compiler/code/parser1.ari";
+    const char* filename = "/home/orion/Projects/Aries/Compiler/code/parser2.ari";
     str* file_content = str_from_filename(filename);
 
     SymbolList* symlist = lex(file_content);
@@ -42,12 +42,20 @@ int main(int argc, char** argv) {
     }
 
     // DEBUG: TEMP
-    Expression* e = expr_parse(parsing_arena, symlist);
-    if (e == NULL) {
-            A_WARNING("temp: failed to parse expr from symlist");
+    Declaration* s = declaration_parse(parsing_arena, symlist);
+    if (s == NULL) {
+            A_WARNING("temp: failed to parse declaration from symlist");
     } else {
-        expr_print(*e);
+        declaration_print(*s);
     }
+
+    // DEBUG: TEMP
+    // Expression* e = expr_parse(parsing_arena, symlist);
+    // if (e == NULL) {
+    //         A_WARNING("temp: failed to parse expr from symlist");
+    // } else {
+    //     expr_print(*e);
+    // }
 
     // Declaration* root = parse(parsing_arena, symlist);
     // if (root == NULL) {

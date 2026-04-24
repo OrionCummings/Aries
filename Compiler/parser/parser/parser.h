@@ -4,8 +4,9 @@
 #include "str.h"
 #include "symlist.h"
 #include "arena.h"
+#include "types.h"
 
-typedef enum parsing_error_t : char {
+typedef enum ParsingError : char {
 
     // An unknown error has occurred while parsing.
     PE_UNKNOWN = -1,
@@ -13,55 +14,16 @@ typedef enum parsing_error_t : char {
     // No error has occurred while parsing.
     PE_OK = 0,
 
-} parsing_error_t;
-
-typedef enum BuiltinType : char {
-    BITYPE_UNKNOWN,
-    BITYPE_VOID,
-    BITYPE_BOOL,
-    BITYPE_U8,
-    BITYPE_U16,
-    BITYPE_U32,
-    BITYPE_U64,
-    BITYPE_I8,
-    BITYPE_I16,
-    BITYPE_I32,
-    BITYPE_I64,
-    BITYPE_F32,
-    BITYPE_F64,
-    BITYPE_OPT,
-    BITYPE_RES,
-    BITYPE_STR,
-} BuiltinType;
+} ParsingError;
 
 typedef enum ExpressionType : char {
-    EXPR_T_UNKNOWN = 0,
-    EXPR_T_LIT_U8
+    EXPRESSION_T_UNKNOWN = 0,
+    EXPRESSION_T_LIT_U8
 } ExpressionType;
 
-static const char* const EXPR_T_NAMES[] = {
-    [EXPR_T_UNKNOWN] = "EXPR_T_UNKNOWN",
-    [EXPR_T_LIT_U8] = "EXPR_T_LIT_U8",
-};
-
-typedef enum StatementType : char {
-    STMT_T_UNKNOWN
-} StatementType;
-
-static const char* const STMT_T_NAMES[] = {
-    [STMT_T_UNKNOWN] = "STMT_T_UNKNOWN",
-};
-
-typedef enum DeclarationType : char {
-    DECL_T_UNKNOWN = 0,
-    DECL_T_VARIABLE,
-    DECL_T_FUNCTION
-} DeclarationType;
-
-static const char* const DECL_T_NAMES[] = {
-    [DECL_T_UNKNOWN] = "DECL_T_UNKNOWN",
-    [DECL_T_VARIABLE] = "DECL_T_VARIABLE",
-    [DECL_T_FUNCTION] = "DECL_T_FUNCTION",
+static const char* const EXPRESSION_T_NAMES[] = {
+    [EXPRESSION_T_UNKNOWN] = "EXPRESSION_T_UNKNOWN",
+    [EXPRESSION_T_LIT_U8] = "EXPRESSION_T_LIT_U8",
 };
 
 typedef struct Expression {
@@ -73,16 +35,17 @@ typedef struct Expression {
     const char* str_value;
 } Expression;
 
-typedef struct Statement {
-    StatementType type;
-    struct Declaration* decl;
-    struct Expression* init_expr;
-    struct Expression* expr;
-    struct Expression* next_expr;
-    struct Statement* body;
-    struct Statement* else_body;
-    struct Statement* next; // TODO: Do we want linked lists?
-} Statement;
+typedef enum DeclarationType : char {
+    DECLARATION_T_UNKNOWN = 0,
+    DECLARATION_T_VARIABLE,
+    DECLARATION_T_FUNCTION
+} DeclarationType;
+
+static const char* const DECLARATION_T_NAMES[] = {
+    [DECLARATION_T_UNKNOWN] = "DECLARATION_T_UNKNOWN",
+    [DECLARATION_T_VARIABLE] = "DECLARATION_T_VARIABLE",
+    [DECLARATION_T_FUNCTION] = "DECLARATION_T_FUNCTION",
+};
 
 typedef struct Declaration {
     DeclarationType type;
@@ -92,7 +55,24 @@ typedef struct Declaration {
     struct Declaration* next; // TODO: Do we want linked lists?
 } Declaration;
 
-// High-level functions
+typedef enum StatementType : char {
+    STATEMENT_T_UNKNOWN
+} StatementType;
+
+static const char* const STATEMENT_T_NAMES[] = {
+    [STATEMENT_T_UNKNOWN] = "STATEMENT_T_UNKNOWN",
+};
+
+typedef struct Statement {
+    StatementType type;
+    struct Declaration* declaration;
+    struct Expression* init_expression;
+    struct Expression* expression;
+    struct Expression* next_expression;
+    struct Statement* body;
+    struct Statement* else_body;
+    struct Statement* next; // TODO: Do we want linked lists?
+} Statement;
 
 /// @brief Parses the given symbol list.
 /// @param arena The arena in which parsing allocation should be placed.
@@ -100,19 +80,17 @@ typedef struct Declaration {
 /// @return A list of declarations.
 Declaration* parse(arena* arena, SymbolList* const symlist);
 
-Declaration* decl_parse(arena* arena, SymbolList* const symlist);
-Statement* stmt_parse(arena* arena, SymbolList* const symlist);
-Expression* expr_parse(arena* arena, SymbolList* const symlist);
+Declaration* declaration_parse(arena*, SymbolList* const);
+void declaration_print(const Declaration);
+void declaration_type_print(const DeclarationType);
+DeclarationType token_to_declaration_type(Token);
 
-// Utility functions
-void decl_print(const Declaration decl);
-void decl_type_print(const DeclarationType decl_type);
-void stmt_print(const Statement stmt);
-void stmt_type_print(const StatementType stmt_type);
-void expr_print(const Expression expr);
-void expr_type_print(const ExpressionType expr_type);
+Expression* expression_parse(arena*, SymbolList* const);
+void expression_print(const Expression);
+void expression_type_print(const ExpressionType);
 
-
-DeclarationType token_to_decl_type(Token t);
+Statement* statement_parse(arena*, SymbolList* const);
+void statement_print(const Statement);
+void statement_type_print(const StatementType);
 
 #endif
