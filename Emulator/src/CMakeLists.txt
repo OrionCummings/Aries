@@ -8,6 +8,7 @@ add_executable(AriesEmulator
     user_input.c
     backplane.c
     util.c
+    bus.c
 )
 
 target_link_libraries(AriesEmulator PUBLIC

@@ -81,9 +81,9 @@ static const char* const OPCODE_NAMES[] = {
 };
 
 opcode_t instr_get_opcode(instruction_t instr);
-reg_t instr_get_reg_1(instruction_t instr);
-reg_t instr_get_reg_2(instruction_t instr);
-reg_t instr_get_reg_3(instruction_t instr);
+instr_reg_t instr_get_reg_1(instruction_t instr);
+instr_reg_t instr_get_reg_2(instruction_t instr);
+instr_reg_t instr_get_reg_3(instruction_t instr);
 instr_value_t instr_get_value(instruction_t instr);
 address_t instr_get_address(instruction_t instr);
 

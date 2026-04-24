@@ -9,6 +9,7 @@
 #include "memory.h"
 
 typedef struct {
+    bus32_t bus;
     register_file_t regs;
     // control_unit_t cu;
     alu_t alu;

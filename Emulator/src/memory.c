@@ -7,22 +7,39 @@ void memory_reset(memory_t* memory) {
 }
 
 bool memory_read(const memory_t* memory, u8* data, address_t address) {
+
     if (memory == NULL) { return false; }
     if (data == NULL) { return false; }
-    if (address > MEMORY_SIZE_ALL_BYTES) { return false; }
-    *data = memory->memory[address];
+
+    // If the video control bit is set, then act on VRAM instead of RAM.
+    if (memory->control.byte & MEMORY_CONTROL_MASK_VIDEO) {
+        if (address > MEMORY_SIZE_VIDEO_BYTES) { return false; } // TODO: Update this check when a VRAM memory map is established.
+        *data = memory->vram[address];
+    } else {
+        if (address > MEMORY_SIZE_ALL_BYTES) { return false; }
+        *data = memory->ram[address];
+    }
+
     return true;
 }
 
 bool memory_write(memory_t* memory, u8 data, address_t address) {
+
     if (memory == NULL) { return false; }
-    if (address > MEMORY_SIZE_ALL_BYTES) { return false; }
-    memcpy(memory->memory + address, &data, sizeof(data));
+
+    // If the video control bit is set, then act on VRAM instead of RAM.
+    if (memory->control.byte & MEMORY_CONTROL_MASK_VIDEO) {
+        if (address > MEMORY_SIZE_VIDEO_BYTES) { return false; } // TODO: Update this check when a VRAM memory map is established.
+        memcpy(memory->vram + address, &data, sizeof(data));
+    } else {
+        if (address > MEMORY_SIZE_ALL_BYTES) { return false; }
+        memcpy(memory->ram + address, &data, sizeof(data));
+    }
     return true;
 }
 
 void memory_print(memory_t* const memory) {
-    _hex_dump(memory->memory, MEMORY_SIZE_ALL_BYTES);
+    _hex_dump(memory->ram, MEMORY_SIZE_ALL_BYTES);
 }
 
 void _hex_dump(u8* data, size_t size) {

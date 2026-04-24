@@ -5,13 +5,17 @@
 #include "bus.h"
 
 typedef struct {
-    cpu_t* cpu;
-    memory_t* memory;
 
-    bus32_t address_bus;
-    bus8_t data_bus;
+    // Memory buses
+    bus32_t* address_bus;
+    bus8_t* data_bus;
+
+    cpu_t cpu;
+    memory_t memory;
+
 } backplane_t;
 
+void backplane_init(backplane_t* backplane, bus32_t* address_bus, bus8_t* data_bus);
 void backplane_reset(backplane_t* backplane);
 bool backplane_bus_active(backplane_t* backplane);
 bool backplane_(backplane_t* backplane);

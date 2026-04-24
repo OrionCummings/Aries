@@ -5,6 +5,25 @@
 #include <stdint.h>
 #include "defs.h"
 
+typedef enum : u8 {
+    REG_A,
+    REG_B,
+    REG_C,
+    REG_D,
+    REG_E,
+    REG_F,
+    REG_G,
+    REG_H,
+    REG_I,
+    REG_J,
+    REG_K,
+    REG_L,
+    REG_SP,
+    REG_BP,
+    REG_PC,
+    REG_FL
+} reg_name_t;
+
 typedef struct {
     reg_t a;
     reg_t b;
@@ -36,6 +55,13 @@ typedef struct {
     };
 } register_file_t;
 
-void register_file_print(const register_file_t reg_file, bool verbose);
+void register_file_tick(register_file_t* const reg_file);
+
+void register_file_print(const register_file_t reg_file, bool verbose); // TODO: pass by ref!
+
+void register_file_write(register_file_t* const reg_file, reg_name_t name, reg_t value);
+reg_t register_file_read(const register_file_t* reg_file, reg_name_t name);
+
+
 
 #endif
