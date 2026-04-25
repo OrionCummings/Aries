@@ -79,6 +79,9 @@ Expression* expression_parse(arena* arena, SymbolList* const symlist) {
 
     sym_print(sym);
 
+    // TODO: Assess if this ownership transfer is a good idea.
+    expression->value = sym.s;
+
     switch (sym.t) {
 
         case(SYM_PAREN_OPEN): {
@@ -86,34 +89,19 @@ Expression* expression_parse(arena* arena, SymbolList* const symlist) {
             // Increment the look ahead index!
             symlist->la_index++;
             Expression* e = expression_parse(arena, symlist);
-            if (!e) { A_WARNING("failed to allocate memory for an expression"); return NULL; }
-
+            if (!e) {
+                A_WARNING("failed to allocate memory for an expression");
+                return NULL;
+            }
         }
 
-        bool success = false;
         case(LIT_U8):
-            uint8_t value8 = 0;
-            success = str_to_u8(sym.s, &value8);
-            if (!success) { A_WARNING("failed to convert str to int value"); return NULL; }
-            expression->int_value = value8;
             expression->type = EXPRESSION_T_LIT_U8;
         case(LIT_U16):
-            uint16_t value16 = 0;
-            success = str_to_u16(sym.s, &value16);
-            if (!success) { A_WARNING("failed to convert str to int value"); return NULL; }
-            expression->int_value = value16;
             expression->type = EXPRESSION_T_LIT_U16;
         case(LIT_U32):
-            uint32_t value32 = 0;
-            success = str_to_u32(sym.s, &value32);
-            if (!success) { A_WARNING("failed to convert str to int value"); return NULL; }
-            expression->int_value = value32;
             expression->type = EXPRESSION_T_LIT_U32;
         case(LIT_U64): {
-            uint64_t value64 = 0;
-            success = str_to_u64(sym.s, &value64);
-            if (!success) { A_WARNING("failed to convert str to int value"); return NULL; }
-            expression->int_value = value64;
             expression->type = EXPRESSION_T_LIT_U64;
         }
     }
@@ -165,8 +153,7 @@ void expression_print(const Expression expression) {
     printf(" ");
     if (expression.right) expression_print(*expression.right);
     printf(" ");
-    printf("%s%lu", (expression.negative) ? "-" : "", expression.int_value);
-    if (expression.str_value) printf("%s", expression.str_value);
+    if (expression.value) str_print("", expression.value);
     printf("\n");
 }
 
@@ -176,22 +163,22 @@ void expression_type_print(const ExpressionType expression_type) {
 
 DeclarationType token_to_declaration_type(Token t) {
     switch (t) {
-        case (KEYWORD_DECL): return DECLARATION_T_FUNCTION;
-        case (KEYWORD_OPT):
-        case (KEYWORD_VOID):
-        case (KEYWORD_BYTE):
-        case (KEYWORD_STRING):
-        case (KEYWORD_U8):
-        case (KEYWORD_U16):
-        case (KEYWORD_U32):
-        case (KEYWORD_U64):
-        case (KEYWORD_I8):
-        case (KEYWORD_I16):
-        case (KEYWORD_I32):
-        case (KEYWORD_I64):
-        case (KEYWORD_F32):
-        case (KEYWORD_F64):
-        case (KEYWORD_BOOL): return DECLARATION_T_VARIABLE;
+        case (KW_DECL): return DECLARATION_T_FUNCTION;
+        case (KW_OPT):
+        case (KW_VOID):
+        case (KW_BYTE):
+        case (KW_STRING):
+        case (KW_U8):
+        case (KW_U16):
+        case (KW_U32):
+        case (KW_U64):
+        case (KW_I8):
+        case (KW_I16):
+        case (KW_I32):
+        case (KW_I64):
+        case (KW_F32):
+        case (KW_F64):
+        case (KW_BOOL): return DECLARATION_T_VARIABLE;
         default: return DECLARATION_T_UNKNOWN;
     }
 }

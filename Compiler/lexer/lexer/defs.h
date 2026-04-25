@@ -4,9 +4,9 @@
 #include <stdint.h>
 
 #define MAX_IDENTIFIER_LENGTH (8)
-#define NULL_SYMBOL ((Symbol){.location = NULL_CHAR_LOC, .s = NULL, .t = 0})
 #define DEREF_SYMBOL(s) ((s != NULL) ? *s : NULL_SYMBOL)
 #define NULL_CHAR_LOC ((CharacterLocation){.line = 0, .start = 0, .end = 0})
+#define NULL_SYMBOL ((Symbol){.location = NULL_CHAR_LOC, .s = NULL, .t = 0})
 #define crange(l, s, e) ((CharacterLocation){.line = l, .start = s, .end = e})
 
 typedef enum {
@@ -56,41 +56,42 @@ typedef enum {
     LIT_BYTE,   //
     LIT_STRING, // "..."
 
-    KEYWORD_OPT,    // opt
-    KEYWORD_VOID,   // void
-    KEYWORD_BYTE,   // byte
-    KEYWORD_STRING, // string
-    KEYWORD_U8,     // u8
-    KEYWORD_U16,    // u16
-    KEYWORD_U32,    // u32
-    KEYWORD_U64,    // u64
-    KEYWORD_I8,     // i8
-    KEYWORD_I16,    // i16
-    KEYWORD_I32,    // i32
-    KEYWORD_I64,    // i64
-    KEYWORD_F32,    // f32
-    KEYWORD_F64,    // f64
-    KEYWORD_BOOL,   // bool
+    KW_OPT,    // opt
+    KW_VOID,   // void
+    KW_BYTE,   // byte
+    KW_STRING, // string
+    KW_U8,     // u8
+    KW_U16,    // u16
+    KW_U32,    // u32
+    KW_U64,    // u64
+    KW_I8,     // i8
+    KW_I16,    // i16
+    KW_I32,    // i32
+    KW_I64,    // i64
+    KW_F32,    // f32
+    KW_F64,    // f64
+    KW_BOOL,   // bool
 
-    KEYWORD_BREAK,    // break
-    KEYWORD_CASE,     // case
-    KEYWORD_MUT,      // mut
-    KEYWORD_CONTINUE, // continue
-    KEYWORD_DEFAULT,  // default
-    KEYWORD_ELSE,     // else
-    KEYWORD_ENUM,     // enum
-    KEYWORD_FOR,      // for
-    KEYWORD_IF,       // if
-    KEYWORD_RETURN,   // return
-    KEYWORD_SIZEOF,   // sizeof
-    KEYWORD_STATIC,   // static
-    KEYWORD_STRUCT,   // struct
-    KEYWORD_SWITCH,   // switch
-    KEYWORD_DECL,     // decl
-    KEYWORD_WHILE,    // while
-    KEYWORD_OVERLOAD, // overload
-    KEYWORD_ASM,      // asm
-    KEYWORD_AS,       // as
+    KW_BREAK,    // break
+    KW_CASE,     // case
+    KW_MUT,      // mut
+    KW_CONTINUE, // continue
+    KW_DEFAULT,  // default
+    KW_ELSE,     // else
+    KW_ENUM,     // enum
+    KW_FOR,      // for
+    KW_IF,       // if
+    KW_RETURN,   // return
+    KW_SIZEOF,   // sizeof
+    KW_STATIC,   // static
+    KW_STRUCT,   // struct
+    KW_SWITCH,   // switch
+    KW_DECL,     // decl
+    KW_DEF,      // def
+    KW_WHILE,    // while
+    KW_OVERLOAD, // overload
+    KW_ASM,      // asm
+    KW_AS,       // as
 
     TOKEN_COUNT
 } Token;
@@ -146,40 +147,41 @@ static const char* const TOKEN_NAMES[] = {
     [LIT_BYTE] = "LIT_BYTE",
     [LIT_STRING] = "LIT_STRING",
 
-    [KEYWORD_OPT] = "KEYWORD_OPT",
-    [KEYWORD_VOID] = "KEYWORD_VOID",
-    [KEYWORD_BYTE] = "KEYWORD_BYTE",
-    [KEYWORD_STRING] = "KEYWORD_STRING",
-    [KEYWORD_U8] = "KEYWORD_U8",
-    [KEYWORD_U16] = "KEYWORD_U16",
-    [KEYWORD_U32] = "KEYWORD_U32",
-    [KEYWORD_U64] = "KEYWORD_U64",
-    [KEYWORD_I8] = "KEYWORD_I8",
-    [KEYWORD_I16] = "KEYWORD_I16",
-    [KEYWORD_I32] = "KEYWORD_I32",
-    [KEYWORD_I64] = "KEYWORD_I64",
-    [KEYWORD_F32] = "KEYWORD_F32",
-    [KEYWORD_F64] = "KEYWORD_F64",
-    [KEYWORD_BOOL] = "KEYWORD_BOOL",
-    [KEYWORD_BREAK] = "KEYWORD_BREAK",
-    [KEYWORD_CASE] = "KEYWORD_CASE",
-    [KEYWORD_MUT] = "KEYWORD_MUT",
-    [KEYWORD_CONTINUE] = "KEYWORD_CONTINUE",
-    [KEYWORD_DEFAULT] = "KEYWORD_DEFAULT",
-    [KEYWORD_ELSE] = "KEYWORD_ELSE",
-    [KEYWORD_ENUM] = "KEYWORD_ENUM",
-    [KEYWORD_FOR] = "KEYWORD_FOR",
-    [KEYWORD_IF] = "KEYWORD_IF",
-    [KEYWORD_RETURN] = "KEYWORD_RETURN",
-    [KEYWORD_SIZEOF] = "KEYWORD_SIZEOF",
-    [KEYWORD_STATIC] = "KEYWORD_STATIC",
-    [KEYWORD_STRUCT] = "KEYWORD_STRUCT",
-    [KEYWORD_SWITCH] = "KEYWORD_SWITCH",
-    [KEYWORD_DECL] = "KEYWORD_DECL",
-    [KEYWORD_WHILE] = "KEYWORD_WHILE",
-    [KEYWORD_OVERLOAD] = "KEYWORD_OVERLOAD",
-    [KEYWORD_ASM] = "KEYWORD_ASM",
-    [KEYWORD_AS] = "KEYWORD_AS",
+    [KW_OPT] = "KW_OPT",
+    [KW_VOID] = "KW_VOID",
+    [KW_BYTE] = "KW_BYTE",
+    [KW_STRING] = "KW_STRING",
+    [KW_U8] = "KW_U8",
+    [KW_U16] = "KW_U16",
+    [KW_U32] = "KW_U32",
+    [KW_U64] = "KW_U64",
+    [KW_I8] = "KW_I8",
+    [KW_I16] = "KW_I16",
+    [KW_I32] = "KW_I32",
+    [KW_I64] = "KW_I64",
+    [KW_F32] = "KW_F32",
+    [KW_F64] = "KW_F64",
+    [KW_BOOL] = "KW_BOOL",
+    [KW_BREAK] = "KW_BREAK",
+    [KW_CASE] = "KW_CASE",
+    [KW_MUT] = "KW_MUT",
+    [KW_CONTINUE] = "KW_CONTINUE",
+    [KW_DEFAULT] = "KW_DEFAULT",
+    [KW_ELSE] = "KW_ELSE",
+    [KW_ENUM] = "KW_ENUM",
+    [KW_FOR] = "KW_FOR",
+    [KW_IF] = "KW_IF",
+    [KW_RETURN] = "KW_RETURN",
+    [KW_SIZEOF] = "KW_SIZEOF",
+    [KW_STATIC] = "KW_STATIC",
+    [KW_STRUCT] = "KW_STRUCT",
+    [KW_SWITCH] = "KW_SWITCH",
+    [KW_DECL] = "KW_DECL",
+    [KW_DEF] = "KW_DEF",
+    [KW_WHILE] = "KW_WHILE",
+    [KW_OVERLOAD] = "KW_OVERLOAD",
+    [KW_ASM] = "KW_ASM",
+    [KW_AS] = "KW_AS",
 };
 
 static const char* const SYM_CHARS[] = {
@@ -210,41 +212,40 @@ static const char* const SYM_CHARS[] = {
     [SYM_CARET] = "^",
     [SYM_SQUOTE] = "'",
     [SYM_DQUOTE] = "\"",
-    [KEYWORD_OPT] = "opt",
-    [KEYWORD_VOID] = "void",
-    [KEYWORD_BYTE] = "byte",
-    [KEYWORD_STRING] = "string",
-    [KEYWORD_U8] = "u8",
-    [KEYWORD_U16] = "u16",
-    [KEYWORD_U32] = "u32",
-    [KEYWORD_U64] = "u64",
-    [KEYWORD_I8] = "i8",
-    [KEYWORD_I16] = "i16",
-    [KEYWORD_I32] = "i32",
-    [KEYWORD_I64] = "i64",
-    [KEYWORD_F32] = "f32",
-    [KEYWORD_F64] = "f64",
-    [KEYWORD_BOOL] = "bool",
-    [KEYWORD_BREAK] = "break",
-    [KEYWORD_CASE] = "case",
-    [KEYWORD_MUT] = "mut",
-    [KEYWORD_CONTINUE] = "continue",
-    [KEYWORD_DEFAULT] = "default",
-    [KEYWORD_ELSE] = "else",
-    [KEYWORD_ENUM] = "enum",
-    [KEYWORD_FOR] = "for",
-    [KEYWORD_IF] = "if",
-    [KEYWORD_RETURN] = "return",
-    [KEYWORD_SIZEOF] = "sizeof",
-    [KEYWORD_STATIC] = "static",
-    [KEYWORD_STRUCT] = "struct",
-    [KEYWORD_SWITCH] = "switch",
-    [KEYWORD_DECL] = "decl",
-    [KEYWORD_WHILE] = "while",
-    [KEYWORD_OVERLOAD] = "overload",
-    [KEYWORD_ASM] = "asm",
-    [KEYWORD_AS] = "as",
+    [KW_OPT] = "opt",
+    [KW_VOID] = "void",
+    [KW_BYTE] = "byte",
+    [KW_STRING] = "string",
+    [KW_U8] = "u8",
+    [KW_U16] = "u16",
+    [KW_U32] = "u32",
+    [KW_U64] = "u64",
+    [KW_I8] = "i8",
+    [KW_I16] = "i16",
+    [KW_I32] = "i32",
+    [KW_I64] = "i64",
+    [KW_F32] = "f32",
+    [KW_F64] = "f64",
+    [KW_BOOL] = "bool",
+    [KW_BREAK] = "break",
+    [KW_CASE] = "case",
+    [KW_MUT] = "mut",
+    [KW_CONTINUE] = "continue",
+    [KW_DEFAULT] = "default",
+    [KW_ELSE] = "else",
+    [KW_ENUM] = "enum",
+    [KW_FOR] = "for",
+    [KW_IF] = "if",
+    [KW_RETURN] = "return",
+    [KW_SIZEOF] = "sizeof",
+    [KW_STATIC] = "static",
+    [KW_STRUCT] = "struct",
+    [KW_SWITCH] = "switch",
+    [KW_DECL] = "decl",
+    [KW_WHILE] = "while",
+    [KW_OVERLOAD] = "overload",
+    [KW_ASM] = "asm",
+    [KW_AS] = "as",
 };
-
 
 #endif

@@ -1,9 +1,9 @@
 #ifndef __PARSER_H
 #define __PARSER_H
 
+#include "arena.h"
 #include "str.h"
 #include "symlist.h"
-#include "arena.h"
 #include "types.h"
 
 typedef enum ParsingError : char {
@@ -33,9 +33,7 @@ typedef struct Expression {
     ExpressionType type;
     struct Expression* left;
     struct Expression* right;
-    bool negative;
-    uint64_t int_value;
-    const char* str_value;
+    str* value;
 } Expression;
 
 typedef enum DeclarationType : char {
@@ -58,9 +56,7 @@ typedef struct Declaration {
     struct Declaration* next; // TODO: Do we want linked lists?
 } Declaration;
 
-typedef enum StatementType : char {
-    STATEMENT_T_UNKNOWN
-} StatementType;
+typedef enum StatementType : char { STATEMENT_T_UNKNOWN } StatementType;
 
 static const char* const STATEMENT_T_NAMES[] = {
     [STATEMENT_T_UNKNOWN] = "STATEMENT_T_UNKNOWN",

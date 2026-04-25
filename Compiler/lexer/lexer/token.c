@@ -17,4 +17,3 @@ Token str_to_token(const str* const s) {
 
     return str_is_literal(s);
 }
-
