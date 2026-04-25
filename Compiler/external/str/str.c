@@ -661,3 +661,217 @@ bool str_to_integer_value(const str* const s, uint64_t* value) {
     return true;
 }
 
+// TODO: Improve/implement overflow error handling!
+bool str_to_u8(const str* const s, uint8_t* value) {
+    if (!s) { return false; }
+    if (!value) { return false; }
+    if (!s->data) { return false; }
+
+    size_t len = str_len(s);
+    if (len == 0) { return false; }
+
+    // No negative values
+    if (s->data[0] == '-') { return false; }
+
+    // "255u8" is the longest possible value; reject everything larger
+    if (len > 5) { return false; }
+
+    int i = 0;
+    uint16_t temp_value = 0;
+    while (s->data[i] && (s->data[i] >= '0' && s->data[i] <= '9')) {
+        temp_value = (temp_value * 10) + (s->data[i] - '0');
+        i++;
+    }
+
+    *value = temp_value;
+    return true;
+}
+
+bool str_to_u16(const str* const s, uint16_t* value) {
+    if (!s) { return false; }
+    if (!value) { return false; }
+    if (!s->data) { return false; }
+
+    size_t len = str_len(s);
+    if (len == 0) { return false; }
+
+    // No negative values
+    if (s->data[0] == '-') { return false; }
+
+    // "65_535u16" is the longest possible value; reject everything larger
+    if (len > 9) { return false; }
+
+    int i = 0;
+    uint32_t temp_value = 0;
+    while (s->data[i] && (s->data[i] >= '0' && s->data[i] <= '9')) {
+        temp_value = (temp_value * 10) + (s->data[i] - '0');
+        i++;
+    }
+
+    *value = temp_value;
+    return true;
+}
+
+bool str_to_u32(const str* const s, uint32_t* value) {
+    if (!s) { return false; }
+    if (!value) { return false; }
+    if (!s->data) { return false; }
+
+    size_t len = str_len(s);
+    if (len == 0) { return false; }
+
+    // No negative values
+    if (s->data[0] == '-') { return false; }
+
+    // "4_294_967_295u32" is the longest possible value; reject everything larger
+    if (len > 16) { return false; }
+
+    int i = 0;
+    uint64_t temp_value = 0;
+    while (s->data[i] && (s->data[i] >= '0' && s->data[i] <= '9')) {
+        temp_value = (temp_value * 10) + (s->data[i] - '0');
+        i++;
+    }
+
+    *value = temp_value;
+
+    return true;
+}
+
+bool str_to_u64(const str* const s, uint64_t* value) {
+    if (!s) { return false; }
+    if (!value) { return false; }
+    if (!s->data) { return false; }
+
+    size_t len = str_len(s);
+    if (len == 0) { return false; }
+
+    // No negative values
+    if (s->data[0] == '-') { return false; }
+
+    // "18_446_744_073_709_551_616u64" is the longest possible value; reject everything larger
+    if (len > 29) { return false; }
+
+    uint64_t curr_value = 0;
+    uint64_t prev_value = 0;
+
+    int i = 0;
+    while (s->data[i] && (s->data[i] >= '0' && s->data[i] <= '9')) {
+
+        curr_value = (curr_value * 10) + (s->data[i] - '0');
+
+        if (curr_value < prev_value) {
+            return false; // TODO: Make better error handling for unrepresentable numbers!
+        }
+
+        prev_value = curr_value;
+        i++;
+    }
+
+    *value = curr_value;
+
+    return true;
+}
+
+bool str_to_i8(const str* const s, int8_t* value) {
+    if (!s) { return false; }
+    if (!value) { return false; }
+    if (!s->data) { return false; }
+
+    size_t len = str_len(s);
+    if (len == 0) { return false; }
+
+    int8_t sign = 1;
+    if (s->data[0] == '-') { sign = -1; }
+
+    // "-127i8" is the longest possible value; reject everything larger
+    if (len > 6) { return false; }
+
+    int i = 0;
+    int16_t temp_value = 0;
+    while (s->data[i] && (s->data[i] >= '0' && s->data[i] <= '9')) {
+        temp_value = (temp_value * 10) + (s->data[i] - '0');
+        i++;
+    }
+
+    *value = sign * temp_value;
+
+    return true;
+}
+
+bool str_to_i16(const str* const s, int16_t* value) {
+    if (!s) { return false; }
+    if (!value) { return false; }
+    if (!s->data) { return false; }
+
+    size_t len = str_len(s);
+    if (len == 0) { return false; }
+
+    int16_t sign = 1;
+    if (s->data[0] == '-') { sign = -1; }
+
+    // "-32_768i16" is the longest possible value; reject everything larger
+    if (len > 10) { return false; }
+
+    int i = 0;
+    int16_t temp_value = 0;
+    while (s->data[i] && (s->data[i] >= '0' && s->data[i] <= '9')) {
+        temp_value = (temp_value * 10) + (s->data[i] - '0');
+        i++;
+    }
+
+    *value = sign * temp_value;
+    return true;
+}
+
+bool str_to_i32(const str* const s, int32_t* value) {
+    if (!s) { return false; }
+    if (!value) { return false; }
+    if (!s->data) { return false; }
+
+    size_t len = str_len(s);
+    if (len == 0) { return false; }
+
+    int32_t sign = 1;
+    if (s->data[0] == '-') { sign = -1; }
+
+    // "-2_147_483_648i32" is the longest possible value; reject everything larger
+    if (len > 17) { return false; }
+
+    int i = 0;
+    int32_t temp_value = 0;
+    while (s->data[i] && (s->data[i] >= '0' && s->data[i] <= '9')) {
+        temp_value = (temp_value * 10) + (s->data[i] - '0');
+        i++;
+    }
+
+    *value = sign * temp_value;
+    return true;
+}
+
+bool str_to_i64(const str* const s, int64_t* value) {
+    if (!s) { return false; }
+    if (!value) { return false; }
+    if (!s->data) { return false; }
+
+    size_t len = str_len(s);
+    if (len == 0) { return false; }
+
+    int64_t sign = 1;
+    if (s->data[0] == '-') { sign = -1; }
+
+    // "-9_223_372_036_854_775_808i64" is the longest possible value; reject everything larger
+    if (len > 29) { return false; }
+
+    int i = 0;
+    int64_t temp_value = 0;
+    while (s->data[i] && (s->data[i] >= '0' && s->data[i] <= '9')) {
+        temp_value = (temp_value * 10) + (s->data[i] - '0');
+        i++;
+    }
+
+    *value = sign * temp_value;
+    return true;
+}
+
+

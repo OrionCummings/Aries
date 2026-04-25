@@ -68,6 +68,7 @@ Expression* expression_parse(arena* arena, SymbolList* const symlist) {
     // TODO: Add some bounds checking to the symlist base and look-ahead indices.
     if (arena == NULL) { A_WARNING("invalid arena"); return NULL; }
     if (symlist == NULL) { A_WARNING("invalid symlist"); return NULL; }
+    if (symlist->symbols == NULL) { A_WARNING("invalid symlist->symbols"); return NULL; }
     if (symlist->la_index > symlist->length) { A_WARNING("invalid symlist la index"); return NULL; }
 
     Expression* expression = arena_alloc(arena, sizeof(*expression));
@@ -89,19 +90,31 @@ Expression* expression_parse(arena* arena, SymbolList* const symlist) {
 
         }
 
+        bool success = false;
         case(LIT_U8):
+            uint8_t value8 = 0;
+            success = str_to_u8(sym.s, &value8);
+            if (!success) { A_WARNING("failed to convert str to int value"); return NULL; }
+            expression->int_value = value8;
+            expression->type = EXPRESSION_T_LIT_U8;
         case(LIT_U16):
+            uint16_t value16 = 0;
+            success = str_to_u16(sym.s, &value16);
+            if (!success) { A_WARNING("failed to convert str to int value"); return NULL; }
+            expression->int_value = value16;
+            expression->type = EXPRESSION_T_LIT_U16;
         case(LIT_U32):
+            uint32_t value32 = 0;
+            success = str_to_u32(sym.s, &value32);
+            if (!success) { A_WARNING("failed to convert str to int value"); return NULL; }
+            expression->int_value = value32;
+            expression->type = EXPRESSION_T_LIT_U32;
         case(LIT_U64): {
-            uint64_t value = 0; // TODO: This *probably shouldn't* be a 64-bit int?
-            bool success = str_to_integer_value(sym.s, &value);
-            if (!success) {
-                A_WARNING("failed to convert str to int value");
-                return NULL;
-            }
-
-            expression->int_value = value;
-            expression->type = EXPRESSION_T_LIT_U8; // TODO: Make this actually work with other types LOL
+            uint64_t value64 = 0;
+            success = str_to_u64(sym.s, &value64);
+            if (!success) { A_WARNING("failed to convert str to int value"); return NULL; }
+            expression->int_value = value64;
+            expression->type = EXPRESSION_T_LIT_U64;
         }
     }
 

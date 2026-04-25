@@ -18,7 +18,10 @@ typedef enum ParsingError : char {
 
 typedef enum ExpressionType : char {
     EXPRESSION_T_UNKNOWN = 0,
-    EXPRESSION_T_LIT_U8
+    EXPRESSION_T_LIT_U8,
+    EXPRESSION_T_LIT_U16,
+    EXPRESSION_T_LIT_U32,
+    EXPRESSION_T_LIT_U64,
 } ExpressionType;
 
 static const char* const EXPRESSION_T_NAMES[] = {

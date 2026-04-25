@@ -42,12 +42,12 @@ int main(int argc, char** argv) {
     }
 
     // DEBUG: TEMP
-    Declaration* s = declaration_parse(parsing_arena, symlist);
-    if (s == NULL) {
-            A_WARNING("temp: failed to parse declaration from symlist");
-    } else {
-        declaration_print(*s);
-    }
+    // Declaration* s = declaration_parse(parsing_arena, symlist);
+    // if (s == NULL) {
+    //         A_WARNING("temp: failed to parse declaration from symlist");
+    // } else {
+    //     declaration_print(*s);
+    // }
 
     // DEBUG: TEMP
     // Expression* e = expr_parse(parsing_arena, symlist);

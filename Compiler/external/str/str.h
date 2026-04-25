@@ -318,4 +318,14 @@ bool str_is_res_literal(const str* const s);
 
 bool str_to_integer_value(const str* const s, uint64_t* value);
 
+bool str_to_u8(const str* const s, uint8_t* value);
+bool str_to_u16(const str* const s, uint16_t* value);
+bool str_to_u32(const str* const s, uint32_t* value);
+bool str_to_u64(const str* const s, uint64_t* value);
+
+bool str_to_i8(const str* const s, int8_t* value);
+bool str_to_i16(const str* const s, int16_t* value);
+bool str_to_i32(const str* const s, int32_t* value);
+bool str_to_i64(const str* const s, int64_t* value);
+
 #endif
