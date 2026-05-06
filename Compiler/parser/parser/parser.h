@@ -22,6 +22,7 @@ typedef enum ExpressionType : char {
     EXPRESSION_T_LIT_U16,
     EXPRESSION_T_LIT_U32,
     EXPRESSION_T_LIT_U64,
+    EXPRESSION_T_BIN_OP_ADD,
 } ExpressionType;
 
 static const char* const EXPRESSION_T_NAMES[] = {
@@ -85,8 +86,10 @@ void declaration_type_print(const DeclarationType);
 DeclarationType token_to_declaration_type(Token);
 
 Expression* expression_parse(arena*, SymbolList* const);
-void expression_print(const Expression);
+Expression* expression_new(arena*, SymbolList* const, index_t, index_t);
+void expression_print(const Expression, size_t);
 void expression_type_print(const ExpressionType);
+bool valid_start_expression(Token);
 
 Statement* statement_parse(arena*, SymbolList* const);
 void statement_print(const Statement);

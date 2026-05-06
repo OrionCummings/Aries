@@ -29,5 +29,6 @@
         "argp.h": "c"
     },
     "workbench.editor.wrapTabs": true,
-    "C_Cpp.errorSquiggles": "enabled"
+    "C_Cpp.errorSquiggles": "enabled",
+    "C_Cpp.clang_format_style": "file"
 }

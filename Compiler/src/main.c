@@ -1,9 +1,9 @@
-#include <stdio.h>
+#include "arena.h"
 #include "debug.h"
-#include "str.h"
 #include "lexer.h"
 #include "parser.h"
-#include "arena.h"
+#include "str.h"
+#include <stdio.h>
 // #include "args.h"
 
 int main(int argc, char** argv) {
@@ -18,7 +18,8 @@ int main(int argc, char** argv) {
 
     ///////////////////
 
-    const char* filename = "/home/orion/Projects/Aries/Compiler/code/parser2.ari";
+    const char* filename =
+        "/home/orion/Projects/Aries/Compiler/code/parser2.ari";
     str* file_content = str_from_filename(filename);
 
     SymbolList* symlist = lex(file_content);
@@ -28,11 +29,9 @@ int main(int argc, char** argv) {
 
     // Free the file string
     str_free(file_content);
-    A_INFO("freed the file content");
 
     // Make sure the symbols are still ok
     symlist_print(*symlist);
-    A_INFO("printed the symlist");
 
     ///////////////////
 
@@ -50,12 +49,35 @@ int main(int argc, char** argv) {
     // }
 
     // DEBUG: TEMP
-    // Expression* e = expr_parse(parsing_arena, symlist);
-    // if (e == NULL) {
-    //         A_WARNING("temp: failed to parse expr from symlist");
-    // } else {
-    //     expr_print(*e);
-    // }
+    // Expression* e = expression_parse(parsing_arena, symlist);
+    Expression* e = expression_new(parsing_arena, symlist, 0, symlist->length);
+    if (e == NULL) {
+        A_WARNING("temp: failed to parse expression from symlist");
+    } else {
+
+        Expression* expected = arena_alloc(parsing_arena, sizeof(*expected));
+        expected->type = EXPRESSION_T_BIN_OP_ADD;
+        expected->value = astr_new(parsing_arena, "9 + 20");
+
+        expected->left = arena_alloc(parsing_arena, sizeof(*expected->left));
+        expected->left->left = nullptr;
+        expected->left->right = nullptr;
+        expected->left->type = EXPRESSION_T_LIT_U8; // BUG: This gets written
+                                                    // to expected->value[1]???
+        expected->left->value = astr_new(parsing_arena, "9");
+
+        expected->right = arena_alloc(parsing_arena, sizeof(*expected->right));
+        expected->right->left = nullptr;
+        expected->right->right = nullptr;
+        expected->right->type = EXPRESSION_T_LIT_U8;
+        expected->right->value = astr_new(parsing_arena, "20");
+
+        print_cyan("\nExpected expression: \n");
+        expression_print(*expected, 0);
+        print_cyan("\nActual expression: \n");
+        expression_print(*e, 0);
+        print_cyan("\n");
+    }
 
     // Declaration* root = parse(parsing_arena, symlist);
     // if (root == NULL) {
