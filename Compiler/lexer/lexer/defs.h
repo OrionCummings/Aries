@@ -5,9 +5,9 @@
 
 #define MAX_IDENTIFIER_LENGTH (8)
 #define DEREF_SYMBOL(s) ((s != NULL) ? *s : NULL_SYMBOL)
-#define NULL_CHAR_LOC ((CharacterLocation){.line = 0, .start = 0, .end = 0})
-#define NULL_SYMBOL ((Symbol){.location = NULL_CHAR_LOC, .s = NULL, .t = 0})
-#define crange(l, s, e) ((CharacterLocation){.line = l, .start = s, .end = e})
+#define NULL_CHAR_LOC ((CharacterLocation){ .line = 0, .start = 0, .end = 0 })
+#define NULL_SYMBOL ((Symbol){ .location = NULL_CHAR_LOC, .s = NULL, .t = 0 })
+#define crange(l, s, e) ((CharacterLocation){ .line = l, .start = s, .end = e })
 
 typedef enum {
     TOKEN_INVALID, // Used for internal errors
@@ -103,35 +103,36 @@ static inline bool token_is_identifier(Token t) {
 }
 
 static inline bool token_is_keyword(Token t) {
-    return (t == KW_OPT || t == KW_VOID || t == KW_BYTE || t == KW_STRING ||
-            t == KW_U8 || t == KW_U16 || t == KW_U32 || t == KW_U64 ||
-            t == KW_I8 || t == KW_I16 || t == KW_I32 || t == KW_I64 ||
-            t == KW_F32 || t == KW_F64 || t == KW_BOOL || t == KW_BREAK ||
-            t == KW_CASE || t == KW_MUT || t == KW_CONTINUE ||
-            t == KW_DEFAULT || t == KW_ELSE || t == KW_ENUM || t == KW_FOR ||
-            t == KW_IF || t == KW_RETURN || t == KW_SIZEOF || t == KW_STATIC ||
-            t == KW_STRUCT || t == KW_SWITCH || t == KW_DECL || t == KW_DEF ||
-            t == KW_WHILE || t == KW_OVERLOAD || t == KW_ASM || t == KW_AS);
+
+    return (t == KW_OPT || t == KW_VOID || t == KW_BYTE || t == KW_STRING
+            || t == KW_U8 || t == KW_U16 || t == KW_U32 || t == KW_U64
+            || t == KW_I8 || t == KW_I16 || t == KW_I32 || t == KW_I64
+            || t == KW_F32 || t == KW_F64 || t == KW_BOOL || t == KW_BREAK
+            || t == KW_CASE || t == KW_MUT || t == KW_CONTINUE
+            || t == KW_DEFAULT || t == KW_ELSE || t == KW_ENUM || t == KW_FOR
+            || t == KW_IF || t == KW_RETURN || t == KW_SIZEOF || t == KW_STATIC
+            || t == KW_STRUCT || t == KW_SWITCH || t == KW_DECL || t == KW_DEF
+            || t == KW_WHILE || t == KW_OVERLOAD || t == KW_ASM || t == KW_AS);
 }
 
 static inline bool token_is_literal(Token t) {
-    return (t == LIT_BOOL || t == LIT_I8 || t == LIT_I16 || t == LIT_I32 ||
-            t == LIT_I64 || t == LIT_U8 || t == LIT_U16 || t == LIT_U32 ||
-            t == LIT_U64 || t == LIT_F32 || t == LIT_F64 || t == LIT_BYTE ||
-            t == LIT_STRING);
+    return (t == LIT_BOOL || t == LIT_I8 || t == LIT_I16 || t == LIT_I32
+            || t == LIT_I64 || t == LIT_U8 || t == LIT_U16 || t == LIT_U32
+            || t == LIT_U64 || t == LIT_F32 || t == LIT_F64 || t == LIT_BYTE
+            || t == LIT_STRING);
 }
 
 static inline bool token_is_symbol(Token t) {
-    return (t == SYM_SPACE || t == SYM_NEWLINE || t == SYM_SEMICOLON ||
-            t == SYM_COLON || t == SYM_COMMA || t == SYM_QUESTION ||
-            t == SYM_FSLASH || t == SYM_BSLASH || t == SYM_PAREN_OPEN ||
-            t == SYM_PAREN_CLOSE || t == SYM_BRACKET_OPEN ||
-            t == SYM_BRACKET_CLOSE || t == SYM_BRACE_OPEN ||
-            t == SYM_BRACE_CLOSE || t == SYM_EQUAL || t == SYM_PLUS ||
-            t == SYM_DASH || t == SYM_STAR || t == SYM_PERCENT ||
-            t == SYM_EXCLAIM || t == SYM_LT || t == SYM_GT ||
-            t == SYM_AMPERSAND || t == SYM_PIPE || t == SYM_CARET ||
-            t == SYM_SQUOTE || t == SYM_DQUOTE);
+    return (t == SYM_SPACE || t == SYM_NEWLINE || t == SYM_SEMICOLON
+            || t == SYM_COLON || t == SYM_COMMA || t == SYM_QUESTION
+            || t == SYM_FSLASH || t == SYM_BSLASH || t == SYM_PAREN_OPEN
+            || t == SYM_PAREN_CLOSE || t == SYM_BRACKET_OPEN
+            || t == SYM_BRACKET_CLOSE || t == SYM_BRACE_OPEN
+            || t == SYM_BRACE_CLOSE || t == SYM_EQUAL || t == SYM_PLUS
+            || t == SYM_DASH || t == SYM_STAR || t == SYM_PERCENT
+            || t == SYM_EXCLAIM || t == SYM_LT || t == SYM_GT
+            || t == SYM_AMPERSAND || t == SYM_PIPE || t == SYM_CARET
+            || t == SYM_SQUOTE || t == SYM_DQUOTE);
 }
 
 typedef struct {

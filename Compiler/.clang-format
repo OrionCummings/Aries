@@ -3,7 +3,13 @@ IndentWidth: 4
 ColumnLimit: 80
 PointerAlignment: Left
 AlignAfterOpenBracket: true
-AlignArrayOfStructures: true
+AlignArrayOfStructures: Right
 AlignEscapedNewlines: true
 Cpp11BracedListStyle: false
-# BreakBeforeBraces: BS_Attach # This one breaks vscode??
+AlignConsecutiveShortCaseStatements:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: true
+  AlignCaseColons: false
+BreakBeforeBinaryOperators: All
+BreakBeforeBraces: Attach # This one breaks vscode??

@@ -52,8 +52,8 @@ Declaration* declaration_parse(arena* arena, SymbolList* const symlist) {
         // TODO: Should we accept non-initialized variables?
         // Example: "u32 x;" <-- should this be acceptable? Methinks not.
 
-        symlist->base_index +=
-            3; // Skip ahead 3 symbols (<type> <name> <symbol> <expression>)
+        symlist->base_index
+            += 3; // Skip ahead 3 symbols (<type> <name> <symbol> <expression>)
         Expression* value = expression_parse(arena, symlist);
         if (!value) {
             A_WARNING("failed to parse expressionession");
@@ -239,8 +239,9 @@ void expression_print(const Expression expression, size_t depth) {
     padding[depth + 1] = '\0';
 
     printf("%s[E]: \n", padding);
-    padding[depth] =
-        '\t'; // 'extend' the string so subsequent padding is one unit longer
+
+    padding[depth]
+        = '\t'; // 'extend' the string so subsequent padding is one unit longer
     if (expression.left) {
         expression_print(*expression.left, depth + 1);
     } else {

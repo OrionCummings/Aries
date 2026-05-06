@@ -18,8 +18,8 @@ int main(int argc, char** argv) {
 
     ///////////////////
 
-    const char* filename =
-        "/home/orion/Projects/Aries/Compiler/code/parser2.ari";
+    const char* filename
+        = "/home/orion/Projects/Aries/Compiler/code/parser2.ari";
     str* file_content = str_from_filename(filename);
 
     SymbolList* symlist = lex(file_content);

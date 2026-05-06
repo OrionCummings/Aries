@@ -2,11 +2,15 @@
 
 str* str_new(const char* s) {
 
-    if (s == NULL) { return NULL; }
+    if (s == NULL) {
+        return NULL;
+    }
 
     str* r = calloc(1, sizeof(*r));
 
-    if (r == NULL) { return NULL; }
+    if (r == NULL) {
+        return NULL;
+    }
 
     size_t len = strlen(s);
 
@@ -21,11 +25,15 @@ str* str_new(const char* s) {
 }
 
 str* astr_new(arena* const a, const char* s) {
-    if (s == NULL || a == NULL) { return NULL; }
+    if (s == NULL || a == NULL) {
+        return NULL;
+    }
 
     str* r = arena_alloc(a, sizeof(*r));
 
-    if (r == NULL) { return NULL; }
+    if (r == NULL) {
+        return NULL;
+    }
 
     size_t len = strlen(s);
 
@@ -79,11 +87,15 @@ str* str_concat(str* s1, str* s2) {
 
 bool str_cmp(const str* const s1, const str* const s2) {
 
-    if (s1 == NULL || s2 == NULL) { return false; }
+    if (s1 == NULL || s2 == NULL) {
+        return false;
+    }
 
     size_t len_s1 = str_len(s1);
     size_t len_s2 = str_len(s2);
-    if (len_s1 != len_s2) { return false; }
+    if (len_s1 != len_s2) {
+        return false;
+    }
 
     for (index_t i = 0; i < len_s1; i++) {
         char a = s1->data[i];
@@ -109,8 +121,8 @@ bool str_cmp_raw(const str* const s, const char* const cs) {
 }
 
 bool str_ident(const str* const s1, const str* const s2) {
-    return (s1 != NULL) && (s2 != NULL) && (s1->location == s2->location) &&
-        (s1->length == s2->length) && (str_cmp(s1, s2));
+    return (s1 != NULL) && (s2 != NULL) && (s1->location == s2->location)
+           && (s1->length == s2->length) && (str_cmp(s1, s2));
 }
 
 int str_find(const str* const s, const char c) {
@@ -192,26 +204,36 @@ str* str_append(const str* const s, const char c) {
     memset(buffer, 0, length + 1); // null byte
 
     (void)snprintf(buffer, length + 2, "%s%c", s->data,
-        c); // new char + null byte
+                   c); // new char + null byte
 
     return str_new((char*)buffer); // get that nasty array away!!! Yuck!
 }
 
 str str_view(const str* const s, size_t start, size_t end) {
-    if (s == NULL || start >= end) { return STR_EMPTY; }
+    if (s == NULL || start >= end) {
+        return STR_EMPTY;
+    }
 
     size_t len = str_len(s);
-    if (len == 0 || start > len || end > len) { return STR_EMPTY; }
+    if (len == 0 || start > len || end > len) {
+        return STR_EMPTY;
+    }
 
-    str view = { .data = s->data + start, .length = end - start, .location = AL_STACK };
+    str view = { .data = s->data + start,
+                 .length = end - start,
+                 .location = AL_STACK };
     return view;
 }
 
 str* str_copy(const str const* s, size_t start, size_t end) {
-    if (s == NULL || start >= end) { return NULL; }
+    if (s == NULL || start >= end) {
+        return NULL;
+    }
 
     size_t len = str_len(s);
-    if (len == 0 || start > len || end > len) { return NULL; }
+    if (len == 0 || start > len || end > len) {
+        return NULL;
+    }
 
     size_t len_substring = end - start;
 
@@ -223,10 +245,14 @@ str* str_copy(const str const* s, size_t start, size_t end) {
 }
 
 str* astr_copy(arena* const a, str* s, size_t start, size_t end) {
-    if (s == NULL || a == NULL || start >= end) { return NULL; } // TODO: Are these conditions correct?
+    if (s == NULL || a == NULL || start >= end) {
+        return NULL;
+    } // TODO: Are these conditions correct?
 
     size_t len = str_len(s);
-    if (len == 0 || start > len || end > len) { return NULL; }
+    if (len == 0 || start > len || end > len) {
+        return NULL;
+    }
 
     size_t len_substring = end - start;
 
@@ -295,7 +321,9 @@ str* astr_from_file(arena* const a, FILE* const file) {
 }
 
 str* str_from_filename(const char* filename) {
-    if (filename == NULL) { return NULL; }
+    if (filename == NULL) {
+        return NULL;
+    }
 
     FILE* file = fopen(filename, "r");
     if (file == NULL) {
@@ -314,10 +342,14 @@ str* str_from_filename(const char* filename) {
 
 str* astr_from_filename(arena* const a, const char* filename) {
 
-    if (a == NULL || filename == NULL) { return NULL; }
+    if (a == NULL || filename == NULL) {
+        return NULL;
+    }
 
     FILE* file = fopen(filename, "r");
-    if (file == NULL) { return NULL; }
+    if (file == NULL) {
+        return NULL;
+    }
 
     // str* s = astr_from_file(a, file);
     A_INFO("calling astr_from_file()");
@@ -376,9 +408,15 @@ void str_print(const char* prefix, const str* const s) {
 }
 
 bool str_valid(const str* s) {
-    if (s == NULL) { return false; }
-    if (s->data == NULL) { return false; }
-    if (s->location == AL_UNKNOWN) { return false; }
+    if (s == NULL) {
+        return false;
+    }
+    if (s->data == NULL) {
+        return false;
+    }
+    if (s->location == AL_UNKNOWN) {
+        return false;
+    }
     return true;
 }
 
@@ -416,8 +454,8 @@ index_t* str_get_alphanumeric_symbolic_boundaries(const str* const s) {
             // Expand the boundary list if needed
             if (length == capacity) {
                 capacity *= 2;
-                void* new_boundaries =
-                    realloc(boundaries, capacity * sizeof(*boundaries));
+                void* new_boundaries
+                    = realloc(boundaries, capacity * sizeof(*boundaries));
                 if (new_boundaries == NULL) {
                     free(boundaries);
                     return NULL;
@@ -435,8 +473,8 @@ index_t* str_get_alphanumeric_symbolic_boundaries(const str* const s) {
     // TODO: Refactor so this is a generic function!
     if (length == capacity) {
         capacity *= 2;
-        void* new_boundaries =
-            realloc(boundaries, capacity * sizeof(*boundaries));
+        void* new_boundaries
+            = realloc(boundaries, capacity * sizeof(*boundaries));
         if (new_boundaries == NULL) {
             return NULL;
         }
@@ -477,7 +515,8 @@ bool str_is_bool_literal(const str* const s) {
     if (s == NULL || s->data) {
         return false;
     }
-    return str_cmp_raw(s, "false") || str_cmp_raw(s, "False") || str_cmp_raw(s, "true") || str_cmp_raw(s, "True");
+    return str_cmp_raw(s, "false") || str_cmp_raw(s, "False")
+           || str_cmp_raw(s, "true") || str_cmp_raw(s, "True");
 }
 
 bool str_is_u8_literal(const str* const s) {
@@ -489,14 +528,20 @@ bool str_is_u8_literal(const str* const s) {
     // must contain at least one digit; "u8" is not valid => min length is 3
     // cannot contain more than 3 digits + "u8" => max length is 5
     size_t len = str_len(s);
-    if (len < 3 || len > 5) { return false; }
+    if (len < 3 || len > 5) {
+        return false;
+    }
 
     // check the suffix
-    if (!str_has_suffix(s, "u8")) { return false; }
+    if (!str_has_suffix(s, "u8")) {
+        return false;
+    }
 
     str view = str_view(s, 0, len - 2);
 
-    if (view.data == NULL) { return false; }
+    if (view.data == NULL) {
+        return false;
+    }
 
     char* buffer;
     long value = strtol(view.data, &buffer, 10);
@@ -512,10 +557,14 @@ bool str_is_u16_literal(const str* const s) {
     // must contain at least one digit; "u16" is not valid => min length is 4
     // cannot contain more than 5 digits + "u16" => max length is 8
     size_t len = str_len(s);
-    if (len < 4 || len > 8) { return false; }
+    if (len < 4 || len > 8) {
+        return false;
+    }
 
     // check the suffix
-    if (!str_has_suffix(s, "u16")) { return false; }
+    if (!str_has_suffix(s, "u16")) {
+        return false;
+    }
 
     str view = str_view(s, 0, len - 3);
 
@@ -534,8 +583,12 @@ bool str_is_u32_literal(const str* const s) {
     // cannot contain more than 10 digits + "u32" => max length is 13
     // u32's are the default type, so it actually CAN have 1 digit!
     size_t len = str_len(s);
-    if (len < 1 || len > 13) { return false; }
-    if (!isdigit(s->data[0])) { return false; }
+    if (len < 1 || len > 13) {
+        return false;
+    }
+    if (!isdigit(s->data[0])) {
+        return false;
+    }
 
     // check the suffix
     str view = STR_EMPTY;
@@ -545,7 +598,9 @@ bool str_is_u32_literal(const str* const s) {
         view = str_view(s, 0, len); // TODO: Remove this; just use s?
     }
 
-    if (view.data == NULL) { return false; }
+    if (view.data == NULL) {
+        return false;
+    }
 
     char* buffer;
     long value = strtol(view.data, &buffer, 10);
@@ -567,10 +622,14 @@ bool str_is_u64_literal(const str* const s) {
     // must contain at least one digit; "u64" is not valid => min length is 4
     // cannot contain more than 20 digits + "u64" => max length is 23
     size_t len = str_len(s);
-    if (len < 4 || len > 23) { return false; }
+    if (len < 4 || len > 23) {
+        return false;
+    }
 
     // check the suffix
-    if (!str_has_suffix(s, "u64")) { return false; }
+    if (!str_has_suffix(s, "u64")) {
+        return false;
+    }
 
     str view = str_view(s, 0, len - 3);
 
@@ -632,12 +691,14 @@ bool str_is_char_literal(const str* const s) {
     size_t len = str_len(s);
 
     // ' ? '
-    if ((len == 3) && (s->data[0] == '\'') && (s->data[1] != '\'') && (s->data[2] == '\'')) {
+    if ((len == 3) && (s->data[0] == '\'') && (s->data[1] != '\'')
+        && (s->data[2] == '\'')) {
         return true;
     }
 
     // ' \ ? '
-    if ((len == 4) && (s->data[0] == '\'') && (s->data[1] == '\\') && (s->data[2] != '\'') && (s->data[3] == '\'')) {
+    if ((len == 4) && (s->data[0] == '\'') && (s->data[1] == '\\')
+        && (s->data[2] != '\'') && (s->data[3] == '\'')) {
         return true;
     }
 
@@ -648,12 +709,14 @@ bool str_is_char_literal(const str* const s) {
 // TODO: this requires a more general solution!
 bool str_to_integer_value(const str* const s, uint64_t* value) {
 
-    // Work backward; ignore the last TWO bytes as those will be u8 <-- STUPID ASSUMPTION
+    // Work backward; ignore the last TWO bytes as those will be u8 <-- STUPID
+    // ASSUMPTION
     index_t n = s->length - 2;
     for (index_t i = n; i > 0; i--) {
         char digit = s->data[i - 1];
 
-        if (!isdigit(digit)) return false;
+        if (!isdigit(digit))
+            return false;
 
         *value += ((digit - '0') * ipow(10, n - i));
     }
@@ -663,18 +726,30 @@ bool str_to_integer_value(const str* const s, uint64_t* value) {
 
 // TODO: Improve/implement overflow error handling!
 bool str_to_u8(const str* const s, uint8_t* value) {
-    if (!s) { return false; }
-    if (!value) { return false; }
-    if (!s->data) { return false; }
+    if (!s) {
+        return false;
+    }
+    if (!value) {
+        return false;
+    }
+    if (!s->data) {
+        return false;
+    }
 
     size_t len = str_len(s);
-    if (len == 0) { return false; }
+    if (len == 0) {
+        return false;
+    }
 
     // No negative values
-    if (s->data[0] == '-') { return false; }
+    if (s->data[0] == '-') {
+        return false;
+    }
 
     // "255u8" is the longest possible value; reject everything larger
-    if (len > 5) { return false; }
+    if (len > 5) {
+        return false;
+    }
 
     int i = 0;
     uint16_t temp_value = 0;
@@ -688,18 +763,30 @@ bool str_to_u8(const str* const s, uint8_t* value) {
 }
 
 bool str_to_u16(const str* const s, uint16_t* value) {
-    if (!s) { return false; }
-    if (!value) { return false; }
-    if (!s->data) { return false; }
+    if (!s) {
+        return false;
+    }
+    if (!value) {
+        return false;
+    }
+    if (!s->data) {
+        return false;
+    }
 
     size_t len = str_len(s);
-    if (len == 0) { return false; }
+    if (len == 0) {
+        return false;
+    }
 
     // No negative values
-    if (s->data[0] == '-') { return false; }
+    if (s->data[0] == '-') {
+        return false;
+    }
 
     // "65_535u16" is the longest possible value; reject everything larger
-    if (len > 9) { return false; }
+    if (len > 9) {
+        return false;
+    }
 
     int i = 0;
     uint32_t temp_value = 0;
@@ -713,18 +800,31 @@ bool str_to_u16(const str* const s, uint16_t* value) {
 }
 
 bool str_to_u32(const str* const s, uint32_t* value) {
-    if (!s) { return false; }
-    if (!value) { return false; }
-    if (!s->data) { return false; }
+    if (!s) {
+        return false;
+    }
+    if (!value) {
+        return false;
+    }
+    if (!s->data) {
+        return false;
+    }
 
     size_t len = str_len(s);
-    if (len == 0) { return false; }
+    if (len == 0) {
+        return false;
+    }
 
     // No negative values
-    if (s->data[0] == '-') { return false; }
+    if (s->data[0] == '-') {
+        return false;
+    }
 
-    // "4_294_967_295u32" is the longest possible value; reject everything larger
-    if (len > 16) { return false; }
+    // "4_294_967_295u32" is the longest possible value; reject everything
+    // larger
+    if (len > 16) {
+        return false;
+    }
 
     int i = 0;
     uint64_t temp_value = 0;
@@ -739,18 +839,31 @@ bool str_to_u32(const str* const s, uint32_t* value) {
 }
 
 bool str_to_u64(const str* const s, uint64_t* value) {
-    if (!s) { return false; }
-    if (!value) { return false; }
-    if (!s->data) { return false; }
+    if (!s) {
+        return false;
+    }
+    if (!value) {
+        return false;
+    }
+    if (!s->data) {
+        return false;
+    }
 
     size_t len = str_len(s);
-    if (len == 0) { return false; }
+    if (len == 0) {
+        return false;
+    }
 
     // No negative values
-    if (s->data[0] == '-') { return false; }
+    if (s->data[0] == '-') {
+        return false;
+    }
 
-    // "18_446_744_073_709_551_616u64" is the longest possible value; reject everything larger
-    if (len > 29) { return false; }
+    // "18_446_744_073_709_551_616u64" is the longest possible value; reject
+    // everything larger
+    if (len > 29) {
+        return false;
+    }
 
     uint64_t curr_value = 0;
     uint64_t prev_value = 0;
@@ -761,7 +874,8 @@ bool str_to_u64(const str* const s, uint64_t* value) {
         curr_value = (curr_value * 10) + (s->data[i] - '0');
 
         if (curr_value < prev_value) {
-            return false; // TODO: Make better error handling for unrepresentable numbers!
+            return false; // TODO: Make better error handling for
+                          // unrepresentable numbers!
         }
 
         prev_value = curr_value;
@@ -774,18 +888,30 @@ bool str_to_u64(const str* const s, uint64_t* value) {
 }
 
 bool str_to_i8(const str* const s, int8_t* value) {
-    if (!s) { return false; }
-    if (!value) { return false; }
-    if (!s->data) { return false; }
+    if (!s) {
+        return false;
+    }
+    if (!value) {
+        return false;
+    }
+    if (!s->data) {
+        return false;
+    }
 
     size_t len = str_len(s);
-    if (len == 0) { return false; }
+    if (len == 0) {
+        return false;
+    }
 
     int8_t sign = 1;
-    if (s->data[0] == '-') { sign = -1; }
+    if (s->data[0] == '-') {
+        sign = -1;
+    }
 
     // "-127i8" is the longest possible value; reject everything larger
-    if (len > 6) { return false; }
+    if (len > 6) {
+        return false;
+    }
 
     int i = 0;
     int16_t temp_value = 0;
@@ -800,18 +926,30 @@ bool str_to_i8(const str* const s, int8_t* value) {
 }
 
 bool str_to_i16(const str* const s, int16_t* value) {
-    if (!s) { return false; }
-    if (!value) { return false; }
-    if (!s->data) { return false; }
+    if (!s) {
+        return false;
+    }
+    if (!value) {
+        return false;
+    }
+    if (!s->data) {
+        return false;
+    }
 
     size_t len = str_len(s);
-    if (len == 0) { return false; }
+    if (len == 0) {
+        return false;
+    }
 
     int16_t sign = 1;
-    if (s->data[0] == '-') { sign = -1; }
+    if (s->data[0] == '-') {
+        sign = -1;
+    }
 
     // "-32_768i16" is the longest possible value; reject everything larger
-    if (len > 10) { return false; }
+    if (len > 10) {
+        return false;
+    }
 
     int i = 0;
     int16_t temp_value = 0;
@@ -825,18 +963,31 @@ bool str_to_i16(const str* const s, int16_t* value) {
 }
 
 bool str_to_i32(const str* const s, int32_t* value) {
-    if (!s) { return false; }
-    if (!value) { return false; }
-    if (!s->data) { return false; }
+    if (!s) {
+        return false;
+    }
+    if (!value) {
+        return false;
+    }
+    if (!s->data) {
+        return false;
+    }
 
     size_t len = str_len(s);
-    if (len == 0) { return false; }
+    if (len == 0) {
+        return false;
+    }
 
     int32_t sign = 1;
-    if (s->data[0] == '-') { sign = -1; }
+    if (s->data[0] == '-') {
+        sign = -1;
+    }
 
-    // "-2_147_483_648i32" is the longest possible value; reject everything larger
-    if (len > 17) { return false; }
+    // "-2_147_483_648i32" is the longest possible value; reject everything
+    // larger
+    if (len > 17) {
+        return false;
+    }
 
     int i = 0;
     int32_t temp_value = 0;
@@ -850,18 +1001,31 @@ bool str_to_i32(const str* const s, int32_t* value) {
 }
 
 bool str_to_i64(const str* const s, int64_t* value) {
-    if (!s) { return false; }
-    if (!value) { return false; }
-    if (!s->data) { return false; }
+    if (!s) {
+        return false;
+    }
+    if (!value) {
+        return false;
+    }
+    if (!s->data) {
+        return false;
+    }
 
     size_t len = str_len(s);
-    if (len == 0) { return false; }
+    if (len == 0) {
+        return false;
+    }
 
     int64_t sign = 1;
-    if (s->data[0] == '-') { sign = -1; }
+    if (s->data[0] == '-') {
+        sign = -1;
+    }
 
-    // "-9_223_372_036_854_775_808i64" is the longest possible value; reject everything larger
-    if (len > 29) { return false; }
+    // "-9_223_372_036_854_775_808i64" is the longest possible value; reject
+    // everything larger
+    if (len > 29) {
+        return false;
+    }
 
     int i = 0;
     int64_t temp_value = 0;
@@ -873,5 +1037,3 @@ bool str_to_i64(const str* const s, int64_t* value) {
     *value = sign * temp_value;
     return true;
 }
-
-
