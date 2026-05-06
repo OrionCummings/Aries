@@ -12,3 +12,5 @@ target_link_libraries(lexer_lib
 target_include_directories(lexer_lib PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}
 )
+
+add_subdirectory(tests)
