@@ -20,7 +20,8 @@ SymbolList* lex(const str const* file_content) {
         return symlist;
     }
 
-    index_t* boundaries = str_get_alphanumeric_symbolic_boundaries(file_content);
+    index_t* boundaries
+        = str_get_alphanumeric_symbolic_boundaries(file_content);
 
     if (boundaries == NULL) {
         A_ERROR("Failed to create alphanumeric symbolic boundaires");
@@ -53,8 +54,8 @@ SymbolList* lex(const str const* file_content) {
             return false;
         }
 
-        // TODO: There is something wrong with this approach; many character numbers are too high!
-        // Update the current line count
+        // TODO: There is something wrong with this approach; many character
+        // numbers are too high! Update the current line count
         char_start += char_len;
         if (sym->t == SYM_NEWLINE) {
             line++;
@@ -64,7 +65,8 @@ SymbolList* lex(const str const* file_content) {
         // Update the symbol's location
         sym->location = crange(line, char_start, char_start + char_len);
 
-        // If the previous symbol was a space and the current symbol is a space, then don't add it to the sym list!
+        // If the previous symbol was a space and the current symbol is a space,
+        // then don't add it to the sym list!
         if (sym->t != SYM_SPACE) {
             symlist_add(symlist, *sym);
         }
@@ -80,7 +82,7 @@ SymbolList* lex(const str const* file_content) {
     return symlist;
 }
 
-Token str_is_literal(const str* const s) {
+TokenType str_is_literal(const str* const s) {
 
     // TODO: Play with the order to get the correct precedence!
     // TODO: Add ALL literals!!!!

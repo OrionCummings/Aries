@@ -1,11 +1,19 @@
 BasedOnStyle: LLVM
 IndentWidth: 4
-ColumnLimit: 80
+ColumnLimit: 120
 PointerAlignment: Left
 AlignAfterOpenBracket: true
 AlignArrayOfStructures: Right
 AlignEscapedNewlines: true
 Cpp11BracedListStyle: false
+# OperandAlignmentStyle: Align
+AlignOperands: AlignAfterOperator
+AllowAllArgumentsOnNextLine: false
+# BinPackArgumentsStyle: OnePerLine
+# BreakBinaryOperations: OnePerLine # interesting but not quite!
+# PackArguments:
+  # BinPackArgumentsStyle: OnePerLine
+  # BinPack: OnePerLine
 AlignConsecutiveShortCaseStatements:
   Enabled: true
   AcrossEmptyLines: true

@@ -85,10 +85,10 @@ void sym_print(const Symbol s) {
 }
 
 bool sym_is_built_in_type(const Symbol sym) {
-    Token t = sym.t;
-    return ((t == KW_OPT) || (t == KW_VOID) || (t == KW_BYTE) ||
-            (t == KW_STRING) || (t == KW_U8) || (t == KW_U16) ||
-            (t == KW_U32) || (t == KW_U64) || (t == KW_I8) || (t == KW_I16) ||
-            (t == KW_I32) || (t == KW_I64) || (t == KW_F32) || (t == KW_F64) ||
-            (t == KW_BOOL));
+    TokenType t = sym.t;
+    return ((t == KW_OPT) || (t == KW_VOID) || (t == KW_BYTE)
+            || (t == KW_STRING) || (t == KW_U8) || (t == KW_U16)
+            || (t == KW_U32) || (t == KW_U64) || (t == KW_I8) || (t == KW_I16)
+            || (t == KW_I32) || (t == KW_I64) || (t == KW_F32) || (t == KW_F64)
+            || (t == KW_BOOL));
 }

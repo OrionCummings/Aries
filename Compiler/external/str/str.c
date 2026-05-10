@@ -121,8 +121,8 @@ bool str_cmp_raw(const str* const s, const char* const cs) {
 }
 
 bool str_ident(const str* const s1, const str* const s2) {
-    return (s1 != NULL) && (s2 != NULL) && (s1->location == s2->location)
-           && (s1->length == s2->length) && (str_cmp(s1, s2));
+    return (s1 != NULL) && (s2 != NULL) && (s1->location == s2->location) && (s1->length == s2->length)
+        && (str_cmp(s1, s2));
 }
 
 int str_find(const str* const s, const char c) {
@@ -219,9 +219,7 @@ str str_view(const str* const s, size_t start, size_t end) {
         return STR_EMPTY;
     }
 
-    str view = { .data = s->data + start,
-                 .length = end - start,
-                 .location = AL_STACK };
+    str view = { .data = s->data + start, .length = end - start, .location = AL_STACK };
     return view;
 }
 
@@ -400,6 +398,25 @@ bool str_has_suffix(const str* const s, const char* suffix) {
     return has_suffix;
 }
 
+bool str_contains(const str* const s, const char c) {
+    if (s == NULL || s->data == NULL) {
+        return NULL;
+    }
+}
+
+str_result str_index_of(const str* const s, const char c) {
+    if (s == NULL || s->data == NULL) {
+        return (str_result){ .type = SRT_INVALID_PARAMS, .valid = false, .data.index = 0 };
+    }
+
+    for (index_t i = 0; i < str_len(s); ++i) {
+        if (s->data[i] == c) {
+            return (str_result){ .type = SRT_FOUND, .valid = true, .data.index = i };
+        }
+    }
+    return (str_result){ .type = SRT_NOT_FOUND, .valid = true, .data.index = 0 };
+}
+
 // TODO: Make this variadic.
 void str_print(const char* prefix, const str* const s) {
     if (s != NULL) {
@@ -454,8 +471,7 @@ index_t* str_get_alphanumeric_symbolic_boundaries(const str* const s) {
             // Expand the boundary list if needed
             if (length == capacity) {
                 capacity *= 2;
-                void* new_boundaries
-                    = realloc(boundaries, capacity * sizeof(*boundaries));
+                void* new_boundaries = realloc(boundaries, capacity * sizeof(*boundaries));
                 if (new_boundaries == NULL) {
                     free(boundaries);
                     return NULL;
@@ -473,8 +489,7 @@ index_t* str_get_alphanumeric_symbolic_boundaries(const str* const s) {
     // TODO: Refactor so this is a generic function!
     if (length == capacity) {
         capacity *= 2;
-        void* new_boundaries
-            = realloc(boundaries, capacity * sizeof(*boundaries));
+        void* new_boundaries = realloc(boundaries, capacity * sizeof(*boundaries));
         if (new_boundaries == NULL) {
             return NULL;
         }
@@ -515,8 +530,7 @@ bool str_is_bool_literal(const str* const s) {
     if (s == NULL || s->data) {
         return false;
     }
-    return str_cmp_raw(s, "false") || str_cmp_raw(s, "False")
-           || str_cmp_raw(s, "true") || str_cmp_raw(s, "True");
+    return str_cmp_raw(s, "false") || str_cmp_raw(s, "False") || str_cmp_raw(s, "true") || str_cmp_raw(s, "True");
 }
 
 bool str_is_u8_literal(const str* const s) {
@@ -525,26 +539,34 @@ bool str_is_u8_literal(const str* const s) {
         return false;
     }
 
+    const char* suffix = "u8";
+    const size_t suffix_len = strlen(suffix);
+    const size_t min_number_len = strlen("0");
+    const size_t max_number_len = strlen("255");
+
     // must contain at least one digit; "u8" is not valid => min length is 3
     // cannot contain more than 3 digits + "u8" => max length is 5
     size_t len = str_len(s);
-    if (len < 3 || len > 5) {
+    if (len < (min_number_len + suffix_len) || len > (max_number_len + suffix_len)) {
         return false;
     }
 
-    // check the suffix
-    if (!str_has_suffix(s, "u8")) {
+    if (!str_has_suffix(s, suffix)) {
         return false;
     }
 
-    str view = str_view(s, 0, len - 2);
+    str_result res = str_index_of(s, '-');
+    if (res.valid && res.type == SRT_FOUND) {
+        return false;
+    }
 
+    str view = str_view(s, 0, len - suffix_len);
     if (view.data == NULL) {
         return false;
     }
 
     char* buffer;
-    long value = strtol(view.data, &buffer, 10);
+    long value = strtol(view.data, &buffer, 10); // TODO: Add more error checking on this function!
 
     return (value >= 0 && value <= 255);
 }
@@ -554,22 +576,34 @@ bool str_is_u16_literal(const str* const s) {
         return false;
     }
 
+    const char* suffix = "u16";
+    const size_t suffix_len = strlen(suffix);
+    const size_t min_number_len = strlen("0");
+    const size_t max_number_len = strlen("65535");
+
     // must contain at least one digit; "u16" is not valid => min length is 4
     // cannot contain more than 5 digits + "u16" => max length is 8
     size_t len = str_len(s);
-    if (len < 4 || len > 8) {
+    if (len < (min_number_len + suffix_len) || len > (max_number_len + suffix_len)) {
         return false;
     }
 
-    // check the suffix
-    if (!str_has_suffix(s, "u16")) {
+    if (!str_has_suffix(s, suffix)) {
         return false;
     }
 
-    str view = str_view(s, 0, len - 3);
+    str_result res = str_index_of(s, '-');
+    if (res.valid && res.type == SRT_FOUND) {
+        return false;
+    }
+
+    str view = str_view(s, 0, len - suffix_len);
+    if (view.data == NULL) {
+        return false;
+    }
 
     char* buffer;
-    long value = strtol(view.data, &buffer, 10);
+    long value = strtol(view.data, &buffer, 10); // TODO: Add more error checking on this function!
 
     return (value >= 0 && value <= 65535);
 }
@@ -579,37 +613,34 @@ bool str_is_u32_literal(const str* const s) {
         return false;
     }
 
+    const char* suffix = "u32";
+    const size_t suffix_len = strlen(suffix);
+    const size_t min_number_len = strlen("0");
+    const size_t max_number_len = strlen("4294967295");
+
     // must contain at least one digit; "u32" is not valid => min length is 4
     // cannot contain more than 10 digits + "u32" => max length is 13
-    // u32's are the default type, so it actually CAN have 1 digit!
     size_t len = str_len(s);
-    if (len < 1 || len > 13) {
-        return false;
-    }
-    if (!isdigit(s->data[0])) {
+    if (len < (min_number_len + suffix_len) || len > (max_number_len + suffix_len)) {
         return false;
     }
 
-    // check the suffix
-    str view = STR_EMPTY;
-    if (str_has_suffix(s, "u32")) {
-        view = str_view(s, 0, len - 3);
-    } else {
-        view = str_view(s, 0, len); // TODO: Remove this; just use s?
+    if (!str_has_suffix(s, suffix)) {
+        return false;
     }
 
+    str_result res = str_index_of(s, '-');
+    if (res.valid && res.type == SRT_FOUND) {
+        return false;
+    }
+
+    str view = str_view(s, 0, len - suffix_len);
     if (view.data == NULL) {
         return false;
     }
 
     char* buffer;
-    long value = strtol(view.data, &buffer, 10);
-
-    int has_suffix = strcmp(buffer, "u32");
-    int lacks_suffix = strcmp(buffer, "");
-    if (has_suffix != 0 && lacks_suffix != 0) {
-        return false;
-    }
+    long value = strtol(view.data, &buffer, 10); // TODO: Add more error checking on this function!
 
     return (value >= 0L && value <= 4294967295L);
 }
@@ -619,22 +650,34 @@ bool str_is_u64_literal(const str* const s) {
         return false;
     }
 
+    const char* suffix = "u64";
+    const size_t suffix_len = strlen(suffix);
+    const size_t min_number_len = strlen("0");
+    const size_t max_number_len = strlen("18446744073709551615");
+
     // must contain at least one digit; "u64" is not valid => min length is 4
     // cannot contain more than 20 digits + "u64" => max length is 23
     size_t len = str_len(s);
-    if (len < 4 || len > 23) {
+    if (len < (min_number_len + suffix_len) || len > (max_number_len + suffix_len)) {
         return false;
     }
 
-    // check the suffix
-    if (!str_has_suffix(s, "u64")) {
+    if (!str_has_suffix(s, suffix)) {
         return false;
     }
 
-    str view = str_view(s, 0, len - 3);
+    str_result res = str_index_of(s, '-');
+    if (res.valid && res.type == SRT_FOUND) {
+        return false;
+    }
+
+    str view = str_view(s, 0, len - suffix_len);
+    if (view.data == NULL) {
+        return false;
+    }
 
     char* buffer;
-    long value = strtoul(view.data, &buffer, 10);
+    long value = strtol(view.data, &buffer, 10); // TODO: Add more error checking on this function!
 
     return (value >= 0UL && value <= 18446744073709551615UL);
 }
@@ -691,14 +734,12 @@ bool str_is_char_literal(const str* const s) {
     size_t len = str_len(s);
 
     // ' ? '
-    if ((len == 3) && (s->data[0] == '\'') && (s->data[1] != '\'')
-        && (s->data[2] == '\'')) {
+    if ((len == 3) && (s->data[0] == '\'') && (s->data[1] != '\'') && (s->data[2] == '\'')) {
         return true;
     }
 
     // ' \ ? '
-    if ((len == 4) && (s->data[0] == '\'') && (s->data[1] == '\\')
-        && (s->data[2] != '\'') && (s->data[3] == '\'')) {
+    if ((len == 4) && (s->data[0] == '\'') && (s->data[1] == '\\') && (s->data[2] != '\'') && (s->data[3] == '\'')) {
         return true;
     }
 

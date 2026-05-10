@@ -177,7 +177,7 @@ Expression* expression_new(arena* arena, SymbolList* const symlist,
     return e;
 }
 
-// bool valid_start_expression(Token t) { return (t ==); }
+// bool valid_start_expression(TokenType t) { return (t ==); }
 
 void declaration_print(const Declaration declaration) {
     printf("[D]: ");
@@ -266,7 +266,7 @@ void expression_type_print(const ExpressionType expression_type) {
     printf("%s", EXPRESSION_T_NAMES[expression_type]);
 }
 
-DeclarationType token_to_declaration_type(Token t) {
+DeclarationType token_to_declaration_type(TokenType t) {
     switch (t) {
     case (KW_DECL):
         return DECLARATION_T_FUNCTION;

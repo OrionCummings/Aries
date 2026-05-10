@@ -1,13 +1,13 @@
 #ifndef __STR_H
 #define __STR_H
 
-#include <stddef.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <ctype.h>
 #include <errno.h>
+#include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "arena.h"
 #include "ipow.h"
@@ -19,20 +19,20 @@
 #define PREFIX_OCT_UPPER ("0O")
 #define PREFIX_HEX_UPPER ("0X")
 
-#define U8_SUFFIX_LOWER  ("u8")
+#define U8_SUFFIX_LOWER ("u8")
 #define U16_SUFFIX_LOWER ("u16")
 #define U32_SUFFIX_LOWER ("u32")
 #define U64_SUFFIX_LOWER ("u64")
-#define U8_SUFFIX_UPPER  ("U8")
+#define U8_SUFFIX_UPPER ("U8")
 #define U16_SUFFIX_UPPER ("U16")
 #define U32_SUFFIX_UPPER ("U32")
 #define U64_SUFFIX_UPPER ("U64")
 
-#define I8_SUFFIX_LOWER  ("i8")
+#define I8_SUFFIX_LOWER ("i8")
 #define I16_SUFFIX_LOWER ("i16")
 #define I32_SUFFIX_LOWER ("i32")
 #define I64_SUFFIX_LOWER ("i64")
-#define I8_SUFFIX_UPPER  ("I8")
+#define I8_SUFFIX_UPPER ("I8")
 #define I16_SUFFIX_UPPER ("I16")
 #define I32_SUFFIX_UPPER ("I32")
 #define I64_SUFFIX_UPPER ("I64")
@@ -42,14 +42,45 @@
 #define F32_SUFFIX_UPPER ("F32")
 #define F64_SUFFIX_UPPER ("F64")
 
-#define STR_EMPTY ((str){.data = NULL, .length = 0, .location = AL_UNKNOWN})
+#define STR_EMPTY ((str){ .data = NULL, .length = 0, .location = AL_UNKNOWN })
 
-typedef enum {
-    AL_UNKNOWN,
-    AL_STACK,
-    AL_HEAP,
-    AL_ARENA
-} AllocationLocation;
+#define MIN_DIGITS_U8 (1)
+#define MAX_DIGITS_U8 (3)
+#define MIN_DIGITS_U16 (1)
+#define MAX_DIGITS_U16 (5)
+#define MIN_DIGITS_U32 (1)
+#define MAX_DIGITS_U32 (10)
+#define MIN_DIGITS_U64 (1)
+#define MAX_DIGITS_U64 (20)
+
+#define MIN_DIGITS_I8 (1)
+#define MAX_DIGITS_I8 (3)
+#define MIN_DIGITS_I16 (1)
+#define MAX_DIGITS_I16 (5)
+#define MIN_DIGITS_I32 (1)
+#define MAX_DIGITS_I32 (10)
+#define MIN_DIGITS_I64 (1)
+#define MAX_DIGITS_I64 (19)
+
+#define SUFFIX_LEN_U8 (2)
+#define SUFFIX_LEN_U16 (3)
+#define SUFFIX_LEN_U32 (3)
+#define SUFFIX_LEN_U64 (3)
+
+#define SUFFIX_LEN_I8 (2)
+#define SUFFIX_LEN_I16 (3)
+#define SUFFIX_LEN_I32 (3)
+#define SUFFIX_LEN_I64 (3)
+
+/// @brief A type to be used for indices.
+typedef size_t index_t;
+
+/// @brief A type to be used for (possibly negative) indices.
+typedef long nindex_t;
+
+typedef enum : uint8_t { AL_UNKNOWN, AL_STACK, AL_HEAP, AL_ARENA } AllocationLocation;
+
+typedef enum : uint8_t { SRT_INVALID_PARAMS, SRT_NOT_FOUND, SRT_FOUND } str_result_type;
 
 /// @brief An immutable string. Usually allocated on the heap.
 typedef struct {
@@ -58,15 +89,23 @@ typedef struct {
     char* data;
 } str;
 
-/// @brief A type to be used for indices.
-typedef size_t index_t;
+typedef struct {
+    str_result_type type;
+    bool valid;
+    union {
+        index_t index;
+    } data;
+} str_result;
+
+#define INVALID_STR_RESULT ((str_result){ .type = SRT_INVALID_PARAMS, .valid = false, .data = 0 })
 
 /// @brief Allocates a new string instance based on the given cstring.
 /// @param s The target cstring.
 /// @return A heap-allocated str* instance.
 str* str_new(const char* s);
 
-/// @brief Allocates a new string instance based on the given cstring in the given arena.
+/// @brief Allocates a new string instance based on the given cstring in the
+/// given arena.
 /// @param a The arena from which to request memory.
 /// @param s The target cstring.
 /// @return An arena-allocated str* instance.
@@ -74,12 +113,14 @@ str* astr_new(arena* const a, const char* s);
 
 /// @brief Frees the given string and sets it to zero.
 /// @param s The string instance to free.
-#define str_free(s) do{ \
-    _str_free(s);       \
-    s = NULL;           \
-} while(0)              \
+#define str_free(s)   \
+    do {              \
+        _str_free(s); \
+        s = NULL;     \
+    } while (0)
 
-/// @brief Private function for freeing string instances. Do not use this function directly. Use str_free() instead.
+/// @brief Private function for freeing string instances. Do not use this
+/// function directly. Use str_free() instead.
 void _str_free(str* s);
 
 /// @brief Concatenates two string instances.
@@ -88,19 +129,26 @@ void _str_free(str* s);
 /// @return A new string instance of the form s1s2.
 str* str_concat(str* s1, str* s2);
 
-/// @brief Compares two strings s1 and s2 character-wise. This does not account for differences in capacity or heap status; this function only checks character content. Safely checking character content requires matching lengths. If strict equality is required, use `str_ident()`.
+/// @brief Compares two strings s1 and s2 character-wise. This does not account
+/// for differences in capacity or heap status; this function only checks
+/// character content. Safely checking character content requires matching
+/// lengths. If strict equality is required, use `str_ident()`.
 /// @param s1 A string.
 /// @param s2 A string.
-/// @return Returns true if the string data in both strings are equal and false otherwise.
+/// @return Returns true if the string data in both strings are equal and false
+/// otherwise.
 bool str_cmp(const str* const s1, const str* const s2);
 
 /// @brief Compares a string `s` and a c-string `cs` for equality.
 /// @param s A string.
 /// @param cs A c-string.
-/// @return Returns true if the string data in `s` is equal to the c-string `cs` and false otherwise.
+/// @return Returns true if the string data in `s` is equal to the c-string `cs`
+/// and false otherwise.
 bool str_cmp_raw(const str* const s, const char* const cs);
 
-/// @brief Compares two strings s1 and s2 character-wise and accounts for differences in length, capacity, and allocation status. If mear character equality is desired, use `str_cmp()` instead.
+/// @brief Compares two strings s1 and s2 character-wise and accounts for
+/// differences in length, capacity, and allocation status. If mear character
+/// equality is desired, use `str_cmp()` instead.
 /// @param s1 A string instance
 /// @param s2 A string instance
 /// @return Returns true if both strings are identical and false otherwise.
@@ -115,7 +163,8 @@ int str_find(const str* const s, const char c);
 /// @brief Returns
 /// @param s The string in which to search for `sub`.
 /// @param sub The 'sub' string to search for in `s`.
-/// @return Returns the index at which `sub` occurs in `s`. Returns -1 if `sub` does not occur in `s`.
+/// @return Returns the index at which `sub` occurs in `s`. Returns -1 if `sub`
+/// does not occur in `s`.
 int str_sub(const str* const s, const str* const sub);
 
 /// @brief Returns the length of `s`.
@@ -126,20 +175,29 @@ size_t str_len(const str* const s);
 /// @brief Returns the character at `index` in `s`.
 /// @param s The string in which to search.
 /// @param index The index to check.
-/// @return The character at the index in the string. Returns the null character if the index exceeds the size of the given string.
+/// @return The character at the index in the string. Returns the null character
+/// if the index exceeds the size of the given string.
 char str_at(const str* const s, size_t index);
 
-/// @brief Appends `c` to the end of `s`. This function will always allocate a new string instance to add the new character; therefore, this function cannot append characters to stack-allocated strings.
+/// @brief Appends `c` to the end of `s`. This function will always allocate a
+/// new string instance to add the new character; therefore, this function
+/// cannot append characters to stack-allocated strings.
 /// @param s The string to which `c` is to be appended.
-/// @param c The character to append to `s`. This character cannot be null as that would break compatability with traditional cstrings AND invalidate an assumption with the return value of `str_at` (on failure, return null char).
-/// @return Returns a new string instance if the character is appended; otherwise, return NULL.
+/// @param c The character to append to `s`. This character cannot be null as
+/// that would break compatability with traditional cstrings AND invalidate an
+/// assumption with the return value of `str_at` (on failure, return null char).
+/// @return Returns a new string instance if the character is appended;
+/// otherwise, return NULL.
 str* str_append(const str* const s, const char c);
 
-/// @brief Returns a view of `s`. The return value of this function should never be passed as an argument to `str_free`. The behavior of this function is undefined if the underlying string is freed.
+/// @brief Returns a view of `s`. The return value of this function should never
+/// be passed as an argument to `str_free`. The behavior of this function is
+/// undefined if the underlying string is freed.
 /// @param s The underlying string.
 /// @param start The starting index of the view (inclusive).
 /// @param end The ending index of the view (inclusive).
-/// @return A new string instance referencing the characters from `start` to `end`, inclusive.
+/// @return A new string instance referencing the characters from `start` to
+/// `end`, inclusive.
 str str_view(const str* const s, size_t start, size_t end);
 
 /// @brief Returns a new copy of `s`.
@@ -184,15 +242,19 @@ str* str_from_filename(const char* filename);
 /// @brief Returns a string instance containing the contents of `file`.
 /// @param a The arena from which to request memory.
 /// @param filename The filename of the file to convert to a string.
-/// @return An arena-allocated string instance containing the contents of the file `filename`.
+/// @return An arena-allocated string instance containing the contents of the
+/// file `filename`.
 str* astr_from_filename(arena* const a, const char* filename);
 
-/// @brief Removes `c` from both the left and right ends of `s`. This function will modify the underlying string but will not reallocate any memory. This function will only remove one instance of `c` from either end. If `c` is not on the ends of `s`, then this function does nothing.
-/// 
+/// @brief Removes `c` from both the left and right ends of `s`. This function
+/// will modify the underlying string but will not reallocate any memory. This
+/// function will only remove one instance of `c` from either end. If `c` is not
+/// on the ends of `s`, then this function does nothing.
+///
 /// Example:
-/// 
+///
 /// s = "test"; str_strip(s, 't') = "es"
-/// 
+///
 /// @param s The string from which `c` is to be removed.
 /// @param c The character that is to be removed from `s`.
 /// @return `s` without `c` on the left and right ends.
@@ -210,6 +272,21 @@ bool str_has_prefix(const str* const s, const char* prefix);
 /// @return Returns true if `s` ends with `suffix`, otherwise returns false.
 bool str_has_suffix(const str* const s, const char* suffix);
 
+/// @brief Returns the index at which the first instance of the character `c`
+/// exists in `s`. Returns `-1` if `c` is not in `s`.
+/// @param s The string in which to search.
+/// @param c The character to search for in `s`.
+/// @return The index of the character `c` in `s`. Guarenteed to return a number
+/// between `0` and `str_len(s)` unless `c` is not in `s` in which case `-1` is
+/// returned.
+str_result str_index_of(const str* const s, const char c);
+
+/// @brief Returns true if `c` is in `s`.
+/// @param s The string in which to search.
+/// @param c The character to search for in `s`.
+/// @return True if `c` is in `s`.
+bool str_contains(const str* const s, const char c);
+
 /// @brief Prints the given string.
 /// @param prefix A cstring prefix to print before the target string.
 /// @param s The string to print.
@@ -220,100 +297,120 @@ void str_print(const char* prefix, const str* const s);
 /// @return A boolean indicating the validity of `s`.
 bool str_valid(const str* s);
 
-/// @brief Returns a list of indices at which alphanumeric-symbolic boundaries occur in `s`. Symbolic character strings will always be split as individual characters. This function is guarenteed to return a monotonic sequence of integers (with the final entry being zero!)
-/// 
-/// Example: 
-/// 
-/// `str_get_alphanumeric_symbolic_boundaries("a nice test")` yields `[0, 1, 2, 6, 7, 11]`
-/// 
+/// @brief Returns a list of indices at which alphanumeric-symbolic boundaries
+/// occur in `s`. Symbolic character strings will always be split as individual
+/// characters. This function is guarenteed to return a monotonic sequence of
+/// integers (with the final entry being zero!)
+///
+/// Example:
+///
+/// `str_get_alphanumeric_symbolic_boundaries("a nice test")` yields `[0, 1, 2,
+/// 6, 7, 11]`
+///
 /// [0 -  1] = "a"
 /// [1 -  2] = " "
 /// [2 -  6] = "nice"
 /// [6 -  7] = " "
 /// [7 - 11] = "test"
-/// 
+///
 /// @param s The string to split.
 /// @return A pointer to a 0-terminated list of indices.
 index_t* str_get_alphanumeric_symbolic_boundaries(const str* const s);
 
-/// @brief Returns true if the given string is a valid identifier. Valid identifiers are of the form [a-zA-Z_][a-zA-Z0-9_]*.
+/// @brief Returns true if the given string is a valid identifier. Valid
+/// identifiers are of the form [a-zA-Z_][a-zA-Z0-9_]*.
 /// @param s A string.
 /// @return Returns true if the given string is a valid identifier.
 bool str_is_identifier(const str* const s);
 
 /// @brief Determines if `s` is a valid boolean literal.
 /// @param s The string to check.
-/// @return Returns `true` if `s` is a valid boolean literal. Otherwise, returns `false`.
+/// @return Returns `true` if `s` is a valid boolean literal. Otherwise, returns
+/// `false`.
 bool str_is_bool_literal(const str* const s);
 
 /// @brief Determines if `s` is a valid unsigned 8-bit int literal.
 /// @param s The string to check.
-/// @return Returns `true` if `s` is a valid unsigned 8-bit int literal. Otherwise, returns `false`.
+/// @return Returns `true` if `s` is a valid unsigned 8-bit int literal.
+/// Otherwise, returns `false`.
 bool str_is_u8_literal(const str* const s);
 
 /// @brief Determines if `s` is a valid unsigned 16-bit int literal.
 /// @param s The string to check.
-/// @return Returns `true` if `s` is a valid unsigned 16-bit int literal. Otherwise, returns `false`.
+/// @return Returns `true` if `s` is a valid unsigned 16-bit int literal.
+/// Otherwise, returns `false`.
 bool str_is_u16_literal(const str* const s);
 
 /// @brief Determines if `s` is a valid unsigned 32-bit int literal.
 /// @param s The string to check.
-/// @return Returns `true` if `s` is a valid unsigned 32-bit int literal. Otherwise, returns `false`.
+/// @return Returns `true` if `s` is a valid unsigned 32-bit int literal.
+/// Otherwise, returns `false`.
 bool str_is_u32_literal(const str* const s);
 
 /// @brief Determines if `s` is a valid unsigned 64-bit int literal.
 /// @param s The string to check.
-/// @return Returns `true` if `s` is a valid unsigned 64-bit int literal. Otherwise, returns `false`.
+/// @return Returns `true` if `s` is a valid unsigned 64-bit int literal.
+/// Otherwise, returns `false`.
 bool str_is_u64_literal(const str* const s);
 
 /// @brief Determines if `s` is a valid 8-bit int literal.
 /// @param s The string to check.
-/// @return Returns `true` if `s` is a valid 8-bit int literal. Otherwise, returns `false`.
+/// @return Returns `true` if `s` is a valid 8-bit int literal. Otherwise,
+/// returns `false`.
 bool str_is_i8_literal(const str* const s);
 
 /// @brief Determines if `s` is a valid 16-bit int literal.
 /// @param s The string to check.
-/// @return Returns `true` if `s` is a valid 16-bit int literal. Otherwise, returns `false`.
+/// @return Returns `true` if `s` is a valid 16-bit int literal. Otherwise,
+/// returns `false`.
 bool str_is_i16_literal(const str* const s);
 
 /// @brief Determines if `s` is a valid 32-bit int literal.
 /// @param s The string to check.
-/// @return Returns `true` if `s` is a valid 32-bit int literal. Otherwise, returns `false`.
+/// @return Returns `true` if `s` is a valid 32-bit int literal. Otherwise,
+/// returns `false`.
 bool str_is_i32_literal(const str* const s);
 
 /// @brief Determines if `s` is a valid 64-bit int literal.
 /// @param s The string to check.
-/// @return Returns `true` if `s` is a valid 64-bit int literal. Otherwise, returns `false`.
+/// @return Returns `true` if `s` is a valid 64-bit int literal. Otherwise,
+/// returns `false`.
 bool str_is_i64_literal(const str* const s);
 
 /// @brief Determines if `s` is a valid 32-bit float literal.
 /// @param s The string to check.
-/// @return Returns `true` if `s` is a valid 32-bit float literal. Otherwise, returns `false`.
+/// @return Returns `true` if `s` is a valid 32-bit float literal. Otherwise,
+/// returns `false`.
 bool str_is_f32_literal(const str* const s);
 
 /// @brief Determines if `s` is a valid 32-bit float literal.
 /// @param s The string to check.
-/// @return Returns `true` if `s` is a valid 32-bit float literal. Otherwise, returns `false`.
+/// @return Returns `true` if `s` is a valid 32-bit float literal. Otherwise,
+/// returns `false`.
 bool str_is_f64_literal(const str* const s);
 
 /// @brief Determines if `s` is a valid 64-bit float literal.
 /// @param s The string to check.
-/// @return Returns `true` if `s` is a valid 64-bit float literal. Otherwise, returns `false`.
+/// @return Returns `true` if `s` is a valid 64-bit float literal. Otherwise,
+/// returns `false`.
 bool str_is_char_literal(const str* const s);
 
 /// @brief Determines if `s` is a valid string literal.
 /// @param s The string to check.
-/// @return Returns `true` if `s` is a valid string literal. Otherwise, returns `false`.
+/// @return Returns `true` if `s` is a valid string literal. Otherwise, returns
+/// `false`.
 bool str_is_str_literal(const str* const s);
 
 /// @brief Determines if `s` is a valid option literal.
 /// @param s The string to check.
-/// @return Returns `true` if `s` is a valid option literal. Otherwise, returns `false`.
+/// @return Returns `true` if `s` is a valid option literal. Otherwise, returns
+/// `false`.
 bool str_is_opt_literal(const str* const s);
 
 /// @brief Determines if `s` is a valid result literal.
 /// @param s The string to check.
-/// @return Returns `true` if `s` is a valid result literal. Otherwise, returns `false`.
+/// @return Returns `true` if `s` is a valid result literal. Otherwise, returns
+/// `false`.
 bool str_is_res_literal(const str* const s);
 
 bool str_to_integer_value(const str* const s, uint64_t* value);

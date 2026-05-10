@@ -83,13 +83,13 @@ Declaration* parse(arena* arena, SymbolList* const symlist);
 Declaration* declaration_parse(arena*, SymbolList* const);
 void declaration_print(const Declaration);
 void declaration_type_print(const DeclarationType);
-DeclarationType token_to_declaration_type(Token);
+DeclarationType token_to_declaration_type(TokenType);
 
 Expression* expression_parse(arena*, SymbolList* const);
 Expression* expression_new(arena*, SymbolList* const, index_t, index_t);
 void expression_print(const Expression, size_t);
 void expression_type_print(const ExpressionType);
-bool valid_start_expression(Token);
+bool valid_start_expression(TokenType);
 
 Statement* statement_parse(arena*, SymbolList* const);
 void statement_print(const Statement);

@@ -94,15 +94,17 @@ typedef enum {
     KW_AS,       // as
 
     TOKEN_COUNT
-} Token;
+} TokenType;
 
-static inline bool token_is_invalid(Token t) { return (t == TOKEN_INVALID); }
-static inline bool token_is_none(Token t) { return (t == TOKEN_NONE); }
-static inline bool token_is_identifier(Token t) {
+static inline bool token_type_is_invalid(TokenType t) {
+    return (t == TOKEN_INVALID);
+}
+static inline bool token_type_is_none(TokenType t) { return (t == TOKEN_NONE); }
+static inline bool token_type_is_identifier(TokenType t) {
     return (t == TOKEN_IDENTIFIER);
 }
 
-static inline bool token_is_keyword(Token t) {
+static inline bool token_type_is_keyword(TokenType t) {
 
     return (t == KW_OPT || t == KW_VOID || t == KW_BYTE || t == KW_STRING
             || t == KW_U8 || t == KW_U16 || t == KW_U32 || t == KW_U64
@@ -115,14 +117,14 @@ static inline bool token_is_keyword(Token t) {
             || t == KW_WHILE || t == KW_OVERLOAD || t == KW_ASM || t == KW_AS);
 }
 
-static inline bool token_is_literal(Token t) {
+static inline bool token_type_is_literal(TokenType t) {
     return (t == LIT_BOOL || t == LIT_I8 || t == LIT_I16 || t == LIT_I32
             || t == LIT_I64 || t == LIT_U8 || t == LIT_U16 || t == LIT_U32
             || t == LIT_U64 || t == LIT_F32 || t == LIT_F64 || t == LIT_BYTE
             || t == LIT_STRING);
 }
 
-static inline bool token_is_symbol(Token t) {
+static inline bool token_type_is_symbol(TokenType t) {
     return (t == SYM_SPACE || t == SYM_NEWLINE || t == SYM_SEMICOLON
             || t == SYM_COLON || t == SYM_COMMA || t == SYM_QUESTION
             || t == SYM_FSLASH || t == SYM_BSLASH || t == SYM_PAREN_OPEN
