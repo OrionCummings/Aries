@@ -24,27 +24,25 @@ str* str_new(const char* s) {
     return r;
 }
 
-str* astr_new(arena* const a, const char* s) {
-    if (s == NULL || a == NULL) {
+str* astr_new(arena* const a, const char* cstr) {
+    if (cstr == NULL || a == NULL) {
         return NULL;
     }
 
-    str* r = arena_alloc(a, sizeof(*r));
+    str* s = arena_alloc(a, sizeof(*s));
 
-    if (r == NULL) {
+    if (s == NULL) {
         return NULL;
     }
 
-    size_t len = strlen(s);
+    size_t len = strlen(cstr);
+    s->data = arena_alloc(a, len * sizeof(*(s->data)));
+    strncpy(s->data, cstr, len);
 
-    r->data = arena_alloc(a, sizeof(*(r->data)));
+    s->length = len;
+    s->location = AL_ARENA;
 
-    strncpy(r->data, s, len);
-
-    r->length = len;
-    r->location = AL_ARENA;
-
-    return r;
+    return s;
 }
 
 void _str_free(str* s) {
@@ -87,13 +85,12 @@ str* str_concat(str* s1, str* s2) {
 
 bool str_cmp(const str* const s1, const str* const s2) {
 
-    if (s1 == NULL || s2 == NULL) {
+    if ((s1 == NULL) ^ (s2 == NULL)) {
         return false;
     }
 
     size_t len_s1 = str_len(s1);
-    size_t len_s2 = str_len(s2);
-    if (len_s1 != len_s2) {
+    if (len_s1 != str_len(s2)) {
         return false;
     }
 

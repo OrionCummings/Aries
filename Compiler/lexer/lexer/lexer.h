@@ -1,11 +1,11 @@
 #ifndef __LEXER_H
 #define __LEXER_H
 
-#include <ctype.h>
-#include <stddef.h>
 #include "debug.h"
 #include "symlist.h"
+#include <ctype.h>
+#include <stddef.h>
 
-SymbolList* lex(const str* file_content);
+symlist* lex(const str* file_content);
 
 #endif

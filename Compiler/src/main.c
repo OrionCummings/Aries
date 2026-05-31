@@ -18,13 +18,14 @@ int main(int argc, char** argv) {
 
     ///////////////////
 
-    const char* filename
-        = "/home/orion/Projects/Aries/Compiler/code/parser2.ari";
+    const char* filename = "/home/orion/Projects/Aries/Compiler/code/parser2.ari";
     str* file_content = str_from_filename(filename);
 
-    SymbolList* symlist = lex(file_content);
+    symlist* symlist = lex(file_content);
     if (symlist == NULL) {
         A_WARNING("failed to lex file '%s'", filename);
+        str_free(file_content);
+        return 3749;
     }
 
     // Free the file string
@@ -35,7 +36,7 @@ int main(int argc, char** argv) {
 
     ///////////////////
 
-    arena* parsing_arena = arena_new(4096); // TODO: Magic number!
+    arena* parsing_arena = arena_new(1024, 1); // TODO: Magic number!
     if (parsing_arena == NULL) {
         A_WARNING("failed to allocate a parsing arena");
     }
@@ -50,33 +51,53 @@ int main(int argc, char** argv) {
 
     // DEBUG: TEMP
     // Expression* e = expression_parse(parsing_arena, symlist);
-    Expression* e = expression_new(parsing_arena, symlist, 0, symlist->length);
-    if (e == NULL) {
+    Expression* actual = expression_parse(parsing_arena, symlist, 0);
+    if (actual == NULL) {
         A_WARNING("temp: failed to parse expression from symlist");
     } else {
 
         Expression* expected = arena_alloc(parsing_arena, sizeof(*expected));
-        expected->type = EXPRESSION_T_BIN_OP_ADD;
-        expected->value = astr_new(parsing_arena, "9 + 20");
-
-        expected->left = arena_alloc(parsing_arena, sizeof(*expected->left));
-        expected->left->left = nullptr;
-        expected->left->right = nullptr;
-        expected->left->type = EXPRESSION_T_LIT_U8; // BUG: This gets written
-                                                    // to expected->value[1]???
-        expected->left->value = astr_new(parsing_arena, "9");
-
-        expected->right = arena_alloc(parsing_arena, sizeof(*expected->right));
-        expected->right->left = nullptr;
-        expected->right->right = nullptr;
-        expected->right->type = EXPRESSION_T_LIT_U8;
-        expected->right->value = astr_new(parsing_arena, "20");
+        expected->type = ET_LIT_U8;
+        expected->value = astr_new(parsing_arena, "255u8");
+        expected->left = nullptr;
+        expected->right = nullptr;
 
         print_cyan("\nExpected expression: \n");
         expression_print(*expected, 0);
         print_cyan("\nActual expression: \n");
-        expression_print(*e, 0);
+        expression_print(*actual, 0);
         print_cyan("\n");
+        printf("Equal? %s\n", ((expression_eq(expected, actual)) ? "true" : "false"));
+
+        // Expression* expected = arena_alloc(parsing_arena, sizeof(*expected));
+        // expected->type = ET_BIN_OP_ADD;
+        // expected->value = nullptr;
+
+        // expected->left = arena_alloc(parsing_arena, sizeof(*(expected->left)));
+        // expected->left->left = arena_alloc(parsing_arena, sizeof(*(expected->left->left)));
+        // expected->left->left->type = ET_LIT_U8;
+        // expected->left->left->value = astr_new(parsing_arena, "255u8");
+        // expected->left->left->left = nullptr;
+        // expected->left->left->right = nullptr;
+
+        // expected->left->right = arena_alloc(parsing_arena, sizeof(*(expected->left->right)));
+        // expected->left->right->type = ET_LIT_U8;
+        // expected->left->right->value = astr_new(parsing_arena, "12u8");
+        // expected->left->right->left = nullptr;
+        // expected->left->right->right = nullptr;
+
+        // expected->right = arena_alloc(parsing_arena, sizeof(*(expected->right)));
+        // expected->right->left = nullptr;
+        // expected->right->right = nullptr;
+        // expected->right->type = ET_LIT_U8;
+        // expected->right->value = astr_new(parsing_arena, "127u8");
+
+        // print_cyan("\nExpected expression: \n");
+        // expression_print(*expected, 0);
+        // print_cyan("\nActual expression: \n");
+        // expression_print(*actual, 0);
+        // print_cyan("\n");
+        // printf("Equal? %s\n", ((expression_eq(expected, actual)) ? "true" : "false"));
     }
 
     // Declaration* root = parse(parsing_arena, symlist);

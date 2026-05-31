@@ -1,8 +1,8 @@
-#include "unity.h"
-#include "bfilter.h"
-#include "arena.h"
-#include "debug.h"
 #include "test_bfilter.h"
+#include "arena.h"
+#include "bfilter.h"
+#include "debug.h"
+#include "unity.h"
 
 #define TEST_ARENA_SIZE_BYTES (1024)
 
@@ -25,16 +25,13 @@ void test_bfilter_in(void) {
 
 ////////////////////////////////////////////////
 
-void setUp() {
-    arena_reset(scratchpad);
-}
+void setUp() { arena_reset(scratchpad); }
 
-void tearDown() {
-}
+void tearDown() {}
 
 void init_suite() {
     LOG_PUSH(LOG_NONE);
-    scratchpad = arena_new(TEST_ARENA_SIZE_BYTES);
+    scratchpad = arena_new(TEST_ARENA_SIZE_BYTES, 4);
 }
 
 void deinit_suite() {

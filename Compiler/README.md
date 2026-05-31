@@ -9,10 +9,10 @@ AC is organized into several stages:
 *The AC does not currently support preprocessing as I have not fully assessed if it is necessary.*
 
 ### Lexing
-The input source file (.ari) is split into `Symbols`. These are placed into a `SymbolList` and passed to the next stage.
+The input source file (.ari) is split into `Symbols`. These are placed into a `symlist` and passed to the next stage.
 
 ### Parsing
-The input `SymbolList` is parsed based on a context free grammar into a parse tree.
+The input `symlist` is parsed based on a context free grammar into a parse tree.
 
 ### Generating
 

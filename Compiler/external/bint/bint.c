@@ -4,13 +4,19 @@
 
 bint_t* bint_new(size_t bytes) {
 
-    if (bytes == 0) { return NULL; }
+    if (bytes == 0) {
+        return NULL;
+    }
 
     bint_t* b = calloc(1, sizeof(*b));
-    if (b == NULL) { return NULL; }
+    if (b == NULL) {
+        return NULL;
+    }
 
     b->bytes = calloc(bytes, sizeof(*b->bytes));
-    if (b->bytes == NULL) { return NULL; }
+    if (b->bytes == NULL) {
+        return NULL;
+    }
 
     b->n_bytes = bytes;
     b->state = (bint_state_t){ .flowed = false, .positive = true, .managed = false };
@@ -22,13 +28,19 @@ bint_t* bint_new(size_t bytes) {
 
 bint_t* bint_anew(arena* const arena, size_t bytes) {
 
-    if (bytes == 0) { return NULL; }
+    if (bytes == 0) {
+        return NULL;
+    }
 
     bint_t* b = arena_alloc(arena, sizeof(*b));
-    if (b == NULL) { return NULL; }
+    if (b == NULL) {
+        return NULL;
+    }
 
     b->bytes = arena_alloc(arena, bytes * sizeof(*b->bytes));
-    if (b->bytes == NULL) { return NULL; }
+    if (b->bytes == NULL) {
+        return NULL;
+    }
 
     b->n_bytes = bytes;
     b->state = (bint_state_t){ .flowed = false, .positive = true, .managed = true };
@@ -43,10 +55,14 @@ bint_t* bint_new_str(const str* const s) {
 
     return NULL;
 
-    if (s == NULL) { return NULL; }
-    if (s->data == NULL) { return NULL; }
+    if (s == NULL) {
+        return NULL;
+    }
+    if (s->data == NULL) {
+        return NULL;
+    }
 
-    arena* scratchpad = arena_new(2048); // TODO: Magic number!
+    arena* scratchpad = arena_new(2048, 4); // TODO: Magic number!
     size_t len = str_len(s);
 
     // TODO: Use the string length to calculate an upper bound on allocated bytes.
@@ -80,7 +96,6 @@ bint_t* bint_new_str(const str* const s) {
             return NULL;
         }
 
-
         bint_free(digit);
         bint_free(placed_digit);
     }
@@ -96,10 +111,14 @@ bint_t* bint_new_str(const str* const s) {
 bint_t* bint_new_cstr(const char* const s) {
 
     str* str = str_new(s);
-    if (str == NULL || str->data == NULL) { return NULL; }
+    if (str == NULL || str->data == NULL) {
+        return NULL;
+    }
 
     bint_t* b = bint_new_str(str);
-    if (b == NULL || b->bytes == NULL) { return NULL; }
+    if (b == NULL || b->bytes == NULL) {
+        return NULL;
+    }
 
     str_free(str);
 
@@ -108,10 +127,18 @@ bint_t* bint_new_cstr(const char* const s) {
 
 bool _bint_free(bint_t* b) {
 
-    if (b == NULL) { return false; }
-    if (b->bytes == NULL) { return false; }
-    if (b->n_bytes == 0) { return false; }
-    if (b->state.managed) { return false; }
+    if (b == NULL) {
+        return false;
+    }
+    if (b->bytes == NULL) {
+        return false;
+    }
+    if (b->n_bytes == 0) {
+        return false;
+    }
+    if (b->state.managed) {
+        return false;
+    }
 
     free(b->bytes);
     free(b);
@@ -121,18 +148,16 @@ bool _bint_free(bint_t* b) {
     return true;
 }
 
-str* bint_to_str(const bint_t a, bint_base_t base) {
-    return NULL;
-}
+str* bint_to_str(const bint_t a, bint_base_t base) { return NULL; }
 
-str* bint_to_astr(arena* const arena, const bint_t a, bint_base_t base) {
-    return NULL;
-}
+str* bint_to_astr(arena* const arena, const bint_t a, bint_base_t base) { return NULL; }
 
 void bint_print(const bint_t a, bint_base_t base) {
 
     str* s = bint_to_str(a, base);
-    if (s == NULL || s->data == NULL) { return; }
+    if (s == NULL || s->data == NULL) {
+        return;
+    }
 
     str_print("", s);
 
@@ -141,17 +166,23 @@ void bint_print(const bint_t a, bint_base_t base) {
 }
 
 void bint_set_bytes(bint_t* const b, uint8_t* bytes, size_t n_bytes, size_t offset) {
-    if (b == NULL || b->bytes == NULL) { return; }
-    if (bytes == NULL) { return; }
-    if (n_bytes + offset > b->n_bytes) { return; }
-    if (n_bytes == 0) { return; }
+    if (b == NULL || b->bytes == NULL) {
+        return;
+    }
+    if (bytes == NULL) {
+        return;
+    }
+    if (n_bytes + offset > b->n_bytes) {
+        return;
+    }
+    if (n_bytes == 0) {
+        return;
+    }
 
     memcpy(&b->bytes[offset], bytes, n_bytes);
 }
 
-bool bint_valid(const bint_t* const b) {
-    return !(b == NULL || b->bytes == NULL || b->n_bytes == 0);
-}
+bool bint_valid(const bint_t* const b) { return !(b == NULL || b->bytes == NULL || b->n_bytes == 0); }
 
 void bint_log_error(bint_error_t err) {
 
@@ -206,17 +237,22 @@ void bint_log_error(bint_error_t err) {
         break;
     }
     }
-
 }
 
 //////////////////// Bitwise Operations ////////////////////
 
 bint_error_t bint_not(bint_t** result, const bint_t* const a) {
-    if (!bint_valid(a) || result == NULL) { return BINTE_INVALID_PARAM; }
-    if (*result != NULL) { return BINTE_LOST_INFO; }
+    if (!bint_valid(a) || result == NULL) {
+        return BINTE_INVALID_PARAM;
+    }
+    if (*result != NULL) {
+        return BINTE_LOST_INFO;
+    }
 
     *result = bint_new(a->n_bytes);
-    if (result == NULL || *result == NULL || (*result)->bytes == NULL) { return BINTE_MEMORY_ALLOCATION_FAILURE; }
+    if (result == NULL || *result == NULL || (*result)->bytes == NULL) {
+        return BINTE_MEMORY_ALLOCATION_FAILURE;
+    }
 
     for (index_t index = 0; index < a->n_bytes; index++) {
         (*result)->bytes[index] = ~(a->bytes[index]);
@@ -226,8 +262,12 @@ bint_error_t bint_not(bint_t** result, const bint_t* const a) {
 }
 
 bint_error_t bint_and(bint_t** result, const bint_t* const a, const bint_t* const b) {
-    if (!bint_valid(a) || !bint_valid(b) || result == NULL) { return BINTE_INVALID_PARAM; }
-    if (*result != NULL) { return BINTE_LOST_INFO; }
+    if (!bint_valid(a) || !bint_valid(b) || result == NULL) {
+        return BINTE_INVALID_PARAM;
+    }
+    if (*result != NULL) {
+        return BINTE_LOST_INFO;
+    }
 
     size_t max_size, min_size, temp_size;
 
@@ -245,13 +285,15 @@ bint_error_t bint_and(bint_t** result, const bint_t* const a, const bint_t* cons
     assert(max_size >= min_size);
 
     *result = bint_new(max_size);
-    if (result == NULL || *result == NULL || (*result)->bytes == NULL) { return BINTE_MEMORY_ALLOCATION_FAILURE; }
+    if (result == NULL || *result == NULL || (*result)->bytes == NULL) {
+        return BINTE_MEMORY_ALLOCATION_FAILURE;
+    }
 
     for (index_t index = 0; index < min_size; index++) {
         (*result)->bytes[index] = (a->bytes[index] & b->bytes[index]);
     }
 
-    // NOTE: 
+    // NOTE:
     // We are assuming bytes beyond 'min_size' of the small bint to be zero
     // => any result of AND(x, 0) = 0 which is the default value
     // => we don't have to do anything. This will NOT necessarily be the case for other operations!!
@@ -260,17 +302,25 @@ bint_error_t bint_and(bint_t** result, const bint_t* const a, const bint_t* cons
 }
 
 bint_error_t bint_nand(bint_t** result, const bint_t* const a, const bint_t* const b) {
-    if (!bint_valid(a) || !bint_valid(b) || result == NULL) { return BINTE_INVALID_PARAM; }
-    if (*result != NULL) { return BINTE_LOST_INFO; }
+    if (!bint_valid(a) || !bint_valid(b) || result == NULL) {
+        return BINTE_INVALID_PARAM;
+    }
+    if (*result != NULL) {
+        return BINTE_LOST_INFO;
+    }
 
     bint_t* r1 = NULL;
     bint_error_t err;
 
     err = bint_and(&r1, a, b);
-    if (err) { return err; }
+    if (err) {
+        return err;
+    }
 
     err = bint_not(result, r1);
-    if (err) { return err; }
+    if (err) {
+        return err;
+    }
 
     bint_free(r1);
 
@@ -278,8 +328,12 @@ bint_error_t bint_nand(bint_t** result, const bint_t* const a, const bint_t* con
 }
 
 bint_error_t bint_or(bint_t** result, const bint_t* const a, const bint_t* const b) {
-    if (!bint_valid(a) || !bint_valid(b) || result == NULL) { return BINTE_INVALID_PARAM; }
-    if (*result != NULL) { return BINTE_LOST_INFO; }
+    if (!bint_valid(a) || !bint_valid(b) || result == NULL) {
+        return BINTE_INVALID_PARAM;
+    }
+    if (*result != NULL) {
+        return BINTE_LOST_INFO;
+    }
 
     size_t max_size, min_size, temp_size;
 
@@ -299,7 +353,9 @@ bint_error_t bint_or(bint_t** result, const bint_t* const a, const bint_t* const
     assert(max_size >= min_size);
 
     *result = bint_new(max_size);
-    if (result == NULL || *result == NULL || (*result)->bytes == NULL) { return BINTE_MEMORY_ALLOCATION_FAILURE; }
+    if (result == NULL || *result == NULL || (*result)->bytes == NULL) {
+        return BINTE_MEMORY_ALLOCATION_FAILURE;
+    }
 
     for (index_t index = 0; index < min_size; index++) {
         (*result)->bytes[index] = (a->bytes[index] | b->bytes[index]);
@@ -314,76 +370,57 @@ bint_error_t bint_or(bint_t** result, const bint_t* const a, const bint_t* const
 }
 
 bint_error_t bint_nor(bint_t** result, const bint_t* const a, const bint_t* const b) {
-    if (!bint_valid(a) || !bint_valid(b) || result == NULL) { return BINTE_INVALID_PARAM; }
-    if (*result != NULL) { return BINTE_LOST_INFO; }
+    if (!bint_valid(a) || !bint_valid(b) || result == NULL) {
+        return BINTE_INVALID_PARAM;
+    }
+    if (*result != NULL) {
+        return BINTE_LOST_INFO;
+    }
 
     bint_t* r1 = NULL;
     bint_error_t err;
 
     err = bint_or(&r1, a, b);
-    if (err) { return err; }
+    if (err) {
+        return err;
+    }
 
     err = bint_not(result, r1);
-    if (err) { return err; }
+    if (err) {
+        return err;
+    }
 
     bint_free(r1);
 
     return BINTE_NONE;
 }
 
-bint_error_t bint_xor(bint_t** result, const bint_t* const a, const bint_t* const b) {
-    return BINTE_UNKNOWN;
-}
+bint_error_t bint_xor(bint_t** result, const bint_t* const a, const bint_t* const b) { return BINTE_UNKNOWN; }
 
-bint_error_t bint_xnor(bint_t** result, const bint_t* const a, const bint_t* const b) {
-    return BINTE_UNKNOWN;
-}
+bint_error_t bint_xnor(bint_t** result, const bint_t* const a, const bint_t* const b) { return BINTE_UNKNOWN; }
 
-bint_error_t bint_shl(bint_t** result, const bint_t* const a, const uint64_t bits) {
-    return BINTE_UNKNOWN;
-}
+bint_error_t bint_shl(bint_t** result, const bint_t* const a, const uint64_t bits) { return BINTE_UNKNOWN; }
 
-bint_error_t bint_shr(bint_t** result, const bint_t* const a, const uint64_t bits) {
-    return BINTE_UNKNOWN;
-}
+bint_error_t bint_shr(bint_t** result, const bint_t* const a, const uint64_t bits) { return BINTE_UNKNOWN; }
 
-bint_error_t bint_rotr(bint_t** result, const bint_t* const a, const uint64_t bits) {
-    return BINTE_UNKNOWN;
-}
+bint_error_t bint_rotr(bint_t** result, const bint_t* const a, const uint64_t bits) { return BINTE_UNKNOWN; }
 
-bint_error_t bint_rotl(bint_t** result, const bint_t* const a, const uint64_t bits) {
-    return BINTE_UNKNOWN;
-}
+bint_error_t bint_rotl(bint_t** result, const bint_t* const a, const uint64_t bits) { return BINTE_UNKNOWN; }
 
 //////////////////// Simple Operations ////////////////////
 
-bint_error_t bint_add(bint_t** result, const bint_t* const a, const bint_t* const b) {
-    return BINTE_UNKNOWN;
-}
+bint_error_t bint_add(bint_t** result, const bint_t* const a, const bint_t* const b) { return BINTE_UNKNOWN; }
 
-bint_error_t bint_sub(bint_t** result, const bint_t* const a, const bint_t* const b) {
-    return BINTE_UNKNOWN;
-}
+bint_error_t bint_sub(bint_t** result, const bint_t* const a, const bint_t* const b) { return BINTE_UNKNOWN; }
 
-bint_error_t bint_mul(bint_t** result, const bint_t* const a, const bint_t* const b) {
-    return BINTE_UNKNOWN;
-}
+bint_error_t bint_mul(bint_t** result, const bint_t* const a, const bint_t* const b) { return BINTE_UNKNOWN; }
 
-bint_error_t bint_div(bint_t** result, const bint_t* const a, const bint_t* const b) {
-    return BINTE_UNKNOWN;
-}
+bint_error_t bint_div(bint_t** result, const bint_t* const a, const bint_t* const b) { return BINTE_UNKNOWN; }
 
-bint_error_t bint_mod(bint_t** result, const bint_t* const a, const bint_t* const b) {
-    return BINTE_UNKNOWN;
-}
+bint_error_t bint_mod(bint_t** result, const bint_t* const a, const bint_t* const b) { return BINTE_UNKNOWN; }
 
 //////////////////// Complex Operations ////////////////////
 
-bint_error_t bint_sqrt(bint_t** result, const bint_t* const a) {
-    return BINTE_UNKNOWN;
-}
+bint_error_t bint_sqrt(bint_t** result, const bint_t* const a) { return BINTE_UNKNOWN; }
 
-bint_error_t bint_pow(bint_t** result, const bint_t* const a, const bint_t* const b) {
-    return BINTE_UNKNOWN;
-}
-
+bint_error_t bint_pow(bint_t** result, const bint_t* const a, const bint_t* const b) { return BINTE_UNKNOWN; }

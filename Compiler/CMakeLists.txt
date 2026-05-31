@@ -1,16 +1,19 @@
 cmake_minimum_required(VERSION 4.0)
 project(AriesCompiler VERSION 0.0.2 LANGUAGES C)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_C_FLAGS_DEBUG "-g -DDEBUG")
+set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address, -fsanitize=undefined")
+set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address -fsanitize=undefined")
+# add_compile_options(-fsanitize=address)
+# add_link_options(-fsanitize=address)
 
 add_compile_definitions(false=0)
 add_compile_definitions(true=1)
+add_compile_definitions(nullptr=0)
 
 add_subdirectory(src)
 add_subdirectory(lexer)

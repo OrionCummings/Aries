@@ -9,7 +9,13 @@
 #define NULL_SYMBOL ((Symbol){ .location = NULL_CHAR_LOC, .s = NULL, .t = 0 })
 #define crange(l, s, e) ((CharacterLocation){ .line = l, .start = s, .end = e })
 
-typedef enum {
+typedef struct {
+    uint16_t line;
+    uint16_t start;
+    uint16_t end;
+} CharacterLocation;
+
+typedef enum : uint8_t {
     TOKEN_INVALID, // Used for internal errors
     TOKEN_NONE,
     TOKEN_IDENTIFIER,
@@ -96,52 +102,79 @@ typedef enum {
     TOKEN_COUNT
 } TokenType;
 
-static inline bool token_type_is_invalid(TokenType t) {
-    return (t == TOKEN_INVALID);
-}
+typedef enum : uint8_t {
+    OPERATOR_INVALID,
+    OPERATOR_PLUS,
+    OPERATOR_MINUS,
+    OPERATOR_MULT,
+    OPERATOR_DIV,
+    OPERATOR_COUNT,
+} Operator;
+typedef uint8_t Precedence;
+static const Precedence OPERATOR_PRECEDENCE[] = {
+    // https://en.cppreference.com/c/language/operator_precedence
+    // clang-format off
+    [OPERATOR_INVALID]      = 0,
+    [OPERATOR_PLUS]         = 4,
+    [OPERATOR_MINUS]        = 4,
+    [OPERATOR_MULT]         = 3,
+    [OPERATOR_DIV]          = 3,
+    [OPERATOR_COUNT]        = 255,
+    // clang-format on
+};
+
+// typedef enum : uint8_t {
+//     OP_ASSOC_UNKNOWN,
+//     OP_ASSOC_LEFT_TO_RIGHT,
+//     OP_ASSOC_RIGHT_TO_LEFT,
+// } OperatorAssociativity;
+
+// typedef uint8_t OperatorPrecedence;
+
+// typedef struct {
+//     const char* name;
+//     const char* chars;
+//     OperatorPrecedence precedence;
+//     OperatorAssociativity associativity;
+// } Operator;
+
+// static const Operator const OPERATORS[] = {
+//     (Operator){ .name = "", .chars = "", .precedence = 0, .associativity = 0 },
+//     (Operator){ .name = "", .chars = "", .precedence = 0, .associativity = 0 },
+//     (Operator){ .name = "", .chars = "", .precedence = 0, .associativity = 0 },
+//     (Operator){ .name = "", .chars = "", .precedence = 0, .associativity = 0 },
+// };
+
+static inline bool token_type_is_invalid(TokenType t) { return (t == TOKEN_INVALID); }
 static inline bool token_type_is_none(TokenType t) { return (t == TOKEN_NONE); }
-static inline bool token_type_is_identifier(TokenType t) {
-    return (t == TOKEN_IDENTIFIER);
-}
+static inline bool token_type_is_identifier(TokenType t) { return (t == TOKEN_IDENTIFIER); }
 
 static inline bool token_type_is_keyword(TokenType t) {
-
-    return (t == KW_OPT || t == KW_VOID || t == KW_BYTE || t == KW_STRING
-            || t == KW_U8 || t == KW_U16 || t == KW_U32 || t == KW_U64
-            || t == KW_I8 || t == KW_I16 || t == KW_I32 || t == KW_I64
-            || t == KW_F32 || t == KW_F64 || t == KW_BOOL || t == KW_BREAK
-            || t == KW_CASE || t == KW_MUT || t == KW_CONTINUE
-            || t == KW_DEFAULT || t == KW_ELSE || t == KW_ENUM || t == KW_FOR
-            || t == KW_IF || t == KW_RETURN || t == KW_SIZEOF || t == KW_STATIC
-            || t == KW_STRUCT || t == KW_SWITCH || t == KW_DECL || t == KW_DEF
-            || t == KW_WHILE || t == KW_OVERLOAD || t == KW_ASM || t == KW_AS);
+    return (t == KW_OPT || t == KW_VOID || t == KW_BYTE || t == KW_STRING || t == KW_U8 || t == KW_U16 || t == KW_U32
+            || t == KW_U64 || t == KW_I8 || t == KW_I16 || t == KW_I32 || t == KW_I64 || t == KW_F32 || t == KW_F64
+            || t == KW_BOOL || t == KW_BREAK || t == KW_CASE || t == KW_MUT || t == KW_CONTINUE || t == KW_DEFAULT
+            || t == KW_ELSE || t == KW_ENUM || t == KW_FOR || t == KW_IF || t == KW_RETURN || t == KW_SIZEOF
+            || t == KW_STATIC || t == KW_STRUCT || t == KW_SWITCH || t == KW_DECL || t == KW_DEF || t == KW_WHILE
+            || t == KW_OVERLOAD || t == KW_ASM || t == KW_AS);
 }
 
 static inline bool token_type_is_literal(TokenType t) {
-    return (t == LIT_BOOL || t == LIT_I8 || t == LIT_I16 || t == LIT_I32
-            || t == LIT_I64 || t == LIT_U8 || t == LIT_U16 || t == LIT_U32
-            || t == LIT_U64 || t == LIT_F32 || t == LIT_F64 || t == LIT_BYTE
-            || t == LIT_STRING);
+    return (t == LIT_BOOL || t == LIT_I8 || t == LIT_I16 || t == LIT_I32 || t == LIT_I64 || t == LIT_U8 || t == LIT_U16
+            || t == LIT_U32 || t == LIT_U64 || t == LIT_F32 || t == LIT_F64 || t == LIT_BYTE || t == LIT_STRING);
 }
 
 static inline bool token_type_is_symbol(TokenType t) {
-    return (t == SYM_SPACE || t == SYM_NEWLINE || t == SYM_SEMICOLON
-            || t == SYM_COLON || t == SYM_COMMA || t == SYM_QUESTION
-            || t == SYM_FSLASH || t == SYM_BSLASH || t == SYM_PAREN_OPEN
-            || t == SYM_PAREN_CLOSE || t == SYM_BRACKET_OPEN
-            || t == SYM_BRACKET_CLOSE || t == SYM_BRACE_OPEN
-            || t == SYM_BRACE_CLOSE || t == SYM_EQUAL || t == SYM_PLUS
-            || t == SYM_DASH || t == SYM_STAR || t == SYM_PERCENT
-            || t == SYM_EXCLAIM || t == SYM_LT || t == SYM_GT
-            || t == SYM_AMPERSAND || t == SYM_PIPE || t == SYM_CARET
-            || t == SYM_SQUOTE || t == SYM_DQUOTE);
+    return (t == SYM_SPACE || t == SYM_NEWLINE || t == SYM_SEMICOLON || t == SYM_COLON || t == SYM_COMMA
+            || t == SYM_QUESTION || t == SYM_FSLASH || t == SYM_BSLASH || t == SYM_PAREN_OPEN || t == SYM_PAREN_CLOSE
+            || t == SYM_BRACKET_OPEN || t == SYM_BRACKET_CLOSE || t == SYM_BRACE_OPEN || t == SYM_BRACE_CLOSE
+            || t == SYM_EQUAL || t == SYM_PLUS || t == SYM_DASH || t == SYM_STAR || t == SYM_PERCENT || t == SYM_EXCLAIM
+            || t == SYM_LT || t == SYM_GT || t == SYM_AMPERSAND || t == SYM_PIPE || t == SYM_CARET || t == SYM_SQUOTE
+            || t == SYM_DQUOTE);
 }
 
-typedef struct {
-    uint16_t line;
-    uint16_t start;
-    uint16_t end;
-} CharacterLocation;
+static inline bool token_type_is_binop(TokenType t) { return (t == SYM_PLUS || t == SYM_DASH); }
+static inline bool token_type_is_uop(TokenType t) { return (t == SYM_EXCLAIM || t == SYM_STAR || t == SYM_AMPERSAND); }
+static inline bool token_type_is_op(TokenType t) { return (token_type_is_binop(t) || token_type_is_uop(t)); }
 
 static const char* const TOKEN_NAMES[] = {
     [TOKEN_INVALID] = "TOKEN_INVALID",

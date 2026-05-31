@@ -1,18 +1,14 @@
-#include "unity.h"
-#include "debug.h"
 #include "arena.h"
+#include "debug.h"
+#include "unity.h"
 
-void setUp() {
-    LOG_PUSH(LOG_NONE);
-}
+void setUp() { LOG_PUSH(LOG_NONE); }
 
-void tearDown() {
-    LOG_POP();
-}
+void tearDown() { LOG_POP(); }
 
 void test_arena_new_success(void) {
 
-    arena* a = arena_new(1024);
+    arena* a = arena_new(1024, 4);
 
     TEST_ASSERT_EQUAL_size_t(a->capacity, 1024);
     TEST_ASSERT_EQUAL_size_t(a->size, 0);
@@ -23,7 +19,7 @@ void test_arena_new_success(void) {
 
 void test_arena_free_success(void) {
 
-    arena* a = arena_new(1024);
+    arena* a = arena_new(1024, 4);
 
     arena_free(a);
 
@@ -41,7 +37,7 @@ void test_arena_free_null_arena(void) {
 
 void test_arena_alloc_success_single(void) {
 
-    arena* a = arena_new(1024);
+    arena* a = arena_new(1024, 4);
     size_t size = 128;
 
     void* ptr = arena_alloc(a, size);
@@ -54,7 +50,7 @@ void test_arena_alloc_success_single(void) {
 
 void test_arena_alloc_success_multi(void) {
 
-    arena* a = arena_new(1024);
+    arena* a = arena_new(1024, 4);
 
     size_t size1 = 128;
     size_t size2 = 278;
@@ -79,7 +75,7 @@ void test_arena_alloc_success_multi(void) {
 
 void test_arena_alloc_success_full(void) {
 
-    arena* a = arena_new(1024);
+    arena* a = arena_new(1024, 4);
     size_t size = 1024;
 
     arena_alloc(a, size);
@@ -91,7 +87,7 @@ void test_arena_alloc_success_full(void) {
 
 void test_arena_alloc_failure_too_full(void) {
 
-    arena* a = arena_new(1024);
+    arena* a = arena_new(1024, 4);
     size_t size = 1025;
 
     void* ptr = arena_alloc(a, size);
@@ -104,7 +100,7 @@ void test_arena_alloc_failure_too_full(void) {
 
 void test_arena_alloc_forward_to_next_success(void) {
     size_t initial_size = 1024;
-    arena* a = arena_new(initial_size);
+    arena* a = arena_new(initial_size, 4);
 
     void* ptr1 = arena_alloc(a, initial_size / 2);
     void* ptr2 = arena_alloc(a, initial_size / 2);

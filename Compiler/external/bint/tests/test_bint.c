@@ -1,21 +1,18 @@
-#include "unity.h"
+#include "test_bint.h"
 #include "arena.h"
 #include "debug.h"
-#include "test_bint.h"
+#include "unity.h"
 
 #define TEST_ARENA_SIZE_BYTES (1024)
 
 static arena* scratchpad;
 
-void setUp() {
-    arena_reset(scratchpad);
-}
-void tearDown() {
-}
+void setUp() { arena_reset(scratchpad); }
+void tearDown() {}
 
 void init_suite() {
     LOG_PUSH(LOG_NONE);
-    scratchpad = arena_new(TEST_ARENA_SIZE_BYTES);
+    scratchpad = arena_new(TEST_ARENA_SIZE_BYTES, 4);
 }
 
 void deinit_suite() {

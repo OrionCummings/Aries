@@ -1,8 +1,8 @@
 #ifndef __ARENA_H
 #define __ARENA_H
 
-#include <stdlib.h>
 #include "debug.h"
+#include <stdlib.h>
 
 typedef struct arena {
 
@@ -11,6 +11,9 @@ typedef struct arena {
 
     // The maximum capacity of the arena
     size_t capacity;
+
+    // The maximum number of children arenas
+    size_t num_children;
 
     // The data contained within this arena.
     void* data;
@@ -21,15 +24,17 @@ typedef struct arena {
 
 /// @brief Create a new arena instance with the given capacity.
 /// @param capacity The maximum size of this arena in bytes.
+/// @param capacity The maximum number of children that this arena can have.
 /// @return The new arena instance.
-arena* arena_new(size_t capacity);
+arena* arena_new(size_t capacity, size_t num_children);
 
 /// @brief Deallocates the given arena.
 /// @param arena The arena instance to deallocate.
-#define arena_free(ptr) do { \
-    _arena_free(ptr);        \
-    ptr = NULL;              \
-} while(0)                   \
+#define arena_free(ptr)   \
+    do {                  \
+        _arena_free(ptr); \
+        ptr = NULL;       \
+    } while (0)
 
 /// @brief Private version of arena_free. Do not use this directly.
 void _arena_free(arena* arena);

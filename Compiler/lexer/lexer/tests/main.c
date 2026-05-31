@@ -1,24 +1,15 @@
-#include "unity.h"
 #include "lexer.h"
 #include "test_lexer.h"
 #include "test_symlist.h"
+#include "unity.h"
 
-void setUp() {
-    LOG_PUSH(LOG_NONE);
-}
+void setUp() { LOG_PUSH(LOG_NONE); }
 
-void tearDown() {
-    LOG_POP();
-}
+void tearDown() { LOG_POP(); }
 
-void suiteSetUp(void) {
+void suiteSetUp(void) {}
 
-}
-
-int suiteTearDown(int num_failures) {
-
-    return 0;
-}
+int suiteTearDown(int num_failures) { return 0; }
 
 int main(void) {
     UNITY_BEGIN();
@@ -30,7 +21,7 @@ int main(void) {
 
     /// Symbol List Tests
     if (true) {
-        RUN_TEST(test_symlist_add_symbol_1);
+        RUN_TEST(test_symlist_push_symbol_1);
     }
 
     /// Lexer Tests

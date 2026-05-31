@@ -4,7 +4,7 @@ static arena* scratchpad;
 
 void init_suite(void) {
     LOG_PUSH(LOG_ALL);
-    scratchpad = arena_new(4096);
+    scratchpad = arena_new(4096, 4);
 }
 
 void deinit_suite(void) {
@@ -48,11 +48,10 @@ void test_single_expression_u8(void) {
         str* output = str_new(cases[i].output);
 
         if (cases[i].valid) {
-            SymbolList* sl = lex(input);
+            symlist* sl = lex(input);
 
-            Expression* e = expression_parse(scratchpad, sl);
-            if (e != nullptr && e->value != nullptr
-                && str_cmp(output, e->value)) {
+            Expression* e = expression_parse(scratchpad, sl, 0);
+            if (e != nullptr && e->value != nullptr && str_cmp(output, e->value)) {
                 cases[i].success = true;
             }
 
@@ -68,9 +67,8 @@ void test_single_expression_u8(void) {
         if (cases[i].valid != cases[i].success) {
 
             char error_message[256] = { 0 };
-            (void)snprintf(error_message, 256,
-                           "Test case #%lu failed: '%s' != '%s'", i,
-                           cases[i].input, cases[i].output);
+            (void)snprintf(error_message, 256, "Test case #%lu failed: '%s' != '%s'", i, cases[i].input,
+                           cases[i].output);
             TEST_MESSAGE(error_message);
             failed = true;
         }
@@ -105,11 +103,10 @@ void test_single_expression_u16(void) {
         str* output = str_new(cases[i].output);
 
         if (cases[i].valid) {
-            SymbolList* sl = lex(input);
+            symlist* sl = lex(input);
 
-            Expression* e = expression_parse(scratchpad, sl);
-            if (e != nullptr && e->value != nullptr
-                && str_cmp(output, e->value)) {
+            Expression* e = expression_parse(scratchpad, sl, 0);
+            if (e != nullptr && e->value != nullptr && str_cmp(output, e->value)) {
                 cases[i].success = true;
             }
 
@@ -125,9 +122,8 @@ void test_single_expression_u16(void) {
         if (cases[i].valid != cases[i].success) {
 
             char error_message[256] = { 0 };
-            (void)snprintf(error_message, 256,
-                           "Test case #%lu failed: '%s' != '%s'", i,
-                           cases[i].input, cases[i].output);
+            (void)snprintf(error_message, 256, "Test case #%lu failed: '%s' != '%s'", i, cases[i].input,
+                           cases[i].output);
             TEST_MESSAGE(error_message);
             failed = true;
         }
@@ -146,19 +142,13 @@ void test_single_expression_i32(void) {}
 
 void test_single_expression_i64(void) {}
 
-void test_single_expression_f32(void) {
-    TEST_IGNORE_MESSAGE("NOT IMPLEMENTED");
-}
+void test_single_expression_f32(void) { TEST_IGNORE_MESSAGE("NOT IMPLEMENTED"); }
 
-void test_single_expression_f64(void) {
-    TEST_IGNORE_MESSAGE("NOT IMPLEMENTED");
-}
+void test_single_expression_f64(void) { TEST_IGNORE_MESSAGE("NOT IMPLEMENTED"); }
 
-void test_single_expression_str(void) {
-    TEST_IGNORE_MESSAGE("NOT IMPLEMENTED");
-}
+void test_single_expression_str(void) { TEST_IGNORE_MESSAGE("NOT IMPLEMENTED"); }
 
-void test_single_expression_type_inference(void) {
+void test_single_EType_inference(void) {
 
     typedef struct { // TODO: Change test case contents for this test!
         const char* input;
@@ -168,7 +158,7 @@ void test_single_expression_type_inference(void) {
     } TestCase;
 
     TestCase cases[] = {
-        (TestCase){                     "0u8",  "u8",true                                                     },
+        (TestCase){                     "0u8",  "u8",  true },
         (TestCase){                    "0u16", "u16",  true },
         (TestCase){                    "0u32", "u32",  true },
         (TestCase){                    "0u64", "u64",  true },
@@ -187,8 +177,7 @@ void test_single_expression_type_inference(void) {
 
         (TestCase){           "4294967296u64", "u64",  true },
         (TestCase){ "18446744073709551615u64", "u64",  true },
-        (TestCase){ "18446744073709551616u64",    "",
-                   false                                   }, // Too big to fit in u64
+        (TestCase){ "18446744073709551616u64",    "", false }, // Too big to fit in u64
 
         // No suffixes; infer the type based on value
         (TestCase){                       "0",  "u8",  true },
@@ -216,10 +205,9 @@ void test_single_expression_type_inference(void) {
 
         str* input = str_new(cases[i].input);
         str* output = str_new(cases[i].output);
-        SymbolList* sl = lex(input);
+        symlist* sl = lex(input);
 
-        Expression* e
-            = expression_parse(scratchpad, sl); // TODO: Failing! null!!
+        Expression* e = expression_parse(scratchpad, sl, 0); // TODO: Failing! null!!
         bool suffix_match = str_has_suffix(e->value, cases[i].output);
         if (e != nullptr && e->value != nullptr && suffix_match) {
             str_print("e->value: ", e->value);
@@ -237,9 +225,8 @@ void test_single_expression_type_inference(void) {
         if (cases[i].valid != cases[i].success) {
 
             char error_message[256] = { 0 };
-            (void)snprintf(error_message, 256,
-                           "Test case #%lu failed: '%s' != '%s'", i,
-                           cases[i].input, cases[i].output);
+            (void)snprintf(error_message, 256, "Test case #%lu failed: '%s' != '%s'", i, cases[i].input,
+                           cases[i].output);
             TEST_MESSAGE(error_message);
             failed = true;
         }
@@ -253,7 +240,7 @@ int main(void) {
     init_suite();
     UNITY_BEGIN();
 
-    RUN_TEST(test_single_expression_type_inference);
+    RUN_TEST(test_single_EType_inference);
 
     // RUN_TEST(test_single_expression_u8);
     // RUN_TEST(test_single_expression_u16);

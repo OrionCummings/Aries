@@ -1,13 +1,13 @@
 #include "lexer.h"
 
-SymbolList* lex(const str const* file_content) {
+symlist* lex(const str const* file_content) {
 
     if (file_content == NULL) {
         A_WARNING("passed null parameter 'file_content'");
         return false;
     }
 
-    SymbolList* symlist = symlist_new(8); // TODO: Magic number
+    symlist* symlist = symlist_new(8); // TODO: Magic number
     if (symlist == NULL) {
         A_ERROR("failed to create symlist"); // TODO: Refactor with goto cleanup
         return NULL;
@@ -20,8 +20,7 @@ SymbolList* lex(const str const* file_content) {
         return symlist;
     }
 
-    index_t* boundaries
-        = str_get_alphanumeric_symbolic_boundaries(file_content);
+    index_t* boundaries = str_get_alphanumeric_symbolic_boundaries(file_content);
 
     if (boundaries == NULL) {
         A_ERROR("Failed to create alphanumeric symbolic boundaires");
@@ -68,7 +67,7 @@ SymbolList* lex(const str const* file_content) {
         // If the previous symbol was a space and the current symbol is a space,
         // then don't add it to the sym list!
         if (sym->t != SYM_SPACE) {
-            symlist_add(symlist, *sym);
+            symlist_push(symlist, *sym);
         }
 
         // Free the symbol because it's no longer needed

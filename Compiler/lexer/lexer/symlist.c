@@ -1,7 +1,7 @@
 #include "symlist.h"
 
-SymbolList* symlist_new(const size_t capacity) {
-    SymbolList* sl = calloc(1, sizeof(*sl));
+symlist* symlist_new(const size_t capacity) {
+    symlist* sl = calloc(1, sizeof(*sl));
 
     if (sl == NULL) {
         A_WARNING("failed to allocate new sym list object");
@@ -9,7 +9,6 @@ SymbolList* symlist_new(const size_t capacity) {
     }
 
     sl->base_index = 0;
-    sl->la_index = 0;
 
     sl->capacity = capacity;
     sl->length = 0;
@@ -26,7 +25,7 @@ SymbolList* symlist_new(const size_t capacity) {
     return sl;
 }
 
-void _symlist_free(SymbolList* sl) {
+void _symlist_free(symlist* sl) {
     if (sl != NULL) {
         for (index_t index = 0; index < sl->length; index++) {
             str_free(sl->symbols[index].s);
@@ -36,9 +35,15 @@ void _symlist_free(SymbolList* sl) {
     free(sl);
 }
 
-void symlist_add(SymbolList* symlist, Symbol sym) {
-    if (symlist == NULL) { A_WARNING("cannot add symbol to NULL symbol list"); return; }
-    if (symlist->symbols == NULL) { A_WARNING("cannot add symbol to NULL symbol list ptr"); return; }
+void symlist_push(symlist* symlist, Symbol sym) {
+    if (symlist == NULL) {
+        A_WARNING("cannot add symbol to NULL symbol list");
+        return;
+    }
+    if (symlist->symbols == NULL) {
+        A_WARNING("cannot add symbol to NULL symbol list ptr");
+        return;
+    }
 
     if (symlist->length == symlist->capacity) {
         void* temp = realloc(symlist->symbols, symlist->capacity * 2 * sizeof(*(symlist->symbols)));
@@ -64,8 +69,31 @@ void symlist_add(SymbolList* symlist, Symbol sym) {
     symlist->length++;
 }
 
-bool symlist_valid(const SymbolList* const symlist) {
-    if (symlist == NULL) { return false; }
+symlist_result symlist_pop(symlist* const sl) {
+
+    symlist_result res = symlist_peek(sl, 0);
+    if (res.type == SYMLIST_SUCCESS) {
+        sl->base_index += 1;
+    }
+    return res;
+}
+
+symlist_result symlist_peek(const symlist* const sl, index_t offset) {
+    if (sl == NULL || sl->symbols == NULL) {
+        return (symlist_result){ .type = SYMLIST_INVALID };
+    }
+
+    if ((sl->base_index + offset) >= sl->length) {
+        return (symlist_result){ .type = SYMLIST_END };
+    }
+
+    return (symlist_result){ .type = SYMLIST_SUCCESS, .data.sym = sl->symbols[sl->base_index + offset] };
+}
+
+bool symlist_valid(const symlist* const symlist) {
+    if (symlist == NULL) {
+        return false;
+    }
 
     bool valid = false;
     for (size_t index = 0; index < symlist->length; index++) {
@@ -74,7 +102,7 @@ bool symlist_valid(const SymbolList* const symlist) {
     return valid;
 }
 
-void symlist_print(const SymbolList sl) {
+void symlist_print(const symlist sl) {
     for (size_t index = 0; index < sl.length; index++) {
         sym_print(sl.symbols[index]);
     }

@@ -1,6 +1,6 @@
 #include "arena.h"
 
-arena* arena_new(size_t capacity) {
+arena* arena_new(size_t capacity, size_t num_children) {
     arena* a = calloc(1, sizeof(*a));
 
     if (a == NULL) {
@@ -17,8 +17,9 @@ arena* arena_new(size_t capacity) {
     a->capacity = capacity;
     a->size = 0;
     a->next = NULL;
+    a->num_children = num_children;
 
-    A_INFO("created new arena");
+    A_INFO("created new %d byte arena", capacity);
 
     return a;
 }
@@ -52,19 +53,21 @@ void* arena_alloc(arena* a, size_t size) {
         return NULL;
     }
 
-    // If the requested size is larger than the capacity of the arena, then we can't store it even by creating new arenas so fail out!
-    // We COULD decide to allow non-contiguous memory regions to be managed by the arena, but that is beyond the scope of the current implementation.
+    // If the requested size is larger than the capacity of the arena, then we can't store it even by creating new
+    // arenas so fail out! We COULD decide to allow non-contiguous memory regions to be managed by the arena, but that
+    // is beyond the scope of the current implementation.
     if (size > a->capacity) {
         A_ERROR("cannot create non-contiguous memory regions with the given size (%lu > %lu)", size, a->capacity);
         return NULL;
     }
 
-    // If the requested amount of memory would not fit in the current arena, then create a new arena and forward the memory request there
-    if (a->size + size > a->capacity) {
+    // If the requested amount of memory would not fit in the current arena AND we are not at the child arena limit,
+    // then create a new arena and forward the memory request there
+    if ((a->size + size > a->capacity) && (a->num_children > 0)) {
 
         // If there is no next arena, make one
         if (a->next == NULL) {
-            a->next = arena_new(a->capacity);
+            a->next = arena_new(a->capacity, a->num_children - 1);
 
             // If we fail to create a new next arena, then we fail
             if (a->next == NULL) {
@@ -82,17 +85,17 @@ void* arena_alloc(arena* a, size_t size) {
             return NULL;
         }
 
-        A_INFO("allocated %lu %s from a child arena", size, ((size > 1)? "bytes" : "byte"));
-        
+        A_INFO("allocated %lu %s from a child arena", size, ((size > 1) ? "bytes" : "byte"));
+
         // Return the address from the next arena
         return next_ptr;
     }
-    
+
     // If there is space in this arena, then calculate the next available offset and return it
     void* ptr = a->data + a->size;
     a->size += size;
-    
-    A_INFO("allocated %lu %s from an arena", size, ((size > 1)? "bytes" : "byte"));
+
+    A_INFO("allocated %lu %s from an arena (0x%08X)", size, ((size > 1) ? "bytes" : "byte"), ptr);
 
     return ptr;
 }
@@ -108,6 +111,7 @@ void arena_reset(arena* const arena) {
     }
 
     memset(arena->data, 0, arena->capacity); // TODO: Figure out of this is a bad idea? Is this slow? Do I care?
-    arena->size = 0; // TODO: This behavior breaks a previous invariant: unused memory was previously zero! Is this ok? What value does this invariant bring? Are we relying on it?
+    arena->size = 0; // TODO: This behavior breaks a previous invariant: unused memory was previously zero! Is this ok?
+                     // What value does this invariant bring? Are we relying on it?
     A_INFO("reset arena");
 }

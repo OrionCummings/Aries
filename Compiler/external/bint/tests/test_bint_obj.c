@@ -38,7 +38,7 @@ void test_bint_new(void) {
 
 void test_bint_anew(void) {
 
-    arena* a = arena_new(64);
+    arena* a = arena_new(64, 4);
     bint_t* b = bint_anew(a, 1);
 
     TEST_ASSERT_NOT_NULL(b);
@@ -166,7 +166,7 @@ void test_bint_free(void) {
 
 void test_bint_free_arena(void) {
 
-    arena* a = arena_new(64);
+    arena* a = arena_new(64, 4);
     bint_t* b = bint_anew(a, 1);
     TEST_ASSERT_NOT_NULL(b);
 
@@ -178,10 +178,6 @@ void test_bint_free_arena(void) {
     arena_free(a);
 }
 
-void test_bint_to_str(void) {
-    TEST_IGNORE_MESSAGE("NOT IMPLEMENTED");
-}
+void test_bint_to_str(void) { TEST_IGNORE_MESSAGE("NOT IMPLEMENTED"); }
 
-void test_bint_to_astr(void) {
-    TEST_IGNORE_MESSAGE("NOT IMPLEMENTED");
-}
+void test_bint_to_astr(void) { TEST_IGNORE_MESSAGE("NOT IMPLEMENTED"); }

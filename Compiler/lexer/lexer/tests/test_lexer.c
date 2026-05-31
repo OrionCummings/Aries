@@ -45,7 +45,7 @@ void test_lexer_lex_success_1() {
                             "Rewrite/lexer/lexer_tests/example1.ari"); // TODO: Make this rely on a
                                                                        // hard-coded string so there
                                                                        // are no file dependencies!
-    SymbolList* symlist = lex(filename);
+    symlist* symlist = lex(filename);
 
     TEST_ASSERT_NOT_NULL(symlist);
     TEST_ASSERT_EQUAL(num_symbols, symlist->length);

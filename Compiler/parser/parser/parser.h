@@ -6,7 +6,25 @@
 #include "symlist.h"
 #include "types.h"
 
-typedef enum ParsingError : char {
+// ???????????????
+// typedef struct {
+//     bool terminal;
+//     const char* id;
+//     const char* production;
+//     bool (*func)(const char*);
+// } Rule;
+
+// static const Rule rules[] = {
+//     (Rule){ .terminal = false, .id = "NumericExpression", .production = "Number BinaryOperation Number" },
+//     (Rule){ .terminal = false, .id = "NumericExpression",                        .production = "Number" },
+//     (Rule){ .terminal = false,            .id = "Number",                         .production = "Digit" },
+// };
+
+// typedef struct {
+
+// } parsing_stack;
+
+typedef enum ParsingError : int8_t {
 
     // An unknown error has occurred while parsing.
     PE_UNKNOWN = -1,
@@ -16,38 +34,23 @@ typedef enum ParsingError : char {
 
 } ParsingError;
 
-typedef enum ExpressionType : char {
-    EXPRESSION_T_UNKNOWN = 0,
-    EXPRESSION_T_LIT_U8,
-    EXPRESSION_T_LIT_U16,
-    EXPRESSION_T_LIT_U32,
-    EXPRESSION_T_LIT_U64,
-    EXPRESSION_T_BIN_OP_ADD,
+typedef enum ExpressionType : uint8_t {
+    ET_UNKNOWN = 0,
+    ET_LIT_U8,
+    ET_LIT_U16,
+    ET_LIT_U32,
+    ET_LIT_U64,
+    ET_BIN_OP_ADD,
 } ExpressionType;
-
-static const char* const EXPRESSION_T_NAMES[] = {
-    [EXPRESSION_T_UNKNOWN] = "EXPRESSION_T_UNKNOWN",
-    [EXPRESSION_T_LIT_U8] = "EXPRESSION_T_LIT_U8",
-};
 
 typedef struct Expression {
     ExpressionType type;
+    str* value;
     struct Expression* left;
     struct Expression* right;
-    str* value;
 } Expression;
 
-typedef enum DeclarationType : char {
-    DECLARATION_T_UNKNOWN = 0,
-    DECLARATION_T_VARIABLE,
-    DECLARATION_T_FUNCTION
-} DeclarationType;
-
-static const char* const DECLARATION_T_NAMES[] = {
-    [DECLARATION_T_UNKNOWN] = "DECLARATION_T_UNKNOWN",
-    [DECLARATION_T_VARIABLE] = "DECLARATION_T_VARIABLE",
-    [DECLARATION_T_FUNCTION] = "DECLARATION_T_FUNCTION",
-};
+typedef enum DeclarationType : char { DT_UNKNOWN = 0, DT_VARIABLE, DT_FUNCTION } DeclarationType;
 
 typedef struct Declaration {
     DeclarationType type;
@@ -57,10 +60,22 @@ typedef struct Declaration {
     struct Declaration* next; // TODO: Do we want linked lists?
 } Declaration;
 
-typedef enum StatementType : char { STATEMENT_T_UNKNOWN } StatementType;
+typedef enum StatementType : char { ST_UNKNOWN } StatementType;
 
-static const char* const STATEMENT_T_NAMES[] = {
-    [STATEMENT_T_UNKNOWN] = "STATEMENT_T_UNKNOWN",
+static const char* const ET_NAMES[] = {
+    [ET_UNKNOWN] = "ET_UNKNOWN",
+    [ET_LIT_U8] = "ET_LIT_U8",
+    [ET_BIN_OP_ADD] = "ET_BIN_OP_ADD",
+};
+
+static const char* const DT_NAMES[] = {
+    [DT_UNKNOWN] = "DT_UNKNOWN",
+    [DT_VARIABLE] = "DT_VARIABLE",
+    [DT_FUNCTION] = "DT_FUNCTION",
+};
+
+static const char* const ST_NAMES[] = {
+    [ST_UNKNOWN] = "ST_UNKNOWN",
 };
 
 typedef struct Statement {
@@ -78,20 +93,21 @@ typedef struct Statement {
 /// @param arena The arena in which parsing allocation should be placed.
 /// @param symlist The symbol list to be parsed.
 /// @return A list of declarations.
-Declaration* parse(arena* arena, SymbolList* const symlist);
+Declaration* parse(arena* arena, symlist* const symlist);
 
-Declaration* declaration_parse(arena*, SymbolList* const);
+Declaration* declaration_parse(arena*, symlist* const);
 void declaration_print(const Declaration);
 void declaration_type_print(const DeclarationType);
 DeclarationType token_to_declaration_type(TokenType);
 
-Expression* expression_parse(arena*, SymbolList* const);
-Expression* expression_new(arena*, SymbolList* const, index_t, index_t);
+Expression* expression_parse(arena*, symlist* const, index_t);
+Expression* expression_new(arena*, ExpressionType, str*);
+bool expression_eq(const Expression* const e1, const Expression* const e2);
 void expression_print(const Expression, size_t);
 void expression_type_print(const ExpressionType);
 bool valid_start_expression(TokenType);
 
-Statement* statement_parse(arena*, SymbolList* const);
+Statement* statement_parse(arena*, symlist* const);
 void statement_print(const Statement);
 void statement_type_print(const StatementType);
 
