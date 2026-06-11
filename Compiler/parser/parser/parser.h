@@ -50,13 +50,15 @@ typedef struct Expression {
     struct Expression* right;
 } Expression;
 
-typedef enum DeclarationType : char { DT_UNKNOWN = 0, DT_VARIABLE, DT_FUNCTION } DeclarationType;
+typedef enum DeclarationType : uint8_t { DT_UNKNOWN = 0, DT_VARIABLE, DT_FUNCTION, DT_PARAMETER } DeclarationType;
 
 typedef struct Declaration {
-    DeclarationType type;
+    DeclarationType decl_type;
+    str* type;
     str* name;
+    str* return_type;
+    struct Declaration* parameters;
     struct Expression* value;
-    struct Statement* code;
     struct Declaration* next; // TODO: Do we want linked lists?
 } Declaration;
 
@@ -72,6 +74,7 @@ static const char* const DT_NAMES[] = {
     [DT_UNKNOWN] = "DT_UNKNOWN",
     [DT_VARIABLE] = "DT_VARIABLE",
     [DT_FUNCTION] = "DT_FUNCTION",
+    [DT_PARAMETER] = "DT_PARAMETER",
 };
 
 static const char* const ST_NAMES[] = {
@@ -96,19 +99,28 @@ typedef struct Statement {
 Declaration* parse(arena* arena, symlist* const symlist);
 
 Declaration* declaration_parse(arena*, symlist* const);
+Declaration* declaration_new(arena* arena);
+bool declaration_eq(const Declaration* const a, const Declaration* const b);
 void declaration_print(const Declaration);
 void declaration_type_print(const DeclarationType);
 DeclarationType token_to_declaration_type(TokenType);
+Declaration* parse_parameter_list(arena* arena, symlist* symlist, const index_t max_params);
 
-Expression* expression_parse(arena*, symlist* const, index_t);
+Expression* expression_parse_pratt(arena* arena, symlist* const symlist);
+Expression* expression_parse_pratt_primary(arena* arena, symlist* const symlist);
+Expression* expression_parse_pratt_left(arena* arena, symlist* const symlist, index_t index, precedence min_prec,
+                                        Expression* lhs);
+Expression* expression_parse(arena* arena, symlist* const symlist, index_t index);
 Expression* expression_new(arena*, ExpressionType, str*);
 bool expression_eq(const Expression* const e1, const Expression* const e2);
 void expression_print(const Expression, size_t);
 void expression_type_print(const ExpressionType);
 bool valid_start_expression(TokenType);
 
-Statement* statement_parse(arena*, symlist* const);
-void statement_print(const Statement);
-void statement_type_print(const StatementType);
+Statement* statement_parse(arena* arena, symlist* const symlist);
+Statement* statement_new(arena* arena);
+bool statement_eq(const Statement* const a, const Statement* const b);
+void statement_print(const Statement s);
+void statement_type_print(const StatementType type);
 
 #endif

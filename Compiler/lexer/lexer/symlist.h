@@ -3,9 +3,6 @@
 
 #include "symbol.h"
 
-// TODO: Magic number!
-#define symlist_DEFAULT_SIZE ((size_t)64)
-
 typedef struct {
 
     // The base index (used by the parser).

@@ -24,6 +24,8 @@ bool sym_cmp(const Symbol s1, const Symbol s2);
 bool sym_valid(const Symbol sym);
 void sym_print(const Symbol sym);
 
+precedence_result sym_precedence(const Symbol sym);
+
 bool sym_is_built_in_type(const Symbol sym);
 
 #endif

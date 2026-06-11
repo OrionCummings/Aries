@@ -12,6 +12,7 @@ target_link_libraries(AriesCompiler PUBLIC
 )
 
 target_compile_options(AriesCompiler PRIVATE
+    -O0
     -pedantic
     -Wall
     -Wextra

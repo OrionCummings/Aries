@@ -102,26 +102,29 @@ typedef enum : uint8_t {
     TOKEN_COUNT
 } TokenType;
 
-typedef enum : uint8_t {
-    OPERATOR_INVALID,
-    OPERATOR_PLUS,
-    OPERATOR_MINUS,
-    OPERATOR_MULT,
-    OPERATOR_DIV,
-    OPERATOR_COUNT,
-} Operator;
-typedef uint8_t Precedence;
-static const Precedence OPERATOR_PRECEDENCE[] = {
+typedef uint8_t precedence;
+
+static const uint8_t OPERATOR_PRECEDENCE_MIN = (uint8_t)0u;
+static const uint8_t OPERATOR_PRECEDENCE_MAX = UINT8_MAX;
+static const precedence OPERATOR_PRECEDENCE[] = {
     // https://en.cppreference.com/c/language/operator_precedence
     // clang-format off
-    [OPERATOR_INVALID]      = 0,
-    [OPERATOR_PLUS]         = 4,
-    [OPERATOR_MINUS]        = 4,
-    [OPERATOR_MULT]         = 3,
-    [OPERATOR_DIV]          = 3,
-    [OPERATOR_COUNT]        = 255,
+    [SYM_PLUS]          = 5,
+    [SYM_DASH]          = 5,
+    [SYM_STAR]          = 10,
+    [SYM_FSLASH]        = 10,
     // clang-format on
 };
+
+typedef enum : uint8_t {
+    PREC_VALID = 0,
+    PREC_INVALID = 1,
+} precedence_type;
+
+typedef struct {
+    precedence_type type;
+    precedence prec;
+} precedence_result;
 
 // typedef enum : uint8_t {
 //     OP_ASSOC_UNKNOWN,

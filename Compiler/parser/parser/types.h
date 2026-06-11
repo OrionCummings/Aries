@@ -1,6 +1,8 @@
 #ifndef __TYPES_H
 #define __TYPES_H
 
+#include "str.h"
+
 typedef enum BuiltinType : char {
     BITYPE_UNKNOWN,
     BITYPE_VOID,
@@ -19,5 +21,17 @@ typedef enum BuiltinType : char {
     BITYPE_RES,
     BITYPE_STR,
 } BuiltinType;
+
+typedef struct {
+    str* name;
+    size_t bytes;
+} Type;
+
+static inline bool type_eq(Type a, Type b) { return str_cmp(a.name, b.name); }
+
+typedef struct {
+    Type types;
+    size_t length;
+} TypeTable;
 
 #endif

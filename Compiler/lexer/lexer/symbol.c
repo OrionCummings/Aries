@@ -57,9 +57,7 @@ Symbol* sym_copy(const Symbol* s) {
     return sym;
 }
 
-bool sym_cmp(const Symbol s1, const Symbol s2) {
-    return (s1.t == s2.t && str_cmp(s1.s, s2.s));
-}
+bool sym_cmp(const Symbol s1, const Symbol s2) { return (s1.t == s2.t && str_cmp(s1.s, s2.s)); }
 
 bool sym_valid(const Symbol sym) {
     if (sym.t == TOKEN_INVALID) {
@@ -75,8 +73,7 @@ bool sym_valid(const Symbol sym) {
 }
 
 void sym_print(const Symbol s) {
-    printf("[%s:%d(%d-%d)]: ", TOKEN_NAMES[s.t], s.location.line,
-           s.location.start, s.location.end);
+    printf("[%s:%d(%d-%d)]: ", TOKEN_NAMES[s.t], s.location.line, s.location.start, s.location.end);
     if (s.t == SYM_NEWLINE) {
         printf("'\\n'\n");
     } else {
@@ -84,11 +81,21 @@ void sym_print(const Symbol s) {
     }
 }
 
+precedence_result sym_precedence(const Symbol sym) {
+
+    precedence_result ret = (precedence_result){ .type = PREC_INVALID, .prec = 0 };
+
+    if (token_type_is_op(sym.t)) {
+        ret.type = PREC_VALID;
+        ret.prec = OPERATOR_PRECEDENCE[sym.t];
+    }
+
+    return ret;
+}
+
 bool sym_is_built_in_type(const Symbol sym) {
     TokenType t = sym.t;
-    return ((t == KW_OPT) || (t == KW_VOID) || (t == KW_BYTE)
-            || (t == KW_STRING) || (t == KW_U8) || (t == KW_U16)
-            || (t == KW_U32) || (t == KW_U64) || (t == KW_I8) || (t == KW_I16)
-            || (t == KW_I32) || (t == KW_I64) || (t == KW_F32) || (t == KW_F64)
-            || (t == KW_BOOL));
+    return ((t == KW_OPT) || (t == KW_VOID) || (t == KW_BYTE) || (t == KW_STRING) || (t == KW_U8) || (t == KW_U16)
+            || (t == KW_U32) || (t == KW_U64) || (t == KW_I8) || (t == KW_I16) || (t == KW_I32) || (t == KW_I64)
+            || (t == KW_F32) || (t == KW_F64) || (t == KW_BOOL));
 }

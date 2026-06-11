@@ -459,7 +459,7 @@ index_t* str_get_alphanumeric_symbolic_boundaries(const str* const s) {
 
         // Update state
         char c = s->data[index];
-        is_alpha = isalnum(c);
+        is_alpha = isalnum(c) || (c == '_');
 
         // Did the state change between the current position and the previous
         // position? Or is this currently NOT an alphanumeric character?

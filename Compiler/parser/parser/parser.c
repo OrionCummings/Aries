@@ -12,57 +12,219 @@ Declaration* parse(arena* arena, symlist* const symlist) {
     return declaration_parse(arena, symlist); // NOTE: This is correct, but not for current testing!
 }
 
+Declaration* parse_parameter_list(arena* arena, symlist* symlist, const index_t max_params) {
+    if (arena == NULL) {
+        A_WARNING("bad parameter 'arena'");
+        return NULL;
+    }
+
+    if (symlist == NULL) {
+        A_WARNING("bad parameter 'symlist'");
+        return NULL;
+    }
+
+    if (max_params == 0) {
+        A_WARNING("bad parameter 'max_params'");
+        return NULL;
+    }
+
+    Declaration* decl = arena_alloc(arena, sizeof(*decl));
+    if (decl == NULL) {
+        A_WARNING("failed to allocate declaration");
+        return NULL;
+    }
+
+    Declaration* decl_active = decl;
+
+    symlist_result open_paren_res = symlist_peek(symlist, 0);
+    if (open_paren_res.type != SYMLIST_SUCCESS) {
+        A_WARNING("failed to peek symlist");
+        return NULL;
+    }
+    Symbol open_paren = open_paren_res.data.sym;
+
+    if (open_paren.t != SYM_PAREN_OPEN) {
+        A_WARNING("expected function parameter list to start with open paren");
+        return NULL;
+    }
+
+    // Pop the open paren
+    (void)symlist_pop(symlist);
+
+    bool more_params = true;
+    index_t param_index = 0;
+    while ((param_index < max_params) && more_params) {
+        decl_active->decl_type = DT_PARAMETER;
+
+        symlist_result a_res = symlist_peek(symlist, 0);
+        if (a_res.type != SYMLIST_SUCCESS) {
+            A_WARNING("failed to peek symlist");
+            return NULL;
+        }
+        Symbol a = a_res.data.sym;
+        (void)symlist_pop(symlist);
+
+        if (a.t == SYM_PAREN_CLOSE) {
+            break;
+        }
+
+        if (str_is_identifier(a.s)) {
+            decl_active->type = a.s;
+        }
+
+        symlist_result b_res = symlist_peek(symlist, 0);
+        if (b_res.type != SYMLIST_SUCCESS) {
+            A_WARNING("failed to peek symlist");
+            return NULL;
+        }
+        Symbol b = b_res.data.sym;
+        (void)symlist_pop(symlist);
+
+        if (str_is_identifier(b.s)) {
+            decl_active->name = b.s;
+        }
+
+        symlist_result c_res = symlist_peek(symlist, 0);
+        if (c_res.type != SYMLIST_SUCCESS) {
+            A_WARNING("failed to peek symlist");
+            return NULL;
+        }
+        Symbol c = c_res.data.sym;
+
+        if (c.t != SYM_COMMA) {
+            more_params = false;
+        } else {
+            (void)symlist_pop(symlist); // pop the comma
+
+            Declaration* decl_next = arena_alloc(arena, sizeof(*decl_next));
+            if (decl_next == NULL) {
+                A_WARNING("failed to allocate decl_next");
+                return NULL;
+            }
+
+            decl_active->next = decl_next;
+
+            decl_active = decl_next;
+        }
+
+        ++param_index;
+    }
+
+    if (param_index == max_params) {
+        A_ERROR("attempted to parse more that the max number of parameters");
+        return NULL;
+    }
+
+    symlist_result close_paren_res = symlist_peek(symlist, 0);
+    if (close_paren_res.type != SYMLIST_SUCCESS) {
+        A_WARNING("failed to peek symlist");
+        return NULL;
+    }
+    Symbol close_paren = close_paren_res.data.sym;
+
+    if (close_paren.t != SYM_PAREN_CLOSE) {
+        A_WARNING("expected function parameter list to end with close paren");
+        return NULL;
+    }
+
+    // Pop the close paren
+    (void)symlist_pop(symlist);
+
+    return decl;
+}
+
 Declaration* declaration_parse(arena* arena, symlist* const symlist) {
 
-    // TODO: Add some bounds checking to the symlist base and look-ahead
-    // indices.
+    if (arena == NULL) {
+        A_ERROR("passed null arena");
+        return NULL;
+    }
 
-    // while (symlist->length < symlist->capacity) { // TODO: This seems flawed!
+    if (symlist == NULL) {
+        A_ERROR("passed null symlist");
+        return NULL;
+    }
 
-    Declaration* declaration = arena_alloc(arena, sizeof(*declaration));
-
-    if (!declaration) {
+    Declaration* decl = arena_alloc(arena, sizeof(*decl));
+    if (!decl) {
         A_WARNING("failed to allocate from arena");
         return NULL;
     }
 
-    // Get the base symbol and the look-ahead symbol.
-    Symbol base_sym = symlist->symbols[symlist->base_index];
+    symlist_result next_decl_res = symlist_peek(symlist, 0);
+    if (next_decl_res.type != SYMLIST_SUCCESS) {
+        A_WARNING("failed to peek symlist");
+        return NULL;
+    }
+    Symbol next_decl = next_decl_res.data.sym;
+    (void)symlist_pop(symlist);
 
-    if (sym_is_built_in_type(base_sym)) {
-
-        // TODO: Add bounds checking!
-        // TODO: Add identifier validation!
-        // TODO: Determine if this is memory-safe (probably not!)
-        str* varname = symlist->symbols[symlist->base_index + 1].s;
-        if (!varname) {
-            A_WARNING("failed to get declaration name");
+    if (next_decl.t == KW_DECL) {
+        decl->decl_type = DT_FUNCTION; // update the decl type
+        symlist_result next_name_res = symlist_peek(symlist, 0);
+        if (next_name_res.type != SYMLIST_SUCCESS) {
+            A_WARNING("failed to peek symlist");
             return NULL;
         }
-        declaration->name = varname;
+        Symbol next_name = next_name_res.data.sym;
+        (void)symlist_pop(symlist); // pop the function name
 
-        DeclarationType type = token_to_declaration_type(base_sym.t);
-        if (type == DT_UNKNOWN) {
-            A_WARNING("failed to convert token to declaration type");
+        decl->name = next_name.s; // update the decl name
+        decl->parameters = parse_parameter_list(arena, symlist, 64);
+
+        bool found_arrow = false;
+        while (!found_arrow) {
+            symlist_result next_dash_res = symlist_peek(symlist, 0);
+            symlist_result next_gt_res = symlist_peek(symlist, 1);
+            if (next_dash_res.type != SYMLIST_SUCCESS || next_gt_res.type != SYMLIST_SUCCESS) {
+                A_WARNING("failed to peek symlist");
+                return NULL;
+            }
+            Symbol next_dash = next_dash_res.data.sym;
+            Symbol next_gt = next_gt_res.data.sym;
+            found_arrow = str_cmp_raw(next_dash.s, "-") && str_cmp_raw(next_gt.s, ">");
+
+            (void)symlist_pop(symlist);
+            (void)symlist_pop(symlist);
+        }
+        symlist_result next_return_type_res = symlist_peek(symlist, 0);
+        if (next_return_type_res.type != SYMLIST_SUCCESS) {
+            A_WARNING("failed to peek symlist");
             return NULL;
         }
-        declaration->type = type;
-
-        // TODO: Should we accept non-initialized variables?
-        // Example: "u32 x;" <-- should this be acceptable? Methinks not.
-
-        symlist->base_index += 3; // Skip ahead 3 symbols (<type> <name> <symbol> <expression>)
-        Expression* value = expression_parse(arena, symlist, symlist->base_index);
-        if (!value) {
-            A_WARNING("failed to parse expressionession");
-            return NULL;
-        }
-        declaration->value = value;
-
-        return declaration;
+        Symbol next_return_type = next_return_type_res.data.sym;
+        // TODO: Check if it's a type!
+        decl->return_type = next_return_type.s;
+    } else {
+        A_WARNING("not a function decl");
     }
 
-    return NULL;
+    return decl;
+}
+
+// TODO: Add more error checking; temp function probably lol
+Declaration* declaration_new(arena* arena) {
+    Declaration* decl = arena_alloc(arena, sizeof(*decl));
+    return decl;
+}
+
+bool declaration_eq(const Declaration* const a, const Declaration* const b) {
+    if ((a == NULL) && (b == NULL)) {
+        return true;
+    }
+
+    if ((a == NULL) ^ (b == NULL)) {
+        return false;
+    }
+
+    bool decl_type = str_cmp(a->type, b->type);
+    bool name_eq = str_cmp(a->name, b->name);
+    bool return_type_eq = str_cmp(a->return_type, b->return_type);
+    bool parameters_eq = declaration_eq(a->parameters, b->parameters);
+    bool value_eq = expression_eq(a->value, b->value);
+    bool next_eq = declaration_eq(a->next, b->next);
+
+    return (decl_type && name_eq && return_type_eq && parameters_eq && value_eq && next_eq);
 }
 
 // TODO: Why is there expression_parse and expression_new?
@@ -72,7 +234,7 @@ Expression* expression_new(arena* arena, ExpressionType type, str* s) {
         A_WARNING("invalid arena");
         return NULL;
     }
-    if (!str_valid(s)) {
+    if ((type != ET_UNKNOWN) && (!str_valid(s))) {
         A_WARNING("invalid string");
         return NULL;
     }
@@ -94,6 +256,74 @@ Expression* expression_new(arena* arena, ExpressionType type, str* s) {
     return expr;
 }
 
+Expression* expression_parse_pratt(arena* arena, symlist* const symlist) {
+    Expression* lhs = expression_parse_pratt_primary(arena, symlist);
+    return expression_parse_pratt_left(arena, symlist, 0, OPERATOR_PRECEDENCE_MIN, lhs);
+}
+
+Expression* expression_parse_pratt_primary(arena* arena, symlist* const symlist) { return NULL; }
+
+Expression* expression_parse_pratt_left(arena* arena, symlist* const symlist, index_t index, precedence min_prec,
+                                        Expression* lhs) {
+
+    // Peek the next symbol
+    symlist_result res_lookahead = symlist_peek(symlist, 0);
+    if (res_lookahead.type != SYMLIST_SUCCESS) {
+        if (res_lookahead.type == SYMLIST_INVALID) {
+            A_WARNING("failed to get lookahead: invalid lookahead");
+        }
+        if (res_lookahead.type == SYMLIST_END) {
+            A_WARNING("failed to get lookahead: end of symlist");
+        }
+        return NULL;
+    }
+    Symbol lookahead = res_lookahead.data.sym;
+
+    precedence_result res_prec = sym_precedence(lookahead);
+    if (res_prec.type != PREC_VALID) {
+        A_WARNING("failed to get lookahead lookahead");
+        return NULL;
+    }
+
+    bool is_binop = token_type_is_binop(res_lookahead.data.sym.t);
+    bool is_greater_precedence = res_prec.prec >= min_prec;
+
+    while (is_binop && is_greater_precedence) {
+        Symbol op = res_lookahead.data.sym;
+        symlist->base_index++; // Advance to the next symbol
+        Expression* rhs = expression_parse_pratt_primary(arena, symlist);
+
+        // Peek the next symbol
+        symlist_result res_lookahead = symlist_peek(symlist, 0);
+        if (res_lookahead.type != SYMLIST_SUCCESS) {
+            if (res_lookahead.type == SYMLIST_INVALID) {
+                A_WARNING("failed to get lookahead: invalid lookahead");
+            }
+            if (res_lookahead.type == SYMLIST_END) {
+                A_WARNING("failed to get lookahead: end of symlist");
+            }
+            return NULL;
+        }
+        Symbol lookahead = res_lookahead.data.sym;
+
+        precedence_result res_prec = sym_precedence(lookahead);
+        if (res_prec.type != PREC_VALID) {
+            A_WARNING("failed to get lookahead lookahead");
+            return NULL;
+        }
+
+        bool is_binop = token_type_is_binop(res_lookahead.data.sym.t);
+        bool is_greater_precedence = res_prec.prec >= min_prec;
+        // bool is_equal_precedence = x == res_prec.prec;
+        // while ((is_binop && is_greater_precedence) || (is_right_associative_op() && is_equal_precedence)) {
+        //     rhs = expression_parse_pratt_left();
+        // }
+    }
+
+    return lhs;
+}
+
+// TODO: Do we need an index?
 Expression* expression_parse(arena* arena, symlist* const symlist, index_t index) {
     if (arena == NULL) {
         A_WARNING("invalid arena");
@@ -112,78 +342,87 @@ Expression* expression_parse(arena* arena, symlist* const symlist, index_t index
         return NULL;
     }
 
-    Expression* e = arena_alloc(arena, sizeof(*e));
+    A_WARNING("UNFINISHED FUNCTION");
+    return NULL;
 
-    symlist_result res_a = symlist_peek(symlist, 0);  // 'A' + B
-    symlist_result res_op = symlist_peek(symlist, 1); // A '+' B
-    symlist_result res_b = symlist_peek(symlist, 2);  // A + 'B'
+    // Expression* e = expression_new(arena, ET_UNKNOWN, NULL);
 
-    if (res_a.type == SYMLIST_SUCCESS) {
-        Symbol sym_a = res_a.data.sym;
+    // symlist_result res_lookahead = symlist_peek(symlist, 0);
+    // switch (res_lookahead.type) {
+    // case (SYMLIST_INVALID): {
+    //     A_WARNING("failed to get lookahead: invalid lookahead");
+    //     return NULL;
+    // }
+    // case (SYMLIST_END): {
+    //     A_WARNING("failed to get lookahead: end of symlist");
+    //     return NULL;
+    // }
+    // case (SYMLIST_SUCCESS): {
+    // }
+    // }
 
-        if ((res_op.type == SYMLIST_SUCCESS) && (res_b.type == SYMLIST_SUCCESS)) {
-            Symbol sym_op = res_op.data.sym;
-            Symbol sym_b = res_b.data.sym;
+    // Symbol lookahead = res_lookahead.data.sym;
+    // bool is_binop = token_type_is_binop(lookahead.t);
+    // precedence_result lookahead_prec_res = sym_precedence(lookahead);
+    // if (lookahead_prec_res.type != PREC_VALID) {
+    //     A_WARNING("failed to get lookahead precedence");
+    //     return;
+    // }
 
-            if (token_type_is_binop(sym_op.t) && (sym_a.t == sym_b.t)) {
+    // precedence prec = lookahead_prec_res.prec;
 
-                Expression* expr_left = expression_new(arena, ET_LIT_U8, sym_a.s);
-                Expression* expr_right = expression_new(arena, ET_LIT_U8, sym_b.s);
+    // while (is_binop && (prec >= OPERATOR_PRECEDENCE_MIN)) {
+    // }
 
-                e->type = ET_BIN_OP_ADD; // TODO: Make this more general; binop =/> OP_ADD
-                e->left = expr_left;
-                e->right = expr_right;
-                e->value = nullptr;
-            }
-            // TODO: These str functions should be implemented on symbols instead. Decouple from str_lib.
-        } else if (str_is_u8_literal(sym_a.s)) {
-            e->type = ET_LIT_U8;
-            e->value = sym_a.s;
-            e->left = nullptr; // TODO: this may not be necessary? calloc/arenas are zero-initialized?
-            e->right = nullptr;
-        } else if (str_is_u16_literal(sym_a.s)) {
-            e->type = ET_LIT_U16;
-            e->value = sym_a.s;
-            e->left = nullptr;
-            e->right = nullptr;
-        } else if (str_is_u32_literal(sym_a.s)) {
-            e->type = ET_LIT_U32;
-            e->value = sym_a.s;
-            e->left = nullptr;
-            e->right = nullptr;
-        } else if (str_is_u64_literal(sym_a.s)) {
-            e->type = ET_LIT_U64;
-            e->value = sym_a.s;
-            e->left = nullptr;
-            e->right = nullptr;
-        }
-
-    } else {
-        // TODO: Make this more robust!
-        A_WARNING("failed to parse expression");
-        return NULL;
-    }
-
-    return e;
+    // return e;
 }
 
-// bool valid_start_expression(TokenType t) { return (t ==); }
-
 void declaration_print(const Declaration declaration) {
-    printf("[D]: ");
-    if (declaration.name)
-        str_print("", declaration.name);
-    printf(" ");
-    declaration_type_print(declaration.type);
-    printf(" ");
-    if (declaration.value)
+    printf("{ decl_type = ");
+    declaration_type_print(declaration.decl_type);
+    printf(", ");
+
+    if (declaration.type) {
+        str_print("type = ", declaration.type);
+    } else {
+        printf("<null>");
+    }
+    printf(", ");
+
+    if (declaration.name) {
+        str_print("name = ", declaration.name);
+    } else {
+        printf("<null>");
+    }
+    printf(", ");
+
+    if (declaration.return_type) {
+        str_print("return_type = ", declaration.return_type);
+    } else {
+        printf("<null>");
+    }
+    printf(", ");
+
+    if (declaration.parameters) {
+        declaration_print(*declaration.parameters);
+    } else {
+        printf("<null>");
+    }
+    printf(", ");
+
+    if (declaration.value) {
         expression_print(*declaration.value, 0);
-    printf(" ");
-    if (declaration.code)
-        statement_print(*declaration.code);
-    printf("\n");
-    if (declaration.next)
+    } else {
+        printf("<null>");
+    }
+    printf(", ");
+
+    if (declaration.next) {
         declaration_print(*declaration.next);
+    } else {
+        printf("<null>");
+    }
+    printf(" }");
 }
 
 void declaration_type_print(const DeclarationType declaration_type) { printf("%s", DT_NAMES[declaration_type]); }
@@ -213,6 +452,33 @@ void statement_print(const Statement statement) {
 }
 
 void statement_type_print(const StatementType statement_type) { printf("%s", ST_NAMES[statement_type]); }
+
+Statement* statement_new(arena* arena) { return arena_alloc(arena, sizeof(Statement)); }
+
+Statement* statement_parse(arena* arena, symlist* const symlist) {
+    A_WARNING("not implemented!");
+    return NULL;
+}
+
+bool statement_eq(const Statement* const a, const Statement* const b) {
+    if ((a == NULL) && (b == NULL)) {
+        return true;
+    }
+
+    if ((a == NULL) ^ (b == NULL)) {
+        return false;
+    }
+
+    bool eq_type = a->type == b->type;
+    bool eq_declaration = declaration_eq(a->declaration, b->declaration);
+    bool eq_else_body = statement_eq(a->else_body, b->else_body);
+    bool eq_expression = expression_eq(a->expression, b->expression);
+    bool eq_init_expression = expression_eq(a->init_expression, b->init_expression);
+    bool eq_next = statement_eq(a->next, b->next);
+    bool eq_next_expression = expression_eq(a->next_expression, b->next_expression);
+
+    return eq_type && eq_declaration && eq_else_body && eq_expression && eq_init_expression && eq_next;
+}
 
 bool expression_eq(const Expression* const e1, const Expression* const e2) {
 
