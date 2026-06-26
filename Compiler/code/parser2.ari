@@ -1,1 +1,1 @@
-decl func1(u32 param1) -> void;
+decl func1(u32 param1, f64 param2) -> void;
